@@ -28,6 +28,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   members       Member[]
+  companies     Company[]
 
   @@map("user")
 }
@@ -94,9 +95,21 @@ model Organization {
   createdAt DateTime @default(now())
 
   members   Member[]
-  jobs      Job[]
 
   @@map("organization")
+}
+
+model Company {
+  id        String   @id @default(cuid())
+  name      String
+  ownerId   String
+  createdAt DateTime @default(now())
+
+  owner     User  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  jobs      Job[]
+
+  @@index([ownerId])
+  @@map("company")
 }
 
 model Member {
@@ -132,7 +145,7 @@ model Invitation {
 
 model Job {
   id             String   @id @default(cuid())
-  organizationId String
+  companyId      String
 
   // Kunduppgifter
   kundNamn  String
@@ -154,14 +167,14 @@ model Job {
   updatedAt DateTime @updatedAt
 
   // Relationer
-  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  artiklar     Article[]
-  resor        Trip[]
-  arbetspass   WorkSession[]
+  company     Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  artiklar    Article[]
+  resor       Trip[]
+  arbetspass  WorkSession[]
 
-  @@index([organizationId])
-  @@index([organizationId, fakturerat])
-  @@index([organizationId, betalt])
+  @@index([companyId])
+  @@index([companyId, fakturerat])
+  @@index([companyId, betalt])
   @@map("job")
 }
 
