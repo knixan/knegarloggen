@@ -1,7 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
+// ============================================================
+// Knegarloggen – Prisma Schema
+// ============================================================
 
 generator client {
   provider = "prisma-client-js"
@@ -9,4 +8,202 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
+
+// ============================================================
+// AUTH – Better-auth hanterar dessa tabeller
+// ============================================================
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relationer
+  accounts      Account[]
+  sessions      Session[]
+  members       Member[]
+
+  @@map("user")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("account")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Better-auth teams
+  activeOrganizationId String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("verification")
+}
+
+// ============================================================
+// TEAMS – Better-auth organization/team plugin
+// ============================================================
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  logo      String?
+  metadata  String?
+  createdAt DateTime @default(now())
+
+  members   Member[]
+  jobs      Job[]
+
+  @@map("organization")
+}
+
+model Member {
+  id             String   @id @default(cuid())
+  userId         String
+  organizationId String
+  role           String   @default("member") // owner | admin | member
+  createdAt      DateTime @default(now())
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@map("member")
+}
+
+model Invitation {
+  id             String   @id @default(cuid())
+  organizationId String
+  email          String
+  role           String   @default("member")
+  status         String   @default("pending") // pending | accepted | rejected | cancelled
+  expiresAt      DateTime
+  inviterId      String
+  createdAt      DateTime @default(now())
+
+  @@map("invitation")
+}
+
+// ============================================================
+// KNEGARLOGGEN – Kärnmodeller
+// ============================================================
+
+model Job {
+  id             String   @id @default(cuid())
+  organizationId String
+
+  // Kunduppgifter
+  kundNamn  String
+  adress    String
+  telefon   String
+  epost     String
+
+  // Status
+  rotAvdrag  Boolean @default(false)
+  utfort     Boolean @default(false)
+  fakturerat Boolean @default(false)
+  betalt     Boolean @default(false)
+
+  // Anteckningar
+  anteckningar String @default("")
+
+  // Tidsstämplar
+  skapad    DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationer
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  artiklar     Article[]
+  resor        Trip[]
+  arbetspass   WorkSession[]
+
+  @@index([organizationId])
+  @@index([organizationId, fakturerat])
+  @@index([organizationId, betalt])
+  @@map("job")
+}
+
+model Article {
+  id        String @id @default(cuid())
+  jobId     String
+
+  namn      String
+  artikelnr String @default("")
+  pris      Float
+  antal     Int    @default(1)
+
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@map("article")
+}
+
+model Trip {
+  id    String @id @default(cuid())
+  jobId String
+
+  datum   String // YYYY-MM-DD
+  stracka Float  @default(0) // körd sträcka (km)
+  avstand Float  @default(0) // avstånd från/till (km)
+
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@map("trip")
+}
+
+model WorkSession {
+  id    String @id @default(cuid())
+  jobId String
+
+  datum  String // YYYY-MM-DD
+  timmar Float
+
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@map("work_session")
+}
+
