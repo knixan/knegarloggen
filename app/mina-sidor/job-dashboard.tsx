@@ -9,7 +9,7 @@ import type { Job } from "@/lib/job-schema";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-type Filter = "alla" | "pågående" | "utfört" | "fakturerat" | "betalt";
+type Filter = "alla" | "ej-påbörjat" | "pågående" | "utfört" | "fakturerat" | "betalt";
 
 const filters: {
   value: Filter;
@@ -23,6 +23,13 @@ const filters: {
     activeClass: "bg-gray-800 text-white border-gray-800 hover:bg-gray-700",
     inactiveClass:
       "border-gray-300 text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300",
+  },
+  {
+    value: "ej-påbörjat",
+    label: "Ej påbörjat",
+    activeClass: "bg-gray-500 text-white border-gray-500 hover:bg-gray-400",
+    inactiveClass:
+      "border-gray-300 text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-400",
   },
   {
     value: "pågående",
@@ -57,8 +64,10 @@ const filters: {
 
 function applyFilter(jobs: Job[], filter: Filter): Job[] {
   switch (filter) {
+    case "ej-påbörjat":
+      return jobs.filter((j) => !j.pagaende && !j.utfort);
     case "pågående":
-      return jobs.filter((j) => !j.utfort);
+      return jobs.filter((j) => j.pagaende && !j.utfort);
     case "utfört":
       return jobs.filter((j) => j.utfort);
     case "fakturerat":

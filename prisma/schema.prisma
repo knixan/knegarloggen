@@ -156,12 +156,14 @@ model Job {
 
   // Status
   rotAvdrag  Boolean @default(false)
+  pagaende   Boolean @default(false)
   utfort     Boolean @default(false)
   fakturerat Boolean @default(false)
   betalt     Boolean @default(false)
 
   // Anteckningar
-  anteckningar String @default("")
+  anteckningar  String @default("")
+  ovrigaArtiklar String @default("")
 
   // Tidsstämplar
   skapad    DateTime @default(now())
@@ -185,6 +187,7 @@ model Article {
 
   namn      String
   artikelnr String @default("")
+  aterforsaljare String @default("")
   pris      Float
   antal     Int    @default(1)
 

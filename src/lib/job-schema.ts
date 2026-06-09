@@ -5,6 +5,8 @@ export const articleSchema = z.object({
 
   artikelnr: z.string().trim().max(50).optional().default(""),
 
+  aterforsaljare: z.string().trim().max(120).optional().default(""),
+
   pris: z.coerce.number().min(0, "Pris får inte vara negativt"),
 
   antal: z.coerce.number().min(1, "Minst 1").default(1),
@@ -49,6 +51,8 @@ export const jobSchema = z.object({
 
   rotAvdrag: z.boolean().default(false),
 
+  pagaende: z.boolean().default(false),
+
   utfort: z.boolean().default(false),
 
   fakturerat: z.boolean().default(false),
@@ -56,6 +60,8 @@ export const jobSchema = z.object({
   betalt: z.boolean().default(false),
 
   anteckningar: z.string().max(2000).optional().default(""),
+
+  ovrigaArtiklar: z.string().max(2000).optional().default(""),
 });
 
 export type JobInput = z.infer<typeof jobSchema>;

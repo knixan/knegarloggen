@@ -33,14 +33,16 @@ const tomDefaults: JobInput = {
   adress: "",
   telefon: "",
   epost: "",
-  artiklar: [{ namn: "", artikelnr: "", pris: 0, antal: 1 }],
+  artiklar: [{ namn: "", artikelnr: "", aterforsaljare: "", pris: 0, antal: 1 }],
   resor: [],
   arbetstider: [],
   rotAvdrag: false,
+  pagaende: false,
   utfort: false,
   fakturerat: false,
   betalt: false,
   anteckningar: "",
+  ovrigaArtiklar: "",
 };
 
 export default function JobForm({
@@ -129,12 +131,7 @@ export default function JobForm({
             size="sm"
             variant="outline"
             onClick={() =>
-              artiklar.append({
-                namn: "",
-                artikelnr: "",
-                pris: 0,
-                antal: 1,
-              })
+              artiklar.append({ namn: "", artikelnr: "", aterforsaljare: "", pris: 0, antal: 1 })
             }
           >
             <Plus className="mr-1 h-4 w-4" />
@@ -158,12 +155,16 @@ export default function JobForm({
                   {...register(`artiklar.${i}.namn`)}
                   placeholder="Artikelnamn"
                 />
-
                 {errors.artiklar?.[i]?.namn && (
                   <p className="text-xs text-destructive mt-1">
                     {errors.artiklar[i]?.namn?.message}
                   </p>
                 )}
+                <Input
+                  className="mt-1.5"
+                  {...register(`artiklar.${i}.aterforsaljare`)}
+                  placeholder="Återförsäljare (valfritt)"
+                />
               </div>
 
               <div className="col-span-6 sm:col-span-3">
@@ -195,6 +196,9 @@ export default function JobForm({
                   })}
                   placeholder="Pris kr"
                 />
+                {(live.artiklar?.[i]?.pris === 0 || live.artiklar?.[i]?.pris === undefined) && (
+                  <p className="text-xs font-bold text-amber-600 dark:text-amber-400 mt-1">Pris ej ifyllt</p>
+                )}
               </div>
 
               <div className="col-span-1 flex justify-end">
@@ -212,6 +216,15 @@ export default function JobForm({
               </div>
             </div>
           ))}
+
+          <div className="space-y-1.5 pt-2">
+            <Label className="text-sm font-medium">Övriga artiklar</Label>
+            <Textarea
+              rows={3}
+              {...register("ovrigaArtiklar")}
+              placeholder="T.ex. förbrukningsmaterial, hyrd utrustning, övrigt..."
+            />
+          </div>
         </CardContent>
       </Card>
 
@@ -340,20 +353,39 @@ export default function JobForm({
           <CardTitle>Hantverkarens status</CardTitle>
 
           <p className="text-xs text-muted-foreground">
-            Bockas av hantverkaren när jobbet är klart.
+            Välj aktuell status för jobbet.
           </p>
         </CardHeader>
 
         <CardContent className="space-y-3">
           <ToggleRow
+            id="ej-paborjat"
+            label="Ej påbörjat"
+            checked={!(live.pagaende ?? false) && !(live.utfort ?? false)}
+            onChange={() => {
+              setValue("pagaende", false, { shouldDirty: true });
+              setValue("utfort", false, { shouldDirty: true });
+            }}
+          />
+
+          <ToggleRow
+            id="pagaende"
+            label="Pågående"
+            checked={(live.pagaende ?? false) && !(live.utfort ?? false)}
+            onChange={() => {
+              setValue("pagaende", true, { shouldDirty: true });
+              setValue("utfort", false, { shouldDirty: true });
+            }}
+          />
+
+          <ToggleRow
             id="utfort"
             label="Jobb utfört och klart"
             checked={live.utfort ?? false}
-            onChange={(v) =>
-              setValue("utfort", v, {
-                shouldDirty: true,
-              })
-            }
+            onChange={() => {
+              setValue("utfort", true, { shouldDirty: true });
+              setValue("pagaende", false, { shouldDirty: true });
+            }}
           />
 
           <ToggleRow
@@ -422,6 +454,11 @@ export default function JobForm({
       {/* Summering */}
       <Card className="border-primary/30">
         <CardContent className="pt-6 space-y-2 text-sm">
+          {live.artiklar?.some((a) => !a.pris) && (
+            <p className="text-xs text-amber-600 dark:text-amber-400 font-medium pb-1">
+              ⚠ En eller flera artiklar saknar pris — totalsumman är inte komplett.
+            </p>
+          )}
           <SumRow
             label="Artiklar totalt"
             value={summering.artiklarSum.toLocaleString("sv-SE", {

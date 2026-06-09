@@ -44,11 +44,13 @@ export default function JobList({ jobs, onEdit, onDelete }: Props) {
                     className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
                       job.utfort
                         ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
-                        : "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400"
+                        : job.pagaende
+                        ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400"
+                        : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
                     }`}
                   >
                     <Wrench className="h-3 w-3" />
-                    {job.utfort ? "Utfört" : "Pågående"}
+                    {job.utfort ? "Utfört" : job.pagaende ? "Pågående" : "Ej påbörjat"}
                   </span>
 
                   {job.rotAvdrag && (
