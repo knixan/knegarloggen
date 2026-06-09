@@ -1,7 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { useFieldArray, useForm, type Resolver } from "react-hook-form";
+import {
+  useFieldArray,
+  useForm,
+  useWatch,
+  type Resolver,
+} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Trash2 } from "lucide-react";
 
@@ -12,12 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
 interface Props {
@@ -60,7 +60,6 @@ export default function JobForm({
     register,
     handleSubmit,
     control,
-    watch,
     setValue,
     formState: { errors },
   } = form;
@@ -80,8 +79,8 @@ export default function JobForm({
     name: "arbetstider",
   });
 
-  const live = watch();
-  const summering = beräknaSummering(live);
+  const live = useWatch({ control }) as Partial<JobInput>;
+  const summering = beräknaSummering({ ...tomDefaults, ...live } as JobInput);
 
   return (
     <form
@@ -96,17 +95,11 @@ export default function JobForm({
 
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <Field label="Namn" error={errors.namn?.message}>
-            <Input
-              {...register("namn")}
-              placeholder="Anna Andersson"
-            />
+            <Input {...register("namn")} placeholder="Anna Andersson" />
           </Field>
 
           <Field label="Telefon" error={errors.telefon?.message}>
-            <Input
-              {...register("telefon")}
-              placeholder="070-123 45 67"
-            />
+            <Input {...register("telefon")} placeholder="070-123 45 67" />
           </Field>
 
           <Field label="E-post" error={errors.epost?.message}>
@@ -159,10 +152,7 @@ export default function JobForm({
           </div>
 
           {artiklar.fields.map((field, i) => (
-            <div
-              key={field.id}
-              className="grid grid-cols-12 gap-2 items-start"
-            >
+            <div key={field.id} className="grid grid-cols-12 gap-2 items-start">
               <div className="col-span-12 sm:col-span-5">
                 <Input
                   {...register(`artiklar.${i}.namn`)}
@@ -247,20 +237,18 @@ export default function JobForm({
           </Button>
         </CardHeader>
 
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-4">
           {resor.fields.map((field, i) => (
-            <div
-              key={field.id}
-              className="grid grid-cols-12 gap-2 items-start"
-            >
-              <div className="col-span-6 sm:col-span-4">
-                <Input
-                  type="date"
-                  {...register(`resor.${i}.datum`)}
-                />
+            <div key={field.id} className="grid grid-cols-12 gap-2 items-end">
+              <div className="col-span-7 sm:col-span-5 space-y-1">
+                <Label className="text-xs text-muted-foreground">Datum</Label>
+                <Input type="date" {...register(`resor.${i}.datum`)} />
               </div>
 
-              <div className="col-span-3 sm:col-span-3">
+              <div className="col-span-4 sm:col-span-6 space-y-1">
+                <Label className="text-xs text-muted-foreground">
+                  Sträcka (km körd)
+                </Label>
                 <Input
                   type="number"
                   step="0.1"
@@ -268,19 +256,7 @@ export default function JobForm({
                   {...register(`resor.${i}.stracka`, {
                     valueAsNumber: true,
                   })}
-                  placeholder="Sträcka km"
-                />
-              </div>
-
-              <div className="col-span-3 sm:col-span-4">
-                <Input
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  {...register(`resor.${i}.avstand`, {
-                    valueAsNumber: true,
-                  })}
-                  placeholder="Avstånd km"
+                  placeholder="0"
                 />
               </div>
 
@@ -320,20 +296,18 @@ export default function JobForm({
           </Button>
         </CardHeader>
 
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-4">
           {arbetstider.fields.map((field, i) => (
-            <div
-              key={field.id}
-              className="grid grid-cols-12 gap-2 items-start"
-            >
-              <div className="col-span-6 sm:col-span-5">
-                <Input
-                  type="date"
-                  {...register(`arbetstider.${i}.datum`)}
-                />
+            <div key={field.id} className="grid grid-cols-12 gap-2 items-end">
+              <div className="col-span-7 sm:col-span-5 space-y-1">
+                <Label className="text-xs text-muted-foreground">Datum</Label>
+                <Input type="date" {...register(`arbetstider.${i}.datum`)} />
               </div>
 
-              <div className="col-span-5 sm:col-span-6">
+              <div className="col-span-4 sm:col-span-6 space-y-1">
+                <Label className="text-xs text-muted-foreground">
+                  Antal timmar
+                </Label>
                 <Input
                   type="number"
                   step="0.25"
@@ -341,7 +315,7 @@ export default function JobForm({
                   {...register(`arbetstider.${i}.timmar`, {
                     valueAsNumber: true,
                   })}
-                  placeholder="Timmar"
+                  placeholder="t.ex. 7.5"
                 />
               </div>
 
@@ -374,7 +348,7 @@ export default function JobForm({
           <ToggleRow
             id="utfort"
             label="Jobb utfört och klart"
-            checked={live.utfort}
+            checked={live.utfort ?? false}
             onChange={(v) =>
               setValue("utfort", v, {
                 shouldDirty: true,
@@ -385,7 +359,7 @@ export default function JobForm({
           <ToggleRow
             id="rot"
             label="ROT-avdrag ska tillämpas"
-            checked={live.rotAvdrag}
+            checked={live.rotAvdrag ?? false}
             onChange={(v) =>
               setValue("rotAvdrag", v, {
                 shouldDirty: true,
@@ -409,7 +383,7 @@ export default function JobForm({
           <ToggleRow
             id="fakturerat"
             label="Fakturerat"
-            checked={live.fakturerat}
+            checked={live.fakturerat ?? false}
             onChange={(v) =>
               setValue("fakturerat", v, {
                 shouldDirty: true,
@@ -420,7 +394,7 @@ export default function JobForm({
           <ToggleRow
             id="betalt"
             label="Betalt"
-            checked={live.betalt}
+            checked={live.betalt ?? false}
             onChange={(v) =>
               setValue("betalt", v, {
                 shouldDirty: true,
@@ -457,30 +431,21 @@ export default function JobForm({
             })}
           />
 
-          <SumRow
-            label="Antal resor"
-            value={`${summering.antalResor} st`}
-          />
+          <SumRow label="Antal resor" value={`${summering.antalResor} st`} />
 
           <SumRow
             label="Total sträcka"
-            value={`${summering.totalStracka.toLocaleString(
-              "sv-SE"
-            )} km`}
+            value={`${summering.totalStracka.toLocaleString("sv-SE")} km`}
           />
 
           <SumRow
             label="Total avstånd"
-            value={`${summering.totalAvstand.toLocaleString(
-              "sv-SE"
-            )} km`}
+            value={`${summering.totalAvstand.toLocaleString("sv-SE")} km`}
           />
 
           <SumRow
             label="Total arbetstid"
-            value={`${summering.totalTimmar.toLocaleString(
-              "sv-SE"
-            )} h`}
+            value={`${summering.totalTimmar.toLocaleString("sv-SE")} h`}
           />
 
           {live.rotAvdrag && (
@@ -519,11 +484,7 @@ function Field({
 
       {children}
 
-      {error && (
-        <p className="text-xs text-destructive">
-          {error}
-        </p>
-      )}
+      {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
   );
 }
@@ -547,32 +508,19 @@ function ToggleRow({
         onCheckedChange={(v) => onChange(Boolean(v))}
       />
 
-      <Label
-        htmlFor={id}
-        className="font-normal cursor-pointer"
-      >
+      <Label htmlFor={id} className="font-normal cursor-pointer">
         {label}
       </Label>
     </div>
   );
 }
 
-function SumRow({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+function SumRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between">
-      <span className="text-muted-foreground">
-        {label}
-      </span>
+      <span className="text-muted-foreground">{label}</span>
 
-      <span className="tabular-nums font-medium">
-        {value}
-      </span>
+      <span className="tabular-nums font-medium">{value}</span>
     </div>
   );
 }

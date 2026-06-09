@@ -1,7 +1,5 @@
 "use client";
 
-
-
 let lastCapturedError:
   | {
       error: unknown;
@@ -24,12 +22,9 @@ if (typeof window !== "undefined") {
     record(event.error ?? event);
   });
 
-  window.addEventListener(
-    "unhandledrejection",
-    (event) => {
-      record(event.reason);
-    }
-  );
+  window.addEventListener("unhandledrejection", (event) => {
+    record(event.reason);
+  });
 }
 
 export function consumeLastCapturedError() {
@@ -38,10 +33,7 @@ export function consumeLastCapturedError() {
   }
 
   // Expire old errors
-  if (
-    Date.now() - lastCapturedError.at >
-    TTL_MS
-  ) {
+  if (Date.now() - lastCapturedError.at > TTL_MS) {
     lastCapturedError = undefined;
 
     return undefined;

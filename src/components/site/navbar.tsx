@@ -249,13 +249,8 @@ const MobileAuthSection: React.FC<MobileAuthSectionProps> = ({
 };
 
 const Navbar: React.FC<NavbarProps> = ({
-  title = "MinSajt",
-  links = [
-    { href: "/", label: "Hem" },
-    { href: "/om", label: "Om" },
-    { href: "/tjanster", label: "Tjänster" },
-    { href: "/kontakt", label: "Kontakt" },
-  ],
+  title = "Knegarloggen",
+  links = [{ href: "/", label: "Hem" }],
   showThemeToggle = true,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

@@ -1,21 +1,11 @@
 "use client";
 
-import {
-  Check,
-  X,
-  Trash2,
-  Pencil,
-  Wrench,
-} from "lucide-react";
+import { Check, Trash2, Pencil, Wrench } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-import {
-  beräknaSummering,
-  type Job,
-} from "@/lib/job-schema";
+import { beräknaSummering, type Job } from "@/lib/job-schema";
 
 interface Props {
   jobs: Job[];
@@ -23,11 +13,7 @@ interface Props {
   onDelete: (id: string) => void;
 }
 
-export default function JobList({
-  jobs,
-  onEdit,
-  onDelete,
-}: Props) {
+export default function JobList({ jobs, onEdit, onDelete }: Props) {
   if (jobs.length === 0) {
     return (
       <Card>
@@ -47,62 +33,43 @@ export default function JobList({
           <Card key={job.id}>
             <CardContent className="pt-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="space-y-1 min-w-0">
-                <div className="font-semibold truncate">
-                  {job.namn}
-                </div>
+                <div className="font-semibold truncate">{job.namn}</div>
 
                 <div className="text-sm text-muted-foreground truncate">
                   {job.adress} · {job.telefon}
                 </div>
 
                 <div className="flex flex-wrap gap-1.5 pt-1">
-                  <Badge
-                    variant={job.utfort ? "default" : "outline"}
+                  <span
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                      job.utfort
+                        ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
+                        : "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400"
+                    }`}
                   >
-                    <Wrench className="h-3 w-3 mr-1" />
-
-                    {job.utfort
-                      ? "Utfört"
-                      : "Pågående"}
-                  </Badge>
+                    <Wrench className="h-3 w-3" />
+                    {job.utfort ? "Utfört" : "Pågående"}
+                  </span>
 
                   {job.rotAvdrag && (
-                    <Badge variant="secondary">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
                       ROT
-                    </Badge>
+                    </span>
                   )}
 
-                  <Badge
-                    variant={
-                      job.fakturerat
-                        ? "default"
-                        : "outline"
-                    }
-                  >
-                    {job.fakturerat ? (
-                      <Check className="h-3 w-3 mr-1" />
-                    ) : (
-                      <X className="h-3 w-3 mr-1" />
-                    )}
+                  {job.fakturerat && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-400">
+                      <Check className="h-3 w-3" />
+                      Fakturerat
+                    </span>
+                  )}
 
-                    Fakturerat
-                  </Badge>
-
-                  <Badge
-                    variant={
-                      job.betalt
-                        ? "default"
-                        : "outline"
-                    }
-                  >
-                    {job.betalt ? (
-                      <Check className="h-3 w-3 mr-1" />
-                    ) : (
-                      <X className="h-3 w-3 mr-1" />
-                    )}
-
-                    Betalt
-                  </Badge>
+                  {job.betalt && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400">
+                      <Check className="h-3 w-3" />
+                      Betalt
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -124,21 +91,14 @@ export default function JobList({
                       {summary.totalStracka}
                     </span>{" "}
                     km ·{" "}
-                    <span className="tabular-nums font-medium text-foreground">
-                      {summary.totalAvstand}
-                    </span>{" "}
-                    km avstånd
                   </div>
 
                   <div className="tabular-nums font-medium text-foreground">
-                    {summary.artiklarSum.toLocaleString(
-                      "sv-SE",
-                      {
-                        style: "currency",
-                        currency: "SEK",
-                        maximumFractionDigits: 0,
-                      }
-                    )}{" "}
+                    {summary.artiklarSum.toLocaleString("sv-SE", {
+                      style: "currency",
+                      currency: "SEK",
+                      maximumFractionDigits: 0,
+                    })}{" "}
                     artiklar
                   </div>
                 </div>
