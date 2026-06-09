@@ -48,6 +48,7 @@ export async function getJobs() {
     betalt: j.betalt,
     anteckningar: j.anteckningar,
     ovrigaArtiklar: j.ovrigaArtiklar,
+    utfortArbete: j.utfortArbete,
     artiklar: j.artiklar.map((a) => ({
       namn: a.namn,
       artikelnr: a.artikelnr,
@@ -58,7 +59,6 @@ export async function getJobs() {
     resor: j.resor.map((r) => ({
       datum: r.datum,
       stracka: r.stracka,
-      avstand: r.avstand,
     })),
     arbetstider: j.arbetspass.map((w) => ({
       datum: w.datum,
@@ -96,6 +96,7 @@ export async function getJob(id: string) {
     betalt: j.betalt,
     anteckningar: j.anteckningar,
     ovrigaArtiklar: j.ovrigaArtiklar,
+    utfortArbete: j.utfortArbete,
     artiklar: j.artiklar.map((a) => ({
       namn: a.namn,
       artikelnr: a.artikelnr,
@@ -106,7 +107,6 @@ export async function getJob(id: string) {
     resor: j.resor.map((r) => ({
       datum: r.datum,
       stracka: r.stracka,
-      avstand: r.avstand,
     })),
     arbetstider: j.arbetspass.map((w) => ({
       datum: w.datum,
@@ -126,9 +126,9 @@ export async function createJob(data: JobInput) {
     data: {
       companyId: company.id,
       kundNamn: data.namn,
-      adress: data.adress,
-      telefon: data.telefon,
-      epost: data.epost,
+      adress: data.adress ?? "",
+      telefon: data.telefon ?? "",
+      epost: data.epost ?? "",
       rotAvdrag: data.rotAvdrag,
       pagaende: data.pagaende,
       utfort: data.utfort,
@@ -136,6 +136,7 @@ export async function createJob(data: JobInput) {
       betalt: data.betalt,
       anteckningar: data.anteckningar ?? "",
       ovrigaArtiklar: data.ovrigaArtiklar ?? "",
+      utfortArbete: data.utfortArbete ?? "",
       artiklar: {
         create: data.artiklar.map((a) => ({
           namn: a.namn,
@@ -149,7 +150,6 @@ export async function createJob(data: JobInput) {
         create: data.resor.map((r) => ({
           datum: r.datum,
           stracka: r.stracka,
-          avstand: r.avstand,
         })),
       },
       arbetspass: {
@@ -183,14 +183,17 @@ export async function updateJob(id: string, data: JobInput) {
     where: { id },
     data: {
       kundNamn: data.namn,
-      adress: data.adress,
-      telefon: data.telefon,
-      epost: data.epost,
+      adress: data.adress ?? "",
+      telefon: data.telefon ?? "",
+      epost: data.epost ?? "",
       rotAvdrag: data.rotAvdrag,
+      pagaende: data.pagaende,
       utfort: data.utfort,
       fakturerat: data.fakturerat,
       betalt: data.betalt,
       anteckningar: data.anteckningar ?? "",
+      ovrigaArtiklar: data.ovrigaArtiklar ?? "",
+      utfortArbete: data.utfortArbete ?? "",
       artiklar: {
         deleteMany: {},
         create: data.artiklar.map((a) => ({
@@ -206,7 +209,6 @@ export async function updateJob(id: string, data: JobInput) {
         create: data.resor.map((r) => ({
           datum: r.datum,
           stracka: r.stracka,
-          avstand: r.avstand,
         })),
       },
       arbetspass: {

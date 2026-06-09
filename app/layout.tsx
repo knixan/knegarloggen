@@ -22,7 +22,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="sv" suppressHydrationWarning className={roboto.className}>
-      <body className="min-h-screen">
+      <body className="min-h-screen" suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

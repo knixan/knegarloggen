@@ -74,7 +74,6 @@ async function main() {
           {
             datum: "2026-05-20",
             stracka: 24,
-            avstand: 12,
           },
         ],
       },
@@ -120,7 +119,6 @@ async function main() {
           {
             datum: "2026-05-22",
             stracka: 30,
-            avstand: 15,
           },
         ],
       },

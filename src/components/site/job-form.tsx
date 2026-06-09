@@ -33,7 +33,7 @@ const tomDefaults: JobInput = {
   adress: "",
   telefon: "",
   epost: "",
-  artiklar: [{ namn: "", artikelnr: "", aterforsaljare: "", pris: 0, antal: 1 }],
+  artiklar: [],
   resor: [],
   arbetstider: [],
   rotAvdrag: false,
@@ -43,6 +43,7 @@ const tomDefaults: JobInput = {
   betalt: false,
   anteckningar: "",
   ovrigaArtiklar: "",
+  utfortArbete: "",
 };
 
 export default function JobForm({
@@ -206,10 +207,7 @@ export default function JobForm({
                   type="button"
                   size="icon"
                   variant="ghost"
-                  onClick={() =>
-                    artiklar.fields.length > 1 && artiklar.remove(i)
-                  }
-                  disabled={artiklar.fields.length === 1}
+                  onClick={() => artiklar.remove(i)}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -241,7 +239,6 @@ export default function JobForm({
               resor.append({
                 datum: idag(),
                 stracka: 0,
-                avstand: 0,
               })
             }
           >
@@ -344,6 +341,20 @@ export default function JobForm({
               </div>
             </div>
           ))}
+        </CardContent>
+      </Card>
+
+      {/* Utfört arbete */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Utfört arbete</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Textarea
+            rows={4}
+            {...register("utfortArbete")}
+            placeholder="Beskriv vad som har gjorts i projektet..."
+          />
         </CardContent>
       </Card>
 
@@ -459,6 +470,11 @@ export default function JobForm({
               ⚠ En eller flera artiklar saknar pris — totalsumman är inte komplett.
             </p>
           )}
+            {live.ovrigaArtiklar && (
+            <p className="text-xs  text-amber-600 dark:text-amber-400 pt-1 italic">
+              * Det finns en notering under övriga artiklar.
+            </p>
+          )}
           <SumRow
             label="Artiklar totalt"
             value={summering.artiklarSum.toLocaleString("sv-SE", {
@@ -476,14 +492,11 @@ export default function JobForm({
           />
 
           <SumRow
-            label="Total avstånd"
-            value={`${summering.totalAvstand.toLocaleString("sv-SE")} km`}
-          />
-
-          <SumRow
             label="Total arbetstid"
             value={`${summering.totalTimmar.toLocaleString("sv-SE")} h`}
           />
+
+        
 
           {live.rotAvdrag && (
             <>

@@ -39,6 +39,12 @@ export default function JobList({ jobs, onEdit, onDelete }: Props) {
                   {job.adress} · {job.telefon}
                 </div>
 
+                {job.utfortArbete && (
+                  <div className="text-xs text-muted-foreground/80 italic line-clamp-1">
+                    {job.utfortArbete}
+                  </div>
+                )}
+
                 <div className="flex flex-wrap gap-1.5 pt-1">
                   <span
                     className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${

@@ -35,6 +35,7 @@ export default function EditJobClient({ job }: Props) {
     betalt: job.betalt,
     anteckningar: job.anteckningar,
     ovrigaArtiklar: job.ovrigaArtiklar,
+    utfortArbete: job.utfortArbete,
     artiklar: job.artiklar,
     resor: job.resor,
     arbetstider: job.arbetstider,

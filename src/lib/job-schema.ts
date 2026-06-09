@@ -16,11 +16,6 @@ export const resaSchema = z.object({
   datum: z.string().min(1, "Datum krävs"),
 
   stracka: z.coerce.number().min(0, "Sträcka får inte vara negativ"),
-
-  avstand: z.coerce
-    .number()
-    .min(0, "Avstånd får inte vara negativt")
-    .default(0),
 });
 
 export const arbetstidSchema = z.object({
@@ -32,18 +27,19 @@ export const arbetstidSchema = z.object({
 export const jobSchema = z.object({
   namn: z.string().trim().min(1, "Kundnamn krävs").max(120),
 
-  adress: z.string().trim().min(1, "Adress krävs").max(200),
+  adress: z.string().trim().max(200).optional().default(""),
 
   telefon: z
     .string()
     .trim()
-    .min(6, "Ange ett giltigt telefonnummer")
     .max(30)
-    .regex(/^[0-9+\-\s()]+$/, "Endast siffror och + - ( ) tillåtna"),
+    .regex(/^[0-9+\-\s()]*$/, "Endast siffror och + - ( ) tillåtna")
+    .optional()
+    .default(""),
 
-  epost: z.string().trim().email("Ogiltig e-post").max(200),
+  epost: z.string().trim().max(200).email("Ogiltig e-post").optional().or(z.literal("")),
 
-  artiklar: z.array(articleSchema).min(1, "Lägg till minst en artikel"),
+  artiklar: z.array(articleSchema).default([]),
 
   resor: z.array(resaSchema).default([]),
 
@@ -62,6 +58,8 @@ export const jobSchema = z.object({
   anteckningar: z.string().max(2000).optional().default(""),
 
   ovrigaArtiklar: z.string().max(2000).optional().default(""),
+
+  utfortArbete: z.string().max(2000).optional().default(""),
 });
 
 export type JobInput = z.infer<typeof jobSchema>;
@@ -84,15 +82,12 @@ export function beräknaSummering(job: JobInput) {
 
   const totalStracka = job.resor.reduce((sum, resa) => sum + resa.stracka, 0);
 
-  const totalAvstand = job.resor.reduce((sum, resa) => sum + resa.avstand, 0);
-
   const antalResor = job.resor.length;
 
   return {
     artiklarSum,
     totalTimmar,
     totalStracka,
-    totalAvstand,
     antalResor,
   };
 }

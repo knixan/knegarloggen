@@ -164,6 +164,7 @@ model Job {
   // Anteckningar
   anteckningar  String @default("")
   ovrigaArtiklar String @default("")
+  utfortArbete   String @default("")
 
   // Tidsstämplar
   skapad    DateTime @default(now())
@@ -203,7 +204,6 @@ model Trip {
 
   datum   String // YYYY-MM-DD
   stracka Float  @default(0) // körd sträcka (km)
-  avstand Float  @default(0) // avstånd från/till (km)
 
   job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
 
@@ -223,4 +223,3 @@ model WorkSession {
   @@index([jobId])
   @@map("work_session")
 }
-
