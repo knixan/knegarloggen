@@ -9,8 +9,8 @@ import type { JobInput } from "@/lib/job-schema";
 export default function NyttJobbPage() {
   const router = useRouter();
 
-  async function handleSubmit(data: JobInput) {
-    const result = await createJob(data);
+  async function handleSubmit(data: JobInput, bilder: { url: string; key: string }[]) {
+    const result = await createJob(data, bilder);
     if (result.ok) {
       toast.success("Jobb sparat!");
       router.push("/mina-sidor");

@@ -13,8 +13,8 @@ interface Props {
 export default function EditJobClient({ job }: Props) {
   const router = useRouter();
 
-  async function handleSubmit(data: JobInput) {
-    const result = await updateJob(job.id, data);
+  async function handleSubmit(data: JobInput, bilder: { url: string; key: string }[]) {
+    const result = await updateJob(job.id, data, bilder);
     if (result.ok) {
       toast.success("Jobb uppdaterat!");
       router.push("/mina-sidor");
@@ -39,6 +39,7 @@ export default function EditJobClient({ job }: Props) {
     artiklar: job.artiklar,
     resor: job.resor,
     arbetstider: job.arbetstider,
+    bilder: job.bilder ?? [],
   };
 
   return (

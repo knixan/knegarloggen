@@ -165,6 +165,7 @@ model Job {
   anteckningar  String @default("")
   ovrigaArtiklar String @default("")
   utfortArbete   String @default("")
+  planeratArbete String @default("")
 
   // Tidsstämplar
   skapad    DateTime @default(now())

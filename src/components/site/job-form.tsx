@@ -109,6 +109,7 @@ export default function JobForm({
     defaultValues?.bilder ?? []
   );
   const [laddarUpp, setLaddarUpp] = useState(false);
+  const [valdBild, setValdBild] = useState<string | null>(null);
 const fileInputRef = useRef<HTMLInputElement>(null);
 
 const { startUpload } = useUploadThing("jobbBilder");
@@ -443,71 +444,75 @@ async function hanteraFiler(e: React.ChangeEvent<HTMLInputElement>) {
           ))}
         </CardContent>
       </Card>
-<Card>
-  <CardHeader>
-    <CardTitle className="flex items-center gap-2">
-      <ClipboardList className="h-5 w-5 text-muted-foreground" />
-      Planera arbete
-    </CardTitle>
-  </CardHeader>
-  <CardContent className="space-y-4">
-    <Textarea
-      rows={4}
-      {...register("planeratArbete")}
-      placeholder="Vad ska göras? T.ex. byta rör i kök, dra el till garage..."
-    />
 
-    <div className="space-y-2">
-      <Label className="flex items-center gap-1.5">
-        <ImagePlus className="h-3.5 w-3.5 text-muted-foreground" />
-        Bilder
-      </Label>
+      {/* Planera arbete & Bilder */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ClipboardList className="h-5 w-5 text-muted-foreground" />
+            Planera arbete & Bilder
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Textarea
+            rows={4}
+            {...register("planeratArbete")}
+            placeholder="Vad ska göras? T.ex. byta rör i kök, dra el till garage..."
+          />
 
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        multiple
-        className="hidden"
-        onChange={hanteraFiler}
-      />
+          <div className="space-y-2">
+            <Label className="flex items-center gap-1.5">
+              <ImagePlus className="h-3.5 w-3.5 text-muted-foreground" />
+              Bilder
+            </Label>
 
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        disabled={laddarUpp}
-        onClick={() => fileInputRef.current?.click()}
-      >
-        <ImagePlus className="mr-1 h-4 w-4" />
-        {laddarUpp ? "Laddar upp..." : "Lägg till bilder"}
-      </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={hanteraFiler}
+            />
 
-      {bilder.length > 0 && (
-        <div className="grid grid-cols-3 gap-2 pt-2">
-          {bilder.map((bild) => (
-            <div key={bild.key} className="relative group aspect-square">
-           <Image
-  src={bild.url}
-  alt="Jobbild"
-  fill
-  sizes="(max-width: 640px) 33vw, 200px"
-  className="object-cover rounded-md"
-/>
-              <button
-                type="button"
-                className="absolute top-1 right-1 bg-black/60 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={() => setBilder(prev => prev.filter(b => b.key !== bild.key))}
-              >
-                <X className="h-3 w-3 text-white" />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  </CardContent>
-</Card>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={laddarUpp}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <ImagePlus className="mr-1 h-4 w-4" />
+              {laddarUpp ? "Laddar upp..." : "Lägg till bilder"}
+            </Button>
+
+            {bilder.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-2">
+                {bilder.map((bild) => (
+                  <div key={bild.key} className="relative group aspect-square">
+                    <Image
+                      src={bild.url}
+                      alt="Jobbild"
+                      fill
+                      sizes="(max-width: 640px) 33vw, 200px"
+                      className="object-cover rounded-md cursor-pointer"
+                      onClick={() => setValdBild(bild.url)}
+                    />
+                    <button
+                      type="button"
+                      className="absolute top-1 right-1 bg-black/60 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => setBilder(prev => prev.filter(b => b.key !== bild.key))}
+                    >
+                      <X className="h-3 w-3 text-white" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Utfört arbete */}
       <Card>
         <CardHeader>
@@ -685,6 +690,31 @@ async function hanteraFiler(e: React.ChangeEvent<HTMLInputElement>) {
           {submitLabel}
         </Button>
       </div>
+
+      {valdBild && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+          onClick={() => setValdBild(null)}
+        >
+          <div className="relative max-w-3xl w-full max-h-[90vh] aspect-auto">
+            <button
+              type="button"
+              className="absolute -top-10 right-0 text-white"
+              onClick={() => setValdBild(null)}
+            >
+              <X className="h-6 w-6" />
+            </button>
+            <Image
+              src={valdBild}
+              alt="Förstorad bild"
+              width={1200}
+              height={900}
+              className="object-contain w-full h-full rounded-md"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
     </form>
   );
 }

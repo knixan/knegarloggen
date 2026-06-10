@@ -31,7 +31,7 @@ export async function getJobs() {
 
   const jobs = await prisma.job.findMany({
     where: { companyId: company.id },
-    include: { artiklar: true, resor: true, arbetspass: true },
+    include: { artiklar: true, resor: true, arbetspass: true, images: true },
     orderBy: { skapad: "desc" },
   });
 
@@ -49,6 +49,7 @@ export async function getJobs() {
     anteckningar: j.anteckningar,
     ovrigaArtiklar: j.ovrigaArtiklar,
     utfortArbete: j.utfortArbete,
+    planeratArbete: j.planeratArbete,
     artiklar: j.artiklar.map((a) => ({
       namn: a.namn,
       artikelnr: a.artikelnr,
@@ -63,6 +64,10 @@ export async function getJobs() {
     arbetstider: j.arbetspass.map((w) => ({
       datum: w.datum,
       timmar: w.timmar,
+    })),
+    bilder: j.images.map((img) => ({
+      url: img.url,
+      key: img.key,
     })),
     skapad: j.skapad.toISOString(),
   }));
@@ -79,7 +84,7 @@ export async function getJob(id: string) {
 
   const j = await prisma.job.findFirst({
     where: { id, companyId: company.id },
-    include: { artiklar: true, resor: true, arbetspass: true },
+    include: { artiklar: true, resor: true, arbetspass: true, images: true },
   });
   if (!j) return null;
 
@@ -97,6 +102,7 @@ export async function getJob(id: string) {
     anteckningar: j.anteckningar,
     ovrigaArtiklar: j.ovrigaArtiklar,
     utfortArbete: j.utfortArbete,
+    planeratArbete: j.planeratArbete,
     artiklar: j.artiklar.map((a) => ({
       namn: a.namn,
       artikelnr: a.artikelnr,
@@ -112,11 +118,15 @@ export async function getJob(id: string) {
       datum: w.datum,
       timmar: w.timmar,
     })),
+    bilder: j.images.map((img) => ({
+      url: img.url,
+      key: img.key,
+    })),
     skapad: j.skapad.toISOString(),
   };
 }
 
-export async function createJob(data: JobInput) {
+export async function createJob(data: JobInput, bilder: { url: string; key: string }[] = []) {
   const session = await getSession();
   if (!session?.user) return { ok: false, error: "Inte inloggad" };
 
@@ -137,6 +147,7 @@ export async function createJob(data: JobInput) {
       anteckningar: data.anteckningar ?? "",
       ovrigaArtiklar: data.ovrigaArtiklar ?? "",
       utfortArbete: data.utfortArbete ?? "",
+      planeratArbete: data.planeratArbete ?? "",
       artiklar: {
         create: data.artiklar.map((a) => ({
           namn: a.namn,
@@ -158,6 +169,9 @@ export async function createJob(data: JobInput) {
           timmar: w.timmar,
         })),
       },
+      images: {
+        create: bilder.map((b) => ({ url: b.url, key: b.key })),
+      },
     },
   });
 
@@ -165,7 +179,7 @@ export async function createJob(data: JobInput) {
   return { ok: true };
 }
 
-export async function updateJob(id: string, data: JobInput) {
+export async function updateJob(id: string, data: JobInput, bilder: { url: string; key: string }[] = []) {
   const session = await getSession();
   if (!session?.user) return { ok: false, error: "Inte inloggad" };
 
@@ -194,6 +208,7 @@ export async function updateJob(id: string, data: JobInput) {
       anteckningar: data.anteckningar ?? "",
       ovrigaArtiklar: data.ovrigaArtiklar ?? "",
       utfortArbete: data.utfortArbete ?? "",
+      planeratArbete: data.planeratArbete ?? "",
       artiklar: {
         deleteMany: {},
         create: data.artiklar.map((a) => ({
@@ -217,6 +232,10 @@ export async function updateJob(id: string, data: JobInput) {
           datum: w.datum,
           timmar: w.timmar,
         })),
+      },
+      images: {
+        deleteMany: {},
+        create: bilder.map((b) => ({ url: b.url, key: b.key })),
       },
     },
   });
