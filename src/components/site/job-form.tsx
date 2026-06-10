@@ -121,7 +121,7 @@ async function hanteraFiler(e: React.ChangeEvent<HTMLInputElement>) {
   if (res) {
     setBilder(prev => [
       ...prev,
-      ...res.map(f => ({ url: f.url, key: f.key }))
+      ...res.map((bild: { url: string; key: string }) => ({ url: bild.url, key: bild.key }))
     ]);
   }
   setLaddarUpp(false);
