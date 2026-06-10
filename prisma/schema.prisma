@@ -175,6 +175,7 @@ model Job {
   artiklar    Article[]
   resor       Trip[]
   arbetspass  WorkSession[]
+  images      JobImage[]
 
   @@index([companyId])
   @@index([companyId, fakturerat])
@@ -222,4 +223,17 @@ model WorkSession {
 
   @@index([jobId])
   @@map("work_session")
+}
+
+model JobImage {
+  id        String   @id @default(cuid())
+  jobId     String
+  url       String
+  key       String
+  createdAt DateTime @default(now())
+
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@map("job_image")
 }

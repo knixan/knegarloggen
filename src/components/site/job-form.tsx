@@ -121,7 +121,7 @@ async function hanteraFiler(e: React.ChangeEvent<HTMLInputElement>) {
   if (res) {
     setBilder(prev => [
       ...prev,
-      ...res.map((bild: { url: string; key: string }) => ({ url: bild.url, key: bild.key }))
+      ...res.map((bild) => ({ url: bild.ufsUrl, key: bild.key }))
     ]);
   }
   setLaddarUpp(false);
@@ -487,12 +487,13 @@ async function hanteraFiler(e: React.ChangeEvent<HTMLInputElement>) {
         <div className="grid grid-cols-3 gap-2 pt-2">
           {bilder.map((bild) => (
             <div key={bild.key} className="relative group aspect-square">
-              <Image
-                src={bild.url}
-                alt="Jobbild"
-                fill
-                className="object-cover rounded-md"
-              />
+           <Image
+  src={bild.url}
+  alt="Jobbild"
+  fill
+  sizes="(max-width: 640px) 33vw, 200px"
+  className="object-cover rounded-md"
+/>
               <button
                 type="button"
                 className="absolute top-1 right-1 bg-black/60 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
