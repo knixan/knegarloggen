@@ -2,9 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import { UTApi } from "uploadthing/server";
 import { auth } from "./auth";
 import { prisma } from "./prisma";
 import type { JobInput } from "./job-schema";
+
+const utapi = new UTApi();
 
 async function getSession() {
   return auth.api.getSession({ headers: await headers() });
@@ -190,8 +193,22 @@ export async function updateJob(id: string, data: JobInput, bilder: { url: strin
 
   const job = await prisma.job.findFirst({
     where: { id, companyId: company.id },
+    include: { images: true },
   });
   if (!job) return { ok: false, error: "Jobb hittades inte" };
+
+  // Identifiera bilder som tagits bort i formuläret och radera dem från UploadThing
+  const befintligaKeys = job.images.map((img) => img.key);
+  const nyaKeys = new Set(bilder.map((b) => b.key));
+  const keysAttRadera = befintligaKeys.filter((key) => !nyaKeys.has(key));
+
+  if (keysAttRadera.length > 0) {
+    try {
+      await utapi.deleteFiles(keysAttRadera);
+    } catch (error) {
+      console.error("Misslyckades att radera filer från UploadThing:", error);
+    }
+  }
 
   await prisma.job.update({
     where: { id },
@@ -255,8 +272,19 @@ export async function deleteJob(id: string) {
 
   const job = await prisma.job.findFirst({
     where: { id, companyId: company.id },
+    include: { images: true },
   });
   if (!job) return { ok: false, error: "Jobb hittades inte" };
+
+  // Radera alla kopplade filer från UploadThing innan jobbet tas bort
+  const keys = job.images.map((img) => img.key);
+  if (keys.length > 0) {
+    try {
+      await utapi.deleteFiles(keys);
+    } catch (error) {
+      console.error("Misslyckades att radera filer från UploadThing vid borttagning av jobb:", error);
+    }
+  }
 
   await prisma.job.delete({ where: { id } });
 

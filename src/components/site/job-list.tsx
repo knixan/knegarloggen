@@ -1,10 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Trash2, Pencil, Wrench, MapPinned, Phone, Mail, Clock, Package, Van, FileText, User, NotebookPen, Calendar, X, ImagePlus, ClipboardList, ChevronDown } from "lucide-react";
+import { Trash2, Pencil, Wrench, MapPinned, Phone, Mail, Clock, Package, Van, User, NotebookPen,  X, ImagePlus, ClipboardList, } from "lucide-react";
 import Image from "next/image";
-import { format } from "date-fns";
-import { sv } from "date-fns/locale";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,12 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+
 
 import { beräknaSummering, type Job } from "@/lib/job-schema";
 
@@ -90,7 +83,7 @@ export default function JobList({ jobs, onEdit, onDelete }: Props) {
                       currency: "SEK",
                       maximumFractionDigits: 0,
                     })}{" "}
-                    artiklar
+                    material
                   </div>
                   {job.bilder?.length ? (
                     <div className="flex items-center gap-1">
@@ -174,6 +167,18 @@ export default function JobList({ jobs, onEdit, onDelete }: Props) {
                       )}
                     </div>
                   </section>
+
+                  {/* Planerat arbete */}
+                  {viewingJob.planeratArbete && (
+                    <section className="space-y-2">
+                      <h4 className="font-semibold text-sm flex items-center gap-2">
+                        <ClipboardList className="h-4 w-4" /> Planerat arbete
+                      </h4>
+                      <p className="text-sm text-muted-foreground whitespace-pre-wrap bg-muted/30 p-3 rounded-md">
+                        {viewingJob.planeratArbete}
+                      </p>
+                    </section>
+                  )}
 
                   {/* Utfört arbete */}
                   {viewingJob.utfortArbete && (
@@ -262,15 +267,6 @@ export default function JobList({ jobs, onEdit, onDelete }: Props) {
       )}
     </div>
   );
-}
-
-function formatDate(dateStr: string) {
-  try {
-    const date = new Date(dateStr);
-    return format(date, "d MMM yyyy", { locale: sv });
-  } catch (e) {
-    return dateStr;
-  }
 }
 
 function InfoItem({ icon, label, value }: { icon: React.ReactNode, label: string, value?: string }) {
