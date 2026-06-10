@@ -1,5 +1,5 @@
 "use client";
-
+import Image from "next/image";
 import * as React from "react";
 import {
   useFieldArray,
@@ -36,6 +36,10 @@ import {
 
 import { jobSchema, type JobInput, beräknaSummering } from "@/lib/job-schema";
 
+import { useUploadThing } from "@/lib/uploadthing-client";
+import { ImagePlus, X } from "lucide-react";
+import { useState, useRef } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -45,7 +49,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
 interface Props {
-  onSubmit: (data: JobInput) => void;
+  onSubmit: (data: JobInput, bilder: { url: string; key: string }[]) => void;
   defaultValues?: Partial<JobInput>;
   submitLabel?: string;
 }
@@ -68,6 +72,8 @@ const tomDefaults: JobInput = {
   anteckningar: "",
   ovrigaArtiklar: "",
   utfortArbete: "",
+  planeratArbete: "",
+  bilder: [],
 };
 
 export default function JobForm({
@@ -98,9 +104,32 @@ export default function JobForm({
   const live = useWatch({ control }) as Partial<JobInput>;
   const summering = beräknaSummering({ ...tomDefaults, ...live } as JobInput);
 
+
+  const [bilder, setBilder] = useState<{ url: string; key: string }[]>(
+    defaultValues?.bilder ?? []
+  );
+  const [laddarUpp, setLaddarUpp] = useState(false);
+const fileInputRef = useRef<HTMLInputElement>(null);
+
+const { startUpload } = useUploadThing("jobbBilder");
+
+async function hanteraFiler(e: React.ChangeEvent<HTMLInputElement>) {
+  const filer = Array.from(e.target.files ?? []);
+  if (!filer.length) return;
+  setLaddarUpp(true);
+  const res = await startUpload(filer);
+  if (res) {
+    setBilder(prev => [
+      ...prev,
+      ...res.map(f => ({ url: f.url, key: f.key }))
+    ]);
+  }
+  setLaddarUpp(false);
+}
+
   return (
     <form
-      onSubmit={handleSubmit((data) => onSubmit(data))}
+      onSubmit={handleSubmit((data) => onSubmit(data, bilder))}
       className="space-y-6"
     >
       {/* Kunduppgifter */}
@@ -414,7 +443,70 @@ export default function JobForm({
           ))}
         </CardContent>
       </Card>
+<Card>
+  <CardHeader>
+    <CardTitle className="flex items-center gap-2">
+      <ClipboardList className="h-5 w-5 text-muted-foreground" />
+      Planera arbete
+    </CardTitle>
+  </CardHeader>
+  <CardContent className="space-y-4">
+    <Textarea
+      rows={4}
+      {...register("planeratArbete")}
+      placeholder="Vad ska göras? T.ex. byta rör i kök, dra el till garage..."
+    />
 
+    <div className="space-y-2">
+      <Label className="flex items-center gap-1.5">
+        <ImagePlus className="h-3.5 w-3.5 text-muted-foreground" />
+        Bilder
+      </Label>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        className="hidden"
+        onChange={hanteraFiler}
+      />
+
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        disabled={laddarUpp}
+        onClick={() => fileInputRef.current?.click()}
+      >
+        <ImagePlus className="mr-1 h-4 w-4" />
+        {laddarUpp ? "Laddar upp..." : "Lägg till bilder"}
+      </Button>
+
+      {bilder.length > 0 && (
+        <div className="grid grid-cols-3 gap-2 pt-2">
+          {bilder.map((bild) => (
+            <div key={bild.key} className="relative group aspect-square">
+              <Image
+                src={bild.url}
+                alt="Jobbild"
+                fill
+                className="object-cover rounded-md"
+              />
+              <button
+                type="button"
+                className="absolute top-1 right-1 bg-black/60 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={() => setBilder(prev => prev.filter(b => b.key !== bild.key))}
+              >
+                <X className="h-3 w-3 text-white" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  </CardContent>
+</Card>
       {/* Utfört arbete */}
       <Card>
         <CardHeader>
