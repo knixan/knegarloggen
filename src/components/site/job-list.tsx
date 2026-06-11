@@ -139,12 +139,12 @@ export default function JobList({ jobs, onEdit, onDelete }: Props) {
 
       {valdBild && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 sm:p-8"
+          className="fixed inset-0 z-100 flex items-center justify-center bg-black/90 p-4 sm:p-8"
           onClick={() => setValdBild(null)}
         >
           <button
             type="button"
-            className="absolute right-4 top-4 z-[110] text-white/70 hover:text-white"
+            className="absolute right-4 top-4 z-110 text-white/70 hover:text-white"
             onClick={() => setValdBild(null)}
             aria-label="Stäng bild"
           >
