@@ -39,6 +39,10 @@ export const jobSchema = z.object({
 
   epost: z.string().trim().max(200).email("Ogiltig e-post").optional().or(z.literal("")),
 
+  personnummer: z.string().trim().max(30).optional().default(""),
+
+  fastighetsbeteckning: z.string().trim().max(120).optional().default(""),
+
   artiklar: z.array(articleSchema).default([]),
 
   resor: z.array(resaSchema).default([]),

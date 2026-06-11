@@ -32,6 +32,8 @@ import {
   MapPinned,
   TriangleAlert,
   Wrench,
+  IdCard,
+  Home,
 } from "lucide-react";
 
 import { jobSchema, type JobInput, beräknaSummering } from "@/lib/job-schema";
@@ -61,6 +63,8 @@ const tomDefaults: JobInput = {
   adress: "",
   telefon: "",
   epost: "",
+  personnummer: "",
+  fastighetsbeteckning: "",
   artiklar: [],
   resor: [],
   arbetstider: [],
@@ -156,6 +160,20 @@ async function hanteraFiler(e: React.ChangeEvent<HTMLInputElement>) {
               type="email"
               {...register("epost")}
               placeholder="anna@exempel.se"
+            />
+          </Field>
+
+          <Field label="Personnummer" icon={<IdCard className="h-3.5 w-3.5" />} error={errors.personnummer?.message}>
+            <Input
+              {...register("personnummer")}
+              placeholder="ÅÅÅÅMMDD-XXXX"
+            />
+          </Field>
+
+          <Field label="Fastighetsbeteckning" icon={<Home className="h-3.5 w-3.5" />} error={errors.fastighetsbeteckning?.message}>
+            <Input
+              {...register("fastighetsbeteckning")}
+              placeholder="T.ex. Berga 1:23"
             />
           </Field>
 

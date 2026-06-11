@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, X, User, LogOut } from "lucide-react";
@@ -277,9 +278,17 @@ const Navbar: React.FC<NavbarProps> = ({
           <div className="flex items-center">
             <Link
               href="/"
-              className="text-xl font-bold hover:text-gray-600 transition-colors"
+              className="flex items-center gap-2 text-xl font-bold hover:text-gray-600 transition-colors"
             >
-              {title}
+              <Image
+                src="/knegaloggen-logga.png"
+                alt=""
+                width={36}
+                height={36}
+                className="h-9 w-9 rounded-sm object-contain"
+                priority
+              />
+              <span>{title}</span>
             </Link>
           </div>
 

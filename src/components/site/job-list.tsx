@@ -1,22 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Trash2, Pencil, Wrench, MapPinned, Phone, Mail, Clock, Package, Van, User, NotebookPen,  X, ImagePlus, ClipboardList, } from "lucide-react";
+import { ClipboardList, Pencil, Trash2, Wrench, X } from "lucide-react";
 import Image from "next/image";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
-
-
+import { Card, CardContent } from "@/components/ui/card";
 import { beräknaSummering, type Job } from "@/lib/job-schema";
+import JobOverviewDialog from "./job-overview-dialog";
 
 interface Props {
   jobs: Job[];
@@ -44,15 +35,15 @@ export default function JobList({ jobs, onEdit, onDelete }: Props) {
         const summary = beräknaSummering(job);
 
         return (
-          <Card 
-            key={job.id} 
-            className="cursor-pointer hover:bg-accent/50 transition-colors group"
+          <Card
+            key={job.id}
+            className="cursor-pointer transition-colors hover:bg-accent/50"
             onClick={() => setViewingJob(job)}
           >
-            <CardContent className="pt-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="space-y-1 min-w-0">
-                <div className="font-bold text-lg truncate">{job.namn}</div>
-                <div className="text-sm text-muted-foreground truncate">
+            <CardContent className="flex flex-col gap-3 pt-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0 space-y-1">
+                <div className="truncate text-lg font-bold">{job.namn}</div>
+                <div className="truncate text-sm text-muted-foreground">
                   {job.adress}
                 </div>
 
@@ -61,8 +52,8 @@ export default function JobList({ jobs, onEdit, onDelete }: Props) {
                 </div>
               </div>
 
-              <div className="flex items-center gap-4 shrink-0">
-                <div className="text-right text-xs text-muted-foreground space-y-0.5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+                <div className="space-y-0.5 text-left text-xs text-muted-foreground sm:text-right">
                   <div>
                     <span className="tabular-nums font-medium text-foreground">
                       {summary.totalTimmar}
@@ -86,7 +77,7 @@ export default function JobList({ jobs, onEdit, onDelete }: Props) {
                     material
                   </div>
                   {job.bilder?.length ? (
-                    <div className="flex items-center gap-1">
+                    <div>
                       <span className="tabular-nums font-medium text-foreground">
                         {job.bilder.length}
                       </span>{" "}
@@ -95,152 +86,57 @@ export default function JobList({ jobs, onEdit, onDelete }: Props) {
                   ) : null}
                 </div>
 
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onEdit(job);
-                  }}
-                  aria-label="Redigera"
-                >
-                  <Pencil className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center gap-2 sm:justify-end">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setViewingJob(job);
+                    }}
+                  >
+                    <ClipboardList className="h-4 w-4" />
+                    Översikt
+                  </Button>
 
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete(job.id);
-                  }}
-                  aria-label="Ta bort"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onEdit(job);
+                    }}
+                    aria-label="Redigera"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onDelete(job.id);
+                    }}
+                    aria-label="Ta bort"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
         );
       })}
-{/* Job details dialog */}
-      <Dialog open={!!viewingJob} onOpenChange={(open) => !open && setViewingJob(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0">
-          {viewingJob && (
-            <>
-              <DialogHeader className="p-6 pb-2">
-                <DialogTitle className="text-xl flex items-center gap-2">
-                  <User className="h-5 w-5 text-muted-foreground" />
-                  {viewingJob.namn}
-                </DialogTitle>
-              </DialogHeader>
 
-              <ScrollArea className="flex-1 p-6 pt-2">
-                <div className="space-y-4">
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    <StatusBadge job={viewingJob} />
-                    {viewingJob.rotAvdrag && <Badge label="ROT" />}
-                    {viewingJob.fakturerat && <Badge label="Fakturerat" color="orange" />}
-                    {viewingJob.betalt && <Badge label="Betalt" color="green" />}
-                  </div>
-                  <Separator />
+      <JobOverviewDialog
+        job={viewingJob}
+        onOpenChange={(open) => {
+          if (!open) setViewingJob(null);
+        }}
+        onSelectImage={setValdBild}
+      />
 
-                  {/* Kundinfo */}
-                  <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                    <InfoItem icon={<MapPinned />} label="Adress" value={viewingJob.adress} />
-                    <InfoItem icon={<Phone />} label="Telefon" value={viewingJob.telefon} />
-                    <InfoItem icon={<Mail />} label="E-post" value={viewingJob.epost} />
-                  </section>
-                  <Separator />
-
-                  {/* Snabböversikt (Summary) */}
-                  <section className="space-y-2">
-                    <h4 className="font-semibold text-sm flex items-center gap-2">
-                      <ClipboardList className="h-4 w-4" /> Snabböversikt
-                    </h4>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <InfoItem icon={<Clock />} label="Arbetstid" value={`${beräknaSummering(viewingJob).totalTimmar} h`} />
-                      <InfoItem icon={<Van />} label="Resor" value={`${beräknaSummering(viewingJob).totalStracka} km`} />
-                      <InfoItem icon={<Package />} label="Material" value={`${beräknaSummering(viewingJob).artiklarSum.toLocaleString('sv-SE')} kr`} />
-                      {viewingJob.bilder?.length > 0 && (
-                        <InfoItem icon={<ImagePlus />} label="Bilder" value={`${viewingJob.bilder.length} st`} />
-                      )}
-                    </div>
-                  </section>
-
-                  {/* Planerat arbete */}
-                  {viewingJob.planeratArbete && (
-                    <section className="space-y-2">
-                      <h4 className="font-semibold text-sm flex items-center gap-2">
-                        <ClipboardList className="h-4 w-4" /> Planerat arbete
-                      </h4>
-                      <p className="text-sm text-muted-foreground whitespace-pre-wrap bg-muted/30 p-3 rounded-md">
-                        {viewingJob.planeratArbete}
-                      </p>
-                    </section>
-                  )}
-
-                  {/* Utfört arbete */}
-                  {viewingJob.utfortArbete && (
-                    <section className="space-y-2">
-                      <h4 className="font-semibold text-sm flex items-center gap-2">
-                        <Wrench className="h-4 w-4" /> Utfört arbete
-                      </h4>
-                      <p className="text-sm text-muted-foreground whitespace-pre-wrap bg-muted/30 p-3 rounded-md italic">
-                        {viewingJob.utfortArbete}
-                      </p>
-                    </section>
-                  )}
-
-                  {/* Bilder */}
-                  {viewingJob.bilder && viewingJob.bilder.length > 0 && (
-                    <section className="space-y-3">
-                      <h4 className="font-semibold text-sm flex items-center gap-2">
-                        <ImagePlus className="h-4 w-4" /> Bilder
-                      </h4>                      
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                        {viewingJob.bilder.map((bild) => (
-                          <div 
-                            key={bild.key} 
-                            className="relative aspect-square cursor-pointer group overflow-hidden rounded-md border"
-                            onClick={() => setValdBild(bild.url)}
-                          >
-                            <Image
-                              src={bild.url}
-                              alt="Jobbild"
-                              fill
-                              sizes="(max-width: 640px) 33vw, 200px"
-                              className="object-cover transition-transform group-hover:scale-105"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </section>
-                  )}
-
-                  {/* Anteckningar */}
-                  {viewingJob.anteckningar && (
-                    <section className="space-y-2 pt-2 border-t">
-                      <h4 className="font-semibold text-sm flex items-center gap-2">
-                        <NotebookPen className="h-4 w-4" /> Interna anteckningar
-                      </h4>
-                      <p className="text-sm whitespace-pre-wrap">{viewingJob.anteckningar}</p>
-                    </section>
-                  )}
-                </div>
-              </ScrollArea>
-              
-              <div className="p-6 pt-2 border-t bg-muted/20 flex justify-end">
-                <Button variant="secondary" onClick={() => setViewingJob(null)}>
-                  Stäng
-                </Button>
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Lightbox overlay */}
       {valdBild && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 sm:p-8"
@@ -248,18 +144,19 @@ export default function JobList({ jobs, onEdit, onDelete }: Props) {
         >
           <button
             type="button"
-            className="absolute top-4 right-4 text-white/70 hover:text-white z-[110]"
+            className="absolute right-4 top-4 z-[110] text-white/70 hover:text-white"
             onClick={() => setValdBild(null)}
+            aria-label="Stäng bild"
           >
             <X className="h-8 w-8" />
           </button>
-          <div className="relative w-full h-full max-w-5xl max-h-[85vh]">
+          <div className="relative h-full max-h-[85vh] w-full max-w-5xl">
             <Image
               src={valdBild}
               alt="Förstorad bild"
               fill
               className="object-contain"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(event) => event.stopPropagation()}
               priority
             />
           </div>
@@ -269,42 +166,18 @@ export default function JobList({ jobs, onEdit, onDelete }: Props) {
   );
 }
 
-function InfoItem({ icon, label, value }: { icon: React.ReactNode, label: string, value?: string }) {
-  if (!value) return null;
-  return (
-    <div className="flex items-start gap-2">
-      <div className="mt-0.5 text-muted-foreground [&_svg]:h-4 [&_svg]:w-4">{icon}</div>
-      <div>
-        <p className="text-[10px] font-medium text-muted-foreground uppercase leading-none mb-1">{label}</p>
-        <p className="leading-tight">{value}</p>
-      </div>
-    </div>
-  );
-}
-
-function Badge({ label, color }: { label: string, color?: 'orange' | 'green' }) {
-  const colors = {
-    orange: "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-400",
-    green: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400",
-    default: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
-  };
-  return (
-    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${color ? colors[color] : colors.default}`}>
-      {label}
-    </span>
-  );
-}
-
 function StatusBadge({ job }: { job: Job }) {
   const label = job.utfort ? "Utfört" : job.pagaende ? "Pågående" : "Ej påbörjat";
   const colorClass = job.utfort
     ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
     : job.pagaende
-    ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400"
-    : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
-    
+      ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400"
+      : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
+
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${colorClass}`}>
+    <span
+      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${colorClass}`}
+    >
       <Wrench className="h-3 w-3" />
       {label}
     </span>

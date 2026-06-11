@@ -154,6 +154,8 @@ model Job {
   adress    String
   telefon   String
   epost     String
+  personnummer String @default("")
+  fastighetsbeteckning String @default("")
 
   // Status
   rotAvdrag  Boolean @default(false)
