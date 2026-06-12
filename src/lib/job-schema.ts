@@ -1,6 +1,8 @@
 import { z } from "zod";
 
 export const articleSchema = z.object({
+  id: z.string().optional(),
+
   namn: z.string().trim().min(1, "Namn krävs").max(120),
 
   artikelnr: z.string().trim().max(50).optional().default(""),
@@ -13,12 +15,16 @@ export const articleSchema = z.object({
 });
 
 export const resaSchema = z.object({
+  id: z.string().optional(),
+
   datum: z.string().min(1, "Datum krävs"),
 
   stracka: z.coerce.number().min(0, "Sträcka får inte vara negativ"),
 });
 
 export const arbetstidSchema = z.object({
+  id: z.string().optional(),
+
   datum: z.string().min(1, "Datum krävs"),
 
   timmar: z.coerce.number().min(0, "Timmar får inte vara negativt"),

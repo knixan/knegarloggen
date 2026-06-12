@@ -2,12 +2,18 @@
 
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import type { Prisma } from "@prisma/client";
 import { UTApi } from "uploadthing/server";
 import { auth } from "./auth";
 import { prisma } from "./prisma";
 import type { JobInput } from "./job-schema";
 
 const utapi = new UTApi();
+const DEFAULT_COMPANY_NAME = "Mitt företag";
+
+type JobWithRelations = Prisma.JobGetPayload<{
+  include: { artiklar: true; resor: true; arbetspass: true; images: true };
+}>;
 
 async function getSession() {
   return auth.api.getSession({ headers: await headers() });
@@ -19,80 +25,11 @@ async function getOrCreateCompany(userId: string) {
   });
   if (existing) return existing;
   return prisma.company.create({
-    data: { name: "Mitt företag", ownerId: userId },
+    data: { name: DEFAULT_COMPANY_NAME, ownerId: userId },
   });
 }
 
-export async function getJobs() {
-  const session = await getSession();
-  if (!session?.user) return [];
-
-  const company = await prisma.company.findFirst({
-    where: { ownerId: session.user.id },
-  });
-  if (!company) return [];
-
-  const jobs = await prisma.job.findMany({
-    where: { companyId: company.id },
-    include: { artiklar: true, resor: true, arbetspass: true, images: true },
-    orderBy: { skapad: "desc" },
-  });
-
-  return jobs.map((j) => ({
-    id: j.id,
-    namn: j.kundNamn,
-    adress: j.adress,
-    telefon: j.telefon,
-    epost: j.epost,
-    personnummer: j.personnummer,
-    fastighetsbeteckning: j.fastighetsbeteckning,
-    rotAvdrag: j.rotAvdrag,
-    pagaende: j.pagaende,
-    utfort: j.utfort,
-    fakturerat: j.fakturerat,
-    betalt: j.betalt,
-    anteckningar: j.anteckningar,
-    ovrigaArtiklar: j.ovrigaArtiklar,
-    utfortArbete: j.utfortArbete,
-    planeratArbete: j.planeratArbete,
-    artiklar: j.artiklar.map((a) => ({
-      namn: a.namn,
-      artikelnr: a.artikelnr,
-      aterforsaljare: a.aterforsaljare,
-      pris: a.pris,
-      antal: a.antal,
-    })),
-    resor: j.resor.map((r) => ({
-      datum: r.datum,
-      stracka: r.stracka,
-    })),
-    arbetstider: j.arbetspass.map((w) => ({
-      datum: w.datum,
-      timmar: w.timmar,
-    })),
-    bilder: j.images.map((img) => ({
-      url: img.url,
-      key: img.key,
-    })),
-    skapad: j.skapad.toISOString(),
-  }));
-}
-
-export async function getJob(id: string) {
-  const session = await getSession();
-  if (!session?.user) return null;
-
-  const company = await prisma.company.findFirst({
-    where: { ownerId: session.user.id },
-  });
-  if (!company) return null;
-
-  const j = await prisma.job.findFirst({
-    where: { id, companyId: company.id },
-    include: { artiklar: true, resor: true, arbetspass: true, images: true },
-  });
-  if (!j) return null;
-
+function mapJob(j: JobWithRelations) {
   return {
     id: j.id,
     namn: j.kundNamn,
@@ -111,6 +48,7 @@ export async function getJob(id: string) {
     utfortArbete: j.utfortArbete,
     planeratArbete: j.planeratArbete,
     artiklar: j.artiklar.map((a) => ({
+      id: a.id,
       namn: a.namn,
       artikelnr: a.artikelnr,
       aterforsaljare: a.aterforsaljare,
@@ -118,10 +56,12 @@ export async function getJob(id: string) {
       antal: a.antal,
     })),
     resor: j.resor.map((r) => ({
+      id: r.id,
       datum: r.datum,
       stracka: r.stracka,
     })),
     arbetstider: j.arbetspass.map((w) => ({
+      id: w.id,
       datum: w.datum,
       timmar: w.timmar,
     })),
@@ -131,6 +71,77 @@ export async function getJob(id: string) {
     })),
     skapad: j.skapad.toISOString(),
   };
+}
+
+function ids<T extends { id?: string }>(rows: T[]) {
+  return rows.flatMap((row) => (row.id ? [row.id] : []));
+}
+
+export async function getCompanySettings() {
+  const session = await getSession();
+  if (!session?.user) return null;
+
+  const company = await getOrCreateCompany(session.user.id);
+
+  return {
+    id: company.id,
+    name: company.name,
+  };
+}
+
+export async function updateCompanyName(name: string) {
+  const session = await getSession();
+  if (!session?.user) return { ok: false, error: "Inte inloggad" };
+
+  const trimmed = name.trim();
+  if (!trimmed) return { ok: false, error: "Företagsnamn krävs" };
+  if (trimmed.length > 120) return { ok: false, error: "Företagsnamnet är för långt" };
+
+  const company = await getOrCreateCompany(session.user.id);
+
+  await prisma.company.update({
+    where: { id: company.id },
+    data: { name: trimmed },
+  });
+
+  revalidatePath("/mina-sidor");
+  return { ok: true };
+}
+
+export async function getJobs() {
+  const session = await getSession();
+  if (!session?.user) return [];
+
+  const company = await prisma.company.findFirst({
+    where: { ownerId: session.user.id },
+  });
+  if (!company) return [];
+
+  const jobs = await prisma.job.findMany({
+    where: { companyId: company.id },
+    include: { artiklar: true, resor: true, arbetspass: true, images: true },
+    orderBy: { skapad: "desc" },
+  });
+
+  return jobs.map(mapJob);
+}
+
+export async function getJob(id: string) {
+  const session = await getSession();
+  if (!session?.user) return null;
+
+  const company = await prisma.company.findFirst({
+    where: { ownerId: session.user.id },
+  });
+  if (!company) return null;
+
+  const j = await prisma.job.findFirst({
+    where: { id, companyId: company.id },
+    include: { artiklar: true, resor: true, arbetspass: true, images: true },
+  });
+  if (!j) return null;
+
+  return mapJob(j);
 }
 
 export async function createJob(data: JobInput, bilder: { url: string; key: string }[] = []) {
@@ -235,8 +246,22 @@ export async function updateJob(id: string, data: JobInput, bilder: { url: strin
       utfortArbete: data.utfortArbete ?? "",
       planeratArbete: data.planeratArbete ?? "",
       artiklar: {
-        deleteMany: {},
-        create: data.artiklar.map((a) => ({
+        deleteMany: ids(data.artiklar).length
+          ? { id: { notIn: ids(data.artiklar) } }
+          : {},
+        updateMany: data.artiklar
+          .filter((a) => a.id)
+          .map((a) => ({
+            where: { id: a.id },
+            data: {
+              namn: a.namn,
+              artikelnr: a.artikelnr ?? "",
+              aterforsaljare: a.aterforsaljare ?? "",
+              pris: a.pris,
+              antal: a.antal,
+            },
+          })),
+        create: data.artiklar.filter((a) => !a.id).map((a) => ({
           namn: a.namn,
           artikelnr: a.artikelnr ?? "",
           aterforsaljare: a.aterforsaljare ?? "",
@@ -245,15 +270,35 @@ export async function updateJob(id: string, data: JobInput, bilder: { url: strin
         })),
       },
       resor: {
-        deleteMany: {},
-        create: data.resor.map((r) => ({
+        deleteMany: ids(data.resor).length ? { id: { notIn: ids(data.resor) } } : {},
+        updateMany: data.resor
+          .filter((r) => r.id)
+          .map((r) => ({
+            where: { id: r.id },
+            data: {
+              datum: r.datum,
+              stracka: r.stracka,
+            },
+          })),
+        create: data.resor.filter((r) => !r.id).map((r) => ({
           datum: r.datum,
           stracka: r.stracka,
         })),
       },
       arbetspass: {
-        deleteMany: {},
-        create: data.arbetstider.map((w) => ({
+        deleteMany: ids(data.arbetstider).length
+          ? { id: { notIn: ids(data.arbetstider) } }
+          : {},
+        updateMany: data.arbetstider
+          .filter((w) => w.id)
+          .map((w) => ({
+            where: { id: w.id },
+            data: {
+              datum: w.datum,
+              timmar: w.timmar,
+            },
+          })),
+        create: data.arbetstider.filter((w) => !w.id).map((w) => ({
           datum: w.datum,
           timmar: w.timmar,
         })),
