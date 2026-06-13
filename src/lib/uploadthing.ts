@@ -11,6 +11,14 @@ export const ourFileRouter = {
     .onUploadComplete(async ({ file }) => {
       console.log("Uppladdad:", file.url);
     }),
+
+  companyLogo: f({ image: { maxFileSize: "2MB", maxFileCount: 1 } })
+    .middleware(async () => {
+      return {};
+    })
+    .onUploadComplete(async ({ file }) => {
+      console.log("Logotyp uppladdad:", file.url);
+    }),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;
