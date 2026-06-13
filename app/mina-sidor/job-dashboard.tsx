@@ -8,6 +8,16 @@ import { deleteJob } from "@/lib/job-actions";
 import type { Job } from "@/lib/job-schema";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type Filter = "alla" | "ej-påbörjat" | "pågående" | "utfört" | "fakturerat" | "betalt";
 
@@ -86,15 +96,18 @@ interface Props {
 export default function JobDashboard({ jobs }: Props) {
   const router = useRouter();
   const [active, setActive] = useState<Filter>("alla");
+  const [jobToDelete, setJobToDelete] = useState<Job | null>(null);
 
-  async function handleDelete(id: string) {
-    const result = await deleteJob(id);
+  async function confirmDelete() {
+    if (!jobToDelete) return;
+    const result = await deleteJob(jobToDelete.id);
     if (result.ok) {
       toast.success("Jobb borttaget");
       router.refresh();
     } else {
       toast.error(result.error ?? "Kunde inte ta bort jobb");
     }
+    setJobToDelete(null);
   }
 
   function handleEdit(job: Job) {
@@ -146,8 +159,34 @@ export default function JobDashboard({ jobs }: Props) {
           </CardContent>
         </Card>
       ) : (
-        <JobList jobs={filtered} onEdit={handleEdit} onDelete={handleDelete} />
+        <JobList jobs={filtered} onEdit={handleEdit} onDelete={(id) => {
+          const job = jobs.find((j) => j.id === id);
+          if (job) setJobToDelete(job);
+        }} />
       )}
+
+      <AlertDialog open={!!jobToDelete} onOpenChange={(open) => !open && setJobToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Ta bort jobb?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Du håller på att ta bort jobbet för{" "}
+              <span className="font-medium text-foreground">{jobToDelete?.namn}</span>.
+              Detta raderar all information, inklusive artiklar, resor, arbetstid och
+              uppladdade bilder. Åtgärden kan inte ångras.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Avbryt</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-white hover:bg-destructive/90"
+            >
+              Ta bort
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
