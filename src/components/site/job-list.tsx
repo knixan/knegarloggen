@@ -1,13 +1,15 @@
+// jobb-listan som visar alla jobb i en överskådlig lista, med möjlighet att se detaljer, redigera eller ta bort varje jobb
 "use client";
 
 import { useState } from "react";
-import { ClipboardList, Pencil, Trash2, Wrench, X } from "lucide-react";
+import { ClipboardList, Pencil, Trash2, X } from "lucide-react";
 import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { beräknaSummering, type Job } from "@/lib/job-schema";
 import JobOverviewDialog from "./job-overview-dialog";
+import { StatusBadge } from "./job-overview-badges";
 
 interface Props {
   jobs: Job[];
@@ -163,23 +165,5 @@ export default function JobList({ jobs, onEdit, onDelete }: Props) {
         </div>
       )}
     </div>
-  );
-}
-
-function StatusBadge({ job }: { job: Job }) {
-  const label = job.utfort ? "Utfört" : job.pagaende ? "Pågående" : "Ej påbörjat";
-  const colorClass = job.utfort
-    ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
-    : job.pagaende
-      ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400"
-      : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
-
-  return (
-    <span
-      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${colorClass}`}
-    >
-      <Wrench className="h-3 w-3" />
-      {label}
-    </span>
   );
 }

@@ -43,7 +43,13 @@ export const jobSchema = z.object({
     .optional()
     .default(""),
 
-  epost: z.string().trim().max(200).email("Ogiltig e-post").optional().or(z.literal("")),
+  epost: z
+    .string()
+    .trim()
+    .max(200)
+    .email("Ogiltig e-post")
+    .optional()
+    .or(z.literal("")),
 
   personnummer: z.string().trim().max(30).optional().default(""),
 
@@ -78,7 +84,7 @@ export const jobSchema = z.object({
       z.object({
         url: z.string(),
         key: z.string(),
-      })
+      }),
     )
     .default([]),
 });

@@ -11,7 +11,10 @@ export default function NyttJobbPage() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  function handleSubmit(data: JobInput, bilder: { url: string; key: string }[]) {
+  function handleSubmit(
+    data: JobInput,
+    bilder: { url: string; key: string }[],
+  ) {
     startTransition(async () => {
       const result = await createJob(data, bilder);
       if (result.ok) {
@@ -26,7 +29,11 @@ export default function NyttJobbPage() {
   return (
     <main className="container mx-auto px-4 py-8 max-w-3xl">
       <h1 className="text-2xl font-bold mb-6">Nytt jobb</h1>
-      <JobForm onSubmit={handleSubmit} submitLabel="Spara jobb" isPending={isPending} />
+      <JobForm
+        onSubmit={handleSubmit}
+        submitLabel="Spara jobb"
+        isPending={isPending}
+      />
     </main>
   );
 }

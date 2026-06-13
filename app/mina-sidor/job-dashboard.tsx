@@ -19,7 +19,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-type Filter = "alla" | "ej-påbörjat" | "pågående" | "utfört" | "fakturerat" | "betalt";
+type Filter =
+  | "alla"
+  | "ej-påbörjat"
+  | "pågående"
+  | "utfört"
+  | "fakturerat"
+  | "betalt";
 
 const filters: {
   value: Filter;
@@ -159,21 +165,30 @@ export default function JobDashboard({ jobs }: Props) {
           </CardContent>
         </Card>
       ) : (
-        <JobList jobs={filtered} onEdit={handleEdit} onDelete={(id) => {
-          const job = jobs.find((j) => j.id === id);
-          if (job) setJobToDelete(job);
-        }} />
+        <JobList
+          jobs={filtered}
+          onEdit={handleEdit}
+          onDelete={(id) => {
+            const job = jobs.find((j) => j.id === id);
+            if (job) setJobToDelete(job);
+          }}
+        />
       )}
 
-      <AlertDialog open={!!jobToDelete} onOpenChange={(open) => !open && setJobToDelete(null)}>
+      <AlertDialog
+        open={!!jobToDelete}
+        onOpenChange={(open) => !open && setJobToDelete(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Ta bort jobb?</AlertDialogTitle>
             <AlertDialogDescription>
               Du håller på att ta bort jobbet för{" "}
-              <span className="font-medium text-foreground">{jobToDelete?.namn}</span>.
-              Detta raderar all information, inklusive artiklar, resor, arbetstid och
-              uppladdade bilder. Åtgärden kan inte ångras.
+              <span className="font-medium text-foreground">
+                {jobToDelete?.namn}
+              </span>
+              . Detta raderar all information, inklusive artiklar, resor,
+              arbetstid och uppladdade bilder. Åtgärden kan inte ångras.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

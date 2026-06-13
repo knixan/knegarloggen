@@ -95,7 +95,8 @@ export async function updateCompanyName(name: string) {
 
   const trimmed = name.trim();
   if (!trimmed) return { ok: false, error: "Företagsnamn krävs" };
-  if (trimmed.length > 120) return { ok: false, error: "Företagsnamnet är för långt" };
+  if (trimmed.length > 120)
+    return { ok: false, error: "Företagsnamnet är för långt" };
 
   const company = await getOrCreateCompany(session.user.id);
 
@@ -144,7 +145,10 @@ export async function getJob(id: string) {
   return mapJob(j);
 }
 
-export async function createJob(data: JobInput, bilder: { url: string; key: string }[] = []) {
+export async function createJob(
+  data: JobInput,
+  bilder: { url: string; key: string }[] = [],
+) {
   const session = await getSession();
   if (!session?.user) return { ok: false, error: "Inte inloggad" };
 
@@ -199,7 +203,11 @@ export async function createJob(data: JobInput, bilder: { url: string; key: stri
   return { ok: true };
 }
 
-export async function updateJob(id: string, data: JobInput, bilder: { url: string; key: string }[] = []) {
+export async function updateJob(
+  id: string,
+  data: JobInput,
+  bilder: { url: string; key: string }[] = [],
+) {
   const session = await getSession();
   if (!session?.user) return { ok: false, error: "Inte inloggad" };
 
@@ -261,16 +269,20 @@ export async function updateJob(id: string, data: JobInput, bilder: { url: strin
               antal: a.antal,
             },
           })),
-        create: data.artiklar.filter((a) => !a.id).map((a) => ({
-          namn: a.namn,
-          artikelnr: a.artikelnr ?? "",
-          aterforsaljare: a.aterforsaljare ?? "",
-          pris: a.pris,
-          antal: a.antal,
-        })),
+        create: data.artiklar
+          .filter((a) => !a.id)
+          .map((a) => ({
+            namn: a.namn,
+            artikelnr: a.artikelnr ?? "",
+            aterforsaljare: a.aterforsaljare ?? "",
+            pris: a.pris,
+            antal: a.antal,
+          })),
       },
       resor: {
-        deleteMany: ids(data.resor).length ? { id: { notIn: ids(data.resor) } } : {},
+        deleteMany: ids(data.resor).length
+          ? { id: { notIn: ids(data.resor) } }
+          : {},
         updateMany: data.resor
           .filter((r) => r.id)
           .map((r) => ({
@@ -280,10 +292,12 @@ export async function updateJob(id: string, data: JobInput, bilder: { url: strin
               stracka: r.stracka,
             },
           })),
-        create: data.resor.filter((r) => !r.id).map((r) => ({
-          datum: r.datum,
-          stracka: r.stracka,
-        })),
+        create: data.resor
+          .filter((r) => !r.id)
+          .map((r) => ({
+            datum: r.datum,
+            stracka: r.stracka,
+          })),
       },
       arbetspass: {
         deleteMany: ids(data.arbetstider).length
@@ -298,10 +312,12 @@ export async function updateJob(id: string, data: JobInput, bilder: { url: strin
               timmar: w.timmar,
             },
           })),
-        create: data.arbetstider.filter((w) => !w.id).map((w) => ({
-          datum: w.datum,
-          timmar: w.timmar,
-        })),
+        create: data.arbetstider
+          .filter((w) => !w.id)
+          .map((w) => ({
+            datum: w.datum,
+            timmar: w.timmar,
+          })),
       },
       images: {
         deleteMany: {},
@@ -335,7 +351,10 @@ export async function deleteJob(id: string) {
     try {
       await utapi.deleteFiles(keys);
     } catch (error) {
-      console.error("Misslyckades att radera filer från UploadThing vid borttagning av jobb:", error);
+      console.error(
+        "Misslyckades att radera filer från UploadThing vid borttagning av jobb:",
+        error,
+      );
     }
   }
 

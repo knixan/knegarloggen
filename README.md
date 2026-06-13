@@ -27,16 +27,16 @@ Appen är byggd med Next.js, Prisma och PostgreSQL, med inloggning via [better-a
 
 ## Teknisk stack
 
-| Lager | Teknik |
-|---|---|
-| Framework | Next.js 16 (App Router) |
-| Språk | TypeScript |
-| Styling | Tailwind CSS v4 + shadcn/ui |
-| Formulär | React Hook Form + Zod |
-| ORM | Prisma 7 |
-| Databas | PostgreSQL |
-| Auth | better-auth |
-| Runtime | Node.js |
+| Lager     | Teknik                      |
+| --------- | --------------------------- |
+| Framework | Next.js 16 (App Router)     |
+| Språk     | TypeScript                  |
+| Styling   | Tailwind CSS v4 + shadcn/ui |
+| Formulär  | React Hook Form + Zod       |
+| ORM       | Prisma 7                    |
+| Databas   | PostgreSQL                  |
+| Auth      | better-auth                 |
+| Runtime   | Node.js                     |
 
 ---
 

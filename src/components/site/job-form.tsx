@@ -1,3 +1,4 @@
+// jobb formuläret för att skapa eller redigera ett jobb
 "use client";
 import Image from "next/image";
 import * as React from "react";
@@ -110,29 +111,28 @@ export default function JobForm({
   const live = useWatch({ control }) as Partial<JobInput>;
   const summering = beräknaSummering({ ...tomDefaults, ...live } as JobInput);
 
-
   const [bilder, setBilder] = useState<{ url: string; key: string }[]>(
-    defaultValues?.bilder ?? []
+    defaultValues?.bilder ?? [],
   );
   const [laddarUpp, setLaddarUpp] = useState(false);
   const [valdBild, setValdBild] = useState<string | null>(null);
-const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-const { startUpload } = useUploadThing("jobbBilder");
+  const { startUpload } = useUploadThing("jobbBilder");
 
-async function hanteraFiler(e: React.ChangeEvent<HTMLInputElement>) {
-  const filer = Array.from(e.target.files ?? []);
-  if (!filer.length) return;
-  setLaddarUpp(true);
-  const res = await startUpload(filer);
-  if (res) {
-    setBilder(prev => [
-      ...prev,
-      ...res.map((bild) => ({ url: bild.ufsUrl, key: bild.key }))
-    ]);
+  async function hanteraFiler(e: React.ChangeEvent<HTMLInputElement>) {
+    const filer = Array.from(e.target.files ?? []);
+    if (!filer.length) return;
+    setLaddarUpp(true);
+    const res = await startUpload(filer);
+    if (res) {
+      setBilder((prev) => [
+        ...prev,
+        ...res.map((bild) => ({ url: bild.ufsUrl, key: bild.key })),
+      ]);
+    }
+    setLaddarUpp(false);
   }
-  setLaddarUpp(false);
-}
 
   return (
     <form
@@ -149,15 +149,27 @@ async function hanteraFiler(e: React.ChangeEvent<HTMLInputElement>) {
         </CardHeader>
 
         <CardContent className="grid gap-4 sm:grid-cols-2">
-          <Field label="Namn" icon={<User className="h-3.5 w-3.5" />} error={errors.namn?.message}>
+          <Field
+            label="Namn"
+            icon={<User className="h-3.5 w-3.5" />}
+            error={errors.namn?.message}
+          >
             <Input {...register("namn")} placeholder="Anna Andersson" />
           </Field>
 
-          <Field label="Telefon" icon={<Phone className="h-3.5 w-3.5" />} error={errors.telefon?.message}>
+          <Field
+            label="Telefon"
+            icon={<Phone className="h-3.5 w-3.5" />}
+            error={errors.telefon?.message}
+          >
             <Input {...register("telefon")} placeholder="070-123 45 67" />
           </Field>
 
-          <Field label="E-post" icon={<Mail className="h-3.5 w-3.5" />} error={errors.epost?.message}>
+          <Field
+            label="E-post"
+            icon={<Mail className="h-3.5 w-3.5" />}
+            error={errors.epost?.message}
+          >
             <Input
               type="email"
               {...register("epost")}
@@ -165,21 +177,30 @@ async function hanteraFiler(e: React.ChangeEvent<HTMLInputElement>) {
             />
           </Field>
 
-          <Field label="Personnummer" icon={<IdCard className="h-3.5 w-3.5" />} error={errors.personnummer?.message}>
-            <Input
-              {...register("personnummer")}
-              placeholder="ÅÅÅÅMMDD-XXXX"
-            />
+          <Field
+            label="Personnummer"
+            icon={<IdCard className="h-3.5 w-3.5" />}
+            error={errors.personnummer?.message}
+          >
+            <Input {...register("personnummer")} placeholder="ÅÅÅÅMMDD-XXXX" />
           </Field>
 
-          <Field label="Fastighetsbeteckning" icon={<Home className="h-3.5 w-3.5" />} error={errors.fastighetsbeteckning?.message}>
+          <Field
+            label="Fastighetsbeteckning"
+            icon={<Home className="h-3.5 w-3.5" />}
+            error={errors.fastighetsbeteckning?.message}
+          >
             <Input
               {...register("fastighetsbeteckning")}
               placeholder="T.ex. Berga 1:23"
             />
           </Field>
 
-          <Field label="Adress" icon={<MapPinned className="h-3.5 w-3.5" />} error={errors.adress?.message}>
+          <Field
+            label="Adress"
+            icon={<MapPinned className="h-3.5 w-3.5" />}
+            error={errors.adress?.message}
+          >
             <Input
               {...register("adress")}
               placeholder="Storgatan 1, 123 45 Stad"
@@ -201,7 +222,13 @@ async function hanteraFiler(e: React.ChangeEvent<HTMLInputElement>) {
             size="sm"
             variant="outline"
             onClick={() =>
-              artiklar.append({ namn: "", artikelnr: "", aterforsaljare: "", pris: 0, antal: 1 })
+              artiklar.append({
+                namn: "",
+                artikelnr: "",
+                aterforsaljare: "",
+                pris: 0,
+                antal: 1,
+              })
             }
           >
             <Plus className="mr-1 h-4 w-4" />
@@ -286,7 +313,8 @@ async function hanteraFiler(e: React.ChangeEvent<HTMLInputElement>) {
                   {...register(`artiklar.${i}.pris`, { valueAsNumber: true })}
                   placeholder="Pris kr"
                 />
-                {(live.artiklar?.[i]?.pris === 0 || live.artiklar?.[i]?.pris === undefined) && (
+                {(live.artiklar?.[i]?.pris === 0 ||
+                  live.artiklar?.[i]?.pris === undefined) && (
                   <p className="text-xs font-bold text-amber-600 dark:text-amber-400 mt-1 flex items-center gap-1">
                     <TriangleAlert className="h-3 w-3" />
                     Pris ej ifyllt
@@ -445,7 +473,9 @@ async function hanteraFiler(e: React.ChangeEvent<HTMLInputElement>) {
                   type="number"
                   step="0.25"
                   min="0"
-                  {...register(`arbetstider.${i}.timmar`, { valueAsNumber: true })}
+                  {...register(`arbetstider.${i}.timmar`, {
+                    valueAsNumber: true,
+                  })}
                   placeholder="t.ex. 7.5"
                 />
               </div>
@@ -521,7 +551,11 @@ async function hanteraFiler(e: React.ChangeEvent<HTMLInputElement>) {
                     <button
                       type="button"
                       className="absolute top-1 right-1 bg-black/60 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => setBilder(prev => prev.filter(b => b.key !== bild.key))}
+                      onClick={() =>
+                        setBilder((prev) =>
+                          prev.filter((b) => b.key !== bild.key),
+                        )
+                      }
                     >
                       <X className="h-3 w-3 text-white" />
                     </button>
@@ -655,13 +689,14 @@ async function hanteraFiler(e: React.ChangeEvent<HTMLInputElement>) {
           {live.artiklar?.some((a) => !a.pris) && (
             <p className="text-xs text-amber-600 dark:text-amber-400 font-medium pb-1 flex items-center gap-1.5">
               <TriangleAlert className="h-3.5 w-3.5" />
-              En eller flera artiklar saknar pris — totalsumman är inte komplett.
+              En eller flera artiklar saknar pris — totalsumman är inte
+              komplett.
             </p>
           )}
           {live.ovrigaArtiklar && (
             <p className="text-xs text-amber-600 dark:text-amber-400 pt-1 italic flex items-center gap-1.5">
-              <StickyNote className="h-3.5 w-3.5" />
-              * Det finns en notering under övriga artiklar.
+              <StickyNote className="h-3.5 w-3.5" />* Det finns en notering
+              under övriga artiklar.
             </p>
           )}
 
@@ -753,9 +788,7 @@ function Field({
   return (
     <div className="space-y-1.5">
       <Label className="flex items-center gap-1.5">
-        {icon && (
-          <span className="text-muted-foreground">{icon}</span>
-        )}
+        {icon && <span className="text-muted-foreground">{icon}</span>}
         {label}
       </Label>
 
