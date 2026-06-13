@@ -54,6 +54,7 @@ interface Props {
   onSubmit: (data: JobInput, bilder: { url: string; key: string }[]) => void;
   defaultValues?: Partial<JobInput>;
   submitLabel?: string;
+  isPending?: boolean;
 }
 
 const idag = () => new Date().toISOString().slice(0, 10);
@@ -84,6 +85,7 @@ export default function JobForm({
   onSubmit,
   defaultValues,
   submitLabel = "Spara jobb",
+  isPending = false,
 }: Props) {
   const form = useForm<JobInput>({
     resolver: zodResolver(jobSchema) as Resolver<JobInput>,
@@ -704,8 +706,8 @@ async function hanteraFiler(e: React.ChangeEvent<HTMLInputElement>) {
       </Card>
 
       <div className="flex justify-end">
-        <Button type="submit" size="lg">
-          {submitLabel}
+        <Button type="submit" size="lg" disabled={isPending}>
+          {isPending ? "Sparar..." : submitLabel}
         </Button>
       </div>
 
