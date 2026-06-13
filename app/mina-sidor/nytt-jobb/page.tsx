@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTransition } from "react";
 import { toast } from "sonner";
 import JobForm from "@/components/site/job-form";
 import { createJob } from "@/lib/job-actions";
@@ -8,21 +9,24 @@ import type { JobInput } from "@/lib/job-schema";
 
 export default function NyttJobbPage() {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
-  async function handleSubmit(data: JobInput, bilder: { url: string; key: string }[]) {
-    const result = await createJob(data, bilder);
-    if (result.ok) {
-      toast.success("Jobb sparat!");
-      router.push("/mina-sidor");
-    } else {
-      toast.error(result.error ?? "Kunde inte spara jobb");
-    }
+  function handleSubmit(data: JobInput, bilder: { url: string; key: string }[]) {
+    startTransition(async () => {
+      const result = await createJob(data, bilder);
+      if (result.ok) {
+        toast.success("Jobb sparat!");
+        router.push("/mina-sidor");
+      } else {
+        toast.error(result.error ?? "Kunde inte spara jobb");
+      }
+    });
   }
 
   return (
     <main className="container mx-auto px-4 py-8 max-w-3xl">
       <h1 className="text-2xl font-bold mb-6">Nytt jobb</h1>
-      <JobForm onSubmit={handleSubmit} submitLabel="Spara jobb" />
+      <JobForm onSubmit={handleSubmit} submitLabel="Spara jobb" isPending={isPending} />
     </main>
   );
 }
