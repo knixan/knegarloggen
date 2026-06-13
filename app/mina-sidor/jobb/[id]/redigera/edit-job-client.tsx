@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTransition } from "react";
 import { toast } from "sonner";
 import JobForm from "@/components/site/job-form";
 import { updateJob } from "@/lib/job-actions";
@@ -12,15 +13,18 @@ interface Props {
 
 export default function EditJobClient({ job }: Props) {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
-  async function handleSubmit(data: JobInput, bilder: { url: string; key: string }[]) {
-    const result = await updateJob(job.id, data, bilder);
-    if (result.ok) {
-      toast.success("Jobb uppdaterat!");
-      router.push("/mina-sidor");
-    } else {
-      toast.error(result.error ?? "Kunde inte uppdatera jobb");
-    }
+  function handleSubmit(data: JobInput, bilder: { url: string; key: string }[]) {
+    startTransition(async () => {
+      const result = await updateJob(job.id, data, bilder);
+      if (result.ok) {
+        toast.success("Jobb uppdaterat!");
+        router.push("/mina-sidor");
+      } else {
+        toast.error(result.error ?? "Kunde inte uppdatera jobb");
+      }
+    });
   }
 
   const defaultValues: Partial<JobInput> = {
@@ -28,6 +32,8 @@ export default function EditJobClient({ job }: Props) {
     adress: job.adress,
     telefon: job.telefon,
     epost: job.epost,
+    personnummer: job.personnummer,
+    fastighetsbeteckning: job.fastighetsbeteckning,
     rotAvdrag: job.rotAvdrag,
     pagaende: job.pagaende,
     utfort: job.utfort,
@@ -48,6 +54,7 @@ export default function EditJobClient({ job }: Props) {
       onSubmit={handleSubmit}
       defaultValues={defaultValues}
       submitLabel="Uppdatera jobb"
+      isPending={isPending}
     />
   );
 }
