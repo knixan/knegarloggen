@@ -107,6 +107,27 @@ model Company {
   ownerId   String   @unique
   createdAt DateTime @default(now())
 
+  // Företagsuppgifter
+  orgNummer       String @default("")
+  adress          String @default("")
+  postnummer      String @default("")
+  ort             String @default("")
+  telefon         String @default("")
+  epost           String @default("")
+  fSkatt          Boolean @default(false)
+  momsNummer      String @default("")
+  bankgiro        String @default("")
+  plusgiro        String @default("")
+  swish           String @default("")
+  logoUrl         String @default("")
+  logoKey         String @default("")
+
+  // Fakturainställningar
+  nastaFakturanummer Int     @default(1)
+  forfallodagar      Int     @default(30)
+  drojsmalsranta     Float   @default(0)
+  fakturatext        String  @default("")
+
   owner     User  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   jobs      Job[]
 
