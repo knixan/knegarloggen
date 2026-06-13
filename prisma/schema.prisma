@@ -26,7 +26,6 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  // Relationer
   accounts      Account[]
   sessions      Session[]
   members       Member[]
@@ -65,7 +64,6 @@ model Session {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Better-auth teams
   activeOrganizationId String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -108,28 +106,29 @@ model Company {
   createdAt DateTime @default(now())
 
   // Företagsuppgifter
-  orgNummer       String @default("")
-  adress          String @default("")
-  postnummer      String @default("")
-  ort             String @default("")
-  telefon         String @default("")
-  epost           String @default("")
+  orgNummer       String  @default("")
+  adress          String  @default("")
+  postnummer      String  @default("")
+  ort             String  @default("")
+  telefon         String  @default("")
+  epost           String  @default("")
   fSkatt          Boolean @default(false)
-  momsNummer      String @default("")
-  bankgiro        String @default("")
-  plusgiro        String @default("")
-  swish           String @default("")
-  logoUrl         String @default("")
-  logoKey         String @default("")
+  momsNummer      String  @default("")
+  bankgiro        String  @default("")
+  plusgiro        String  @default("")
+  swish           String  @default("")
+  logoUrl         String  @default("")
+  logoKey         String  @default("")
 
   // Fakturainställningar
-  nastaFakturanummer Int     @default(1)
-  forfallodagar      Int     @default(30)
-  drojsmalsranta     Float   @default(0)
-  fakturatext        String  @default("")
+  nastaFakturanummer Int   @default(1)
+  forfallodagar      Int   @default(30)
+  drojsmalsranta     Float @default(0)
+  fakturatext        String @default("")
 
-  owner     User  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  owner     User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   jobs      Job[]
+  customers Customer[]
 
   @@map("company")
 }
@@ -138,7 +137,7 @@ model Member {
   id             String   @id @default(cuid())
   userId         String
   organizationId String
-  role           String   @default("member") // owner | admin | member
+  role           String   @default("member")
   createdAt      DateTime @default(now())
 
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -153,7 +152,7 @@ model Invitation {
   organizationId String
   email          String
   role           String   @default("member")
-  status         String   @default("pending") // pending | accepted | rejected | cancelled
+  status         String   @default("pending")
   expiresAt      DateTime
   inviterId      String
   createdAt      DateTime @default(now())
@@ -165,17 +164,45 @@ model Invitation {
 // KNEGARLOGGEN – Kärnmodeller
 // ============================================================
 
-model Job {
-  id             String   @id @default(cuid())
-  companyId      String
+model Customer {
+  id        String   @id @default(cuid())
+  companyId String
+  typ       String   @default("privat") // "privat" | "foretag"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  // Kunduppgifter
-  kundNamn  String
-  adress    String
-  telefon   String
-  epost     String
+  // Gemensamma fält
+  namn        String
+  adress      String  @default("")
+  postnummer  String  @default("")
+  ort         String  @default("")
+  telefon     String  @default("")
+  epost       String  @default("")
+
+  // Privatperson
   personnummer String @default("")
+
+  // Företagskund
+  foretagsnamn   String @default("")
+  kontaktperson  String @default("")
+  orgNummer      String @default("")
+
+  // ROT-specifikt
   fastighetsbeteckning String @default("")
+  lagenhetsnummer      String @default("")
+  bostadsrattsforening String @default("")
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  jobs    Job[]
+
+  @@index([companyId])
+  @@map("customer")
+}
+
+model Job {
+  id         String  @id @default(cuid())
+  companyId  String
+  customerId String?
 
   // Status
   rotAvdrag  Boolean @default(false)
@@ -185,7 +212,7 @@ model Job {
   betalt     Boolean @default(false)
 
   // Anteckningar
-  anteckningar  String @default("")
+  anteckningar   String @default("")
   ovrigaArtiklar String @default("")
   utfortArbete   String @default("")
   planeratArbete String @default("")
@@ -195,11 +222,12 @@ model Job {
   updatedAt DateTime @updatedAt
 
   // Relationer
-  company     Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  artiklar    Article[]
-  resor       Trip[]
-  arbetspass  WorkSession[]
-  images      JobImage[]
+  company    Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  customer   Customer?    @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  artiklar   Article[]
+  resor      Trip[]
+  arbetspass WorkSession[]
+  images     JobImage[]
 
   @@index([companyId])
   @@index([companyId, fakturerat])
@@ -208,14 +236,14 @@ model Job {
 }
 
 model Article {
-  id        String @id @default(cuid())
-  jobId     String
+  id    String @id @default(cuid())
+  jobId String
 
-  namn      String
-  artikelnr String @default("")
+  namn           String
+  artikelnr      String @default("")
   aterforsaljare String @default("")
-  pris      Float
-  antal     Int    @default(1)
+  pris           Float
+  antal          Int    @default(1)
 
   job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
 
@@ -227,8 +255,8 @@ model Trip {
   id    String @id @default(cuid())
   jobId String
 
-  datum   String // YYYY-MM-DD
-  stracka Float  @default(0) // körd sträcka (km)
+  datum   String
+  stracka Float  @default(0)
 
   job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
 
@@ -240,7 +268,7 @@ model WorkSession {
   id    String @id @default(cuid())
   jobId String
 
-  datum  String // YYYY-MM-DD
+  datum  String
   timmar Float
 
   job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
@@ -261,4 +289,3 @@ model JobImage {
   @@index([jobId])
   @@map("job_image")
 }
-
