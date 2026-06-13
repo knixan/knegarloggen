@@ -115,6 +115,18 @@ export default function Footer() {
                   </Link>
                 </>
               )}
+              <Link
+                href="/integritet"
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Integritetspolicy
+              </Link>
+              <Link
+                href="/villkor"
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Användarvillkor
+              </Link>
             </nav>
           </div>
         </div>

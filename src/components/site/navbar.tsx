@@ -249,7 +249,11 @@ const MobileAuthSection: React.FC<MobileAuthSectionProps> = ({
 };
 
 const Navbar: React.FC<NavbarProps> = ({
-  links = [{ href: "/", label: "Hem" }],
+  links = [
+    { href: "/", label: "Hem" },
+    { href: "/integritet", label: "Integritet" },
+    { href: "/villkor", label: "Villkor" },
+  ],
   showThemeToggle = true,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
