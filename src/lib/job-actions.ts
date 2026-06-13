@@ -86,26 +86,108 @@ export async function getCompanySettings() {
   return {
     id: company.id,
     name: company.name,
+    orgNummer: company.orgNummer,
+    adress: company.adress,
+    postnummer: company.postnummer,
+    ort: company.ort,
+    telefon: company.telefon,
+    epost: company.epost,
+    fSkatt: company.fSkatt,
+    momsNummer: company.momsNummer,
+    bankgiro: company.bankgiro,
+    plusgiro: company.plusgiro,
+    swish: company.swish,
+    logoUrl: company.logoUrl,
+    logoKey: company.logoKey,
+    nastaFakturanummer: company.nastaFakturanummer,
+    forfallodagar: company.forfallodagar,
+    drojsmalsranta: company.drojsmalsranta,
+    fakturatext: company.fakturatext,
   };
 }
 
-export async function updateCompanyName(name: string) {
+export type CompanyInput = {
+  name: string;
+  orgNummer: string;
+  adress: string;
+  postnummer: string;
+  ort: string;
+  telefon: string;
+  epost: string;
+  fSkatt: boolean;
+  momsNummer: string;
+  bankgiro: string;
+  plusgiro: string;
+  swish: string;
+  nastaFakturanummer: number;
+  forfallodagar: number;
+  drojsmalsranta: number;
+  fakturatext: string;
+};
+
+export async function updateCompanySettings(data: CompanyInput) {
   const session = await getSession();
   if (!session?.user) return { ok: false, error: "Inte inloggad" };
 
-  const trimmed = name.trim();
-  if (!trimmed) return { ok: false, error: "Företagsnamn krävs" };
-  if (trimmed.length > 120)
+  const trimmedName = data.name.trim();
+  if (!trimmedName) return { ok: false, error: "Företagsnamn krävs" };
+  if (trimmedName.length > 120)
     return { ok: false, error: "Företagsnamnet är för långt" };
 
   const company = await getOrCreateCompany(session.user.id);
 
   await prisma.company.update({
     where: { id: company.id },
-    data: { name: trimmed },
+    data: {
+      name: trimmedName,
+      orgNummer: data.orgNummer.trim(),
+      adress: data.adress.trim(),
+      postnummer: data.postnummer.trim(),
+      ort: data.ort.trim(),
+      telefon: data.telefon.trim(),
+      epost: data.epost.trim(),
+      fSkatt: data.fSkatt,
+      momsNummer: data.momsNummer.trim(),
+      bankgiro: data.bankgiro.trim(),
+      plusgiro: data.plusgiro.trim(),
+      swish: data.swish.trim(),
+      nastaFakturanummer: Math.max(1, Math.floor(data.nastaFakturanummer || 1)),
+      forfallodagar: Math.max(0, Math.floor(data.forfallodagar || 0)),
+      drojsmalsranta: Math.max(0, data.drojsmalsranta || 0),
+      fakturatext: data.fakturatext,
+    },
   });
 
   revalidatePath("/mina-sidor");
+  revalidatePath("/mina-sidor/foretag");
+  return { ok: true };
+}
+
+export async function updateCompanyLogo(logo: { url: string; key: string } | null) {
+  const session = await getSession();
+  if (!session?.user) return { ok: false, error: "Inte inloggad" };
+
+  const company = await getOrCreateCompany(session.user.id);
+
+  // Rensa gammal logga från UploadThing om den byts ut eller tas bort
+  if (company.logoKey && company.logoKey !== logo?.key) {
+    try {
+      await utapi.deleteFiles(company.logoKey);
+    } catch {
+      // ignorera fel vid radering av gammal fil
+    }
+  }
+
+  await prisma.company.update({
+    where: { id: company.id },
+    data: {
+      logoUrl: logo?.url ?? "",
+      logoKey: logo?.key ?? "",
+    },
+  });
+
+  revalidatePath("/mina-sidor");
+  revalidatePath("/mina-sidor/foretag");
   return { ok: true };
 }
 
