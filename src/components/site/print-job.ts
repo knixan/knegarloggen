@@ -125,7 +125,6 @@ export function printJob(
   `
       : "";
 
-
   const fönster = window.open("", "_blank");
   if (!fönster) return;
 
