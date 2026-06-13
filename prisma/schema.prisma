@@ -104,13 +104,12 @@ model Organization {
 model Company {
   id        String   @id @default(cuid())
   name      String
-  ownerId   String
+  ownerId   String   @unique
   createdAt DateTime @default(now())
 
   owner     User  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   jobs      Job[]
 
-  @@index([ownerId])
   @@map("company")
 }
 
@@ -241,3 +240,4 @@ model JobImage {
   @@index([jobId])
   @@map("job_image")
 }
+
