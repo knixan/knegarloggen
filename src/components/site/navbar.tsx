@@ -18,7 +18,6 @@ type LinkItem = {
 };
 
 interface NavbarProps {
-  title?: string;
   links?: LinkItem[];
   showThemeToggle?: boolean;
 }
@@ -250,14 +249,19 @@ const MobileAuthSection: React.FC<MobileAuthSectionProps> = ({
 };
 
 const Navbar: React.FC<NavbarProps> = ({
-  title = "Knegarloggen",
   links = [{ href: "/", label: "Hem" }],
   showThemeToggle = true,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const [prevPathname, setPrevPathname] = useState(pathname);
   const { isAuthenticated, user, handleLogin, handleRegister, handleLogout } =
     useAuth();
+
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname);
+    setIsMobileMenuOpen(false);
+  }
 
   const closeMobileMenu = useCallback(() => {
     setIsMobileMenuOpen(false);
@@ -278,17 +282,21 @@ const Navbar: React.FC<NavbarProps> = ({
           <div className="flex items-center">
             <Link
               href="/"
-              className="flex items-center gap-2 text-xl font-bold hover:text-gray-600 transition-colors"
+              onClick={closeMobileMenu}
+              className="flex items-center gap-2 text-xl font-black hover:text-gray-600 transition-colors"
             >
               <Image
                 src="/knegaloggen-logga.png"
-                alt=""
-                width={36}
-                height={36}
-                className="h-9 w-9 rounded-sm object-contain"
+                alt="KnegarLoggen"
+                width={100}
+                height={100}
+                className="h-16 w-16 object-contain"
                 priority
               />
-              <span>{title}</span>
+              <span>
+                <span className="text-red-600">Knegar</span>
+                <span className="text-blue-600">Loggen</span>
+              </span>
             </Link>
           </div>
 
