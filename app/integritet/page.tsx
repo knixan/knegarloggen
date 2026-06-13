@@ -24,6 +24,7 @@ export default function IntegritetspolicyPage() {
             2. Vilka uppgifter vi samlar in
           </h2>
           <p>När du använder KnegarLoggen kan vi samla in följande uppgifter:</p>
+          <p>När du använder KnegarLoggen kan vi samlar in följande uppgifter:</p>
 
           <div className="space-y-4 mt-4">
             <div>
