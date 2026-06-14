@@ -5,20 +5,18 @@ import { useTransition } from "react";
 import { toast } from "sonner";
 import JobForm from "@/components/site/job-form";
 import { updateJob } from "@/lib/job-actions";
-import type { Job, JobInput } from "@/lib/job-schema";
+import type { Job, JobInput, Customer } from "@/lib/job-schema";
 
 interface Props {
   job: Job;
+  customers: Customer[];
 }
 
-export default function EditJobClient({ job }: Props) {
+export default function EditJobClient({ job, customers }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  function handleSubmit(
-    data: JobInput,
-    bilder: { url: string; key: string }[],
-  ) {
+  function handleSubmit(data: JobInput, bilder: { url: string; key: string }[]) {
     startTransition(async () => {
       const result = await updateJob(job.id, data, bilder);
       if (result.ok) {
@@ -31,12 +29,7 @@ export default function EditJobClient({ job }: Props) {
   }
 
   const defaultValues: Partial<JobInput> = {
-    namn: job.namn,
-    adress: job.adress,
-    telefon: job.telefon,
-    epost: job.epost,
-    personnummer: job.personnummer,
-    fastighetsbeteckning: job.fastighetsbeteckning,
+    customerId: job.customerId,
     rotAvdrag: job.rotAvdrag,
     pagaende: job.pagaende,
     utfort: job.utfort,
@@ -58,6 +51,7 @@ export default function EditJobClient({ job }: Props) {
       defaultValues={defaultValues}
       submitLabel="Uppdatera jobb"
       isPending={isPending}
+      customers={customers}
     />
   );
 }
