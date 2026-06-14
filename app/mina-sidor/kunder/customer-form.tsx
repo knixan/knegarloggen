@@ -1,27 +1,41 @@
 "use client";
 
 import * as React from "react";
+import { z } from "zod";
 import { useTransition } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
-  User, Building2, Phone, Mail, MapPinned, Hash,
-  IdCard, Home, Users, Key,
+  User,
+  Building2,
+  Phone,
+  Mail,
+  MapPinned,
+  Hash,
+  IdCard,
+  Home,
+  Users,
+  Key,
 } from "lucide-react";
 
-import { createCustomer, updateCustomer, type CustomerInput as CI } from "@/lib/job-actions";
-import { customerSchema, type CustomerInput } from "@/lib/job-schema";
+import {
+  createCustomer,
+  updateCustomer,
+} from "@/lib/job-actions";
+import { customerSchema } from "@/lib/job-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+
+type CustomerFormInput = z.input<typeof customerSchema>;
+type CustomerFormOutput = z.output<typeof customerSchema>;
 
 interface Props {
-  defaultValues?: Partial<CustomerInput> & { id?: string };
+  defaultValues?: Partial<CustomerFormInput> & { id?: string };
   mode: "create" | "edit";
 }
 
@@ -29,32 +43,36 @@ export default function CustomerForm({ defaultValues, mode }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  const { register, handleSubmit, control, setValue, formState: { errors } } =
-    useForm<CustomerInput>({
-      resolver: zodResolver(customerSchema),
-      defaultValues: {
-        typ: "privat",
-        namn: "",
-        adress: "",
-        postnummer: "",
-        ort: "",
-        telefon: "",
-        epost: "",
-        personnummer: "",
-        foretagsnamn: "",
-        kontaktperson: "",
-        orgNummer: "",
-        fastighetsbeteckning: "",
-        lagenhetsnummer: "",
-        bostadsrattsforening: "",
-        ...defaultValues,
-      },
-    });
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<CustomerFormInput, unknown, CustomerFormOutput>({
+    resolver: zodResolver(customerSchema),
+    defaultValues: {
+      typ: "privat",
+      namn: "",
+      adress: "",
+      postnummer: "",
+      ort: "",
+      telefon: "",
+      epost: "",
+      personnummer: "",
+      foretagsnamn: "",
+      kontaktperson: "",
+      orgNummer: "",
+      fastighetsbeteckning: "",
+      lagenhetsnummer: "",
+      bostadsrattsforening: "",
+      ...defaultValues,
+    },
+  });
 
   const typ = useWatch({ control, name: "typ" });
   const arPrivat = typ === "privat";
 
-  function onSubmit(data: CustomerInput) {
+  async function onSubmit(data: CustomerFormOutput) {
     startTransition(async () => {
       const result =
         mode === "edit" && defaultValues?.id
@@ -111,36 +129,78 @@ export default function CustomerForm({ defaultValues, mode }: Props) {
           </CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
-          <Field label="Namn *" icon={<User className="h-3.5 w-3.5" />} error={errors.namn?.message}>
-            <Input {...register("namn")} placeholder={arPrivat ? "Anna Andersson" : "Kontaktpersonens namn"} />
+          <Field
+            label="Namn *"
+            icon={<User className="h-3.5 w-3.5" />}
+            error={errors.namn?.message}
+          >
+            <Input
+              {...register("namn")}
+              placeholder={
+                arPrivat ? "Anna Andersson" : "Kontaktpersonens namn"
+              }
+            />
           </Field>
 
           {!arPrivat && (
             <>
-              <Field label="Företagsnamn" icon={<Building2 className="h-3.5 w-3.5" />}>
-                <Input {...register("foretagsnamn")} placeholder="Svensson AB" />
+              <Field
+                label="Företagsnamn"
+                icon={<Building2 className="h-3.5 w-3.5" />}
+              >
+                <Input
+                  {...register("foretagsnamn")}
+                  placeholder="Svensson AB"
+                />
               </Field>
-              <Field label="Kontaktperson" icon={<User className="h-3.5 w-3.5" />}>
-                <Input {...register("kontaktperson")} placeholder="Anna Andersson" />
+              <Field
+                label="Kontaktperson"
+                icon={<User className="h-3.5 w-3.5" />}
+              >
+                <Input
+                  {...register("kontaktperson")}
+                  placeholder="Anna Andersson"
+                />
               </Field>
-              <Field label="Organisationsnummer" icon={<Hash className="h-3.5 w-3.5" />}>
+              <Field
+                label="Organisationsnummer"
+                icon={<Hash className="h-3.5 w-3.5" />}
+              >
                 <Input {...register("orgNummer")} placeholder="556677-8899" />
               </Field>
             </>
           )}
 
           {arPrivat && (
-            <Field label="Personnummer" icon={<IdCard className="h-3.5 w-3.5" />}>
-              <Input {...register("personnummer")} placeholder="ÅÅÅÅMMDD-XXXX" />
+            <Field
+              label="Personnummer"
+              icon={<IdCard className="h-3.5 w-3.5" />}
+            >
+              <Input
+                {...register("personnummer")}
+                placeholder="ÅÅÅÅMMDD-XXXX"
+              />
             </Field>
           )}
 
-          <Field label="Telefon" icon={<Phone className="h-3.5 w-3.5" />} error={errors.telefon?.message}>
+          <Field
+            label="Telefon"
+            icon={<Phone className="h-3.5 w-3.5" />}
+            error={errors.telefon?.message}
+          >
             <Input {...register("telefon")} placeholder="070-123 45 67" />
           </Field>
 
-          <Field label="E-post" icon={<Mail className="h-3.5 w-3.5" />} error={errors.epost?.message}>
-            <Input type="email" {...register("epost")} placeholder="anna@exempel.se" />
+          <Field
+            label="E-post"
+            icon={<Mail className="h-3.5 w-3.5" />}
+            error={errors.epost?.message}
+          >
+            <Input
+              type="email"
+              {...register("epost")}
+              placeholder="anna@exempel.se"
+            />
           </Field>
         </CardContent>
       </Card>
@@ -155,11 +215,17 @@ export default function CustomerForm({ defaultValues, mode }: Props) {
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
-            <Field label="Gatuadress" icon={<MapPinned className="h-3.5 w-3.5" />}>
+            <Field
+              label="Gatuadress"
+              icon={<MapPinned className="h-3.5 w-3.5" />}
+            >
               <Input {...register("adress")} placeholder="Storgatan 1" />
             </Field>
           </div>
-          <Field label="Postnummer" icon={<MapPinned className="h-3.5 w-3.5" />}>
+          <Field
+            label="Postnummer"
+            icon={<MapPinned className="h-3.5 w-3.5" />}
+          >
             <Input {...register("postnummer")} placeholder="123 45" />
           </Field>
           <Field label="Ort" icon={<MapPinned className="h-3.5 w-3.5" />}>
@@ -180,15 +246,27 @@ export default function CustomerForm({ defaultValues, mode }: Props) {
           </p>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
-          <Field label="Fastighetsbeteckning" icon={<Home className="h-3.5 w-3.5" />}>
-            <Input {...register("fastighetsbeteckning")} placeholder="Berga 1:23" />
+          <Field
+            label="Fastighetsbeteckning"
+            icon={<Home className="h-3.5 w-3.5" />}
+          >
+            <Input
+              {...register("fastighetsbeteckning")}
+              placeholder="Berga 1:23"
+            />
           </Field>
           <Field label="Lägenhetsnummer" icon={<Key className="h-3.5 w-3.5" />}>
             <Input {...register("lagenhetsnummer")} placeholder="1101" />
           </Field>
           <div className="sm:col-span-2">
-            <Field label="Bostadsrättsförening" icon={<Building2 className="h-3.5 w-3.5" />}>
-              <Input {...register("bostadsrattsforening")} placeholder="BRF Solrosen" />
+            <Field
+              label="Bostadsrättsförening"
+              icon={<Building2 className="h-3.5 w-3.5" />}
+            >
+              <Input
+                {...register("bostadsrattsforening")}
+                placeholder="BRF Solrosen"
+              />
             </Field>
           </div>
         </CardContent>
@@ -199,7 +277,11 @@ export default function CustomerForm({ defaultValues, mode }: Props) {
           Avbryt
         </Button>
         <Button type="submit" disabled={isPending}>
-          {isPending ? "Sparar..." : mode === "edit" ? "Uppdatera kund" : "Spara kund"}
+          {isPending
+            ? "Sparar..."
+            : mode === "edit"
+              ? "Uppdatera kund"
+              : "Spara kund"}
         </Button>
       </div>
     </form>
@@ -207,9 +289,15 @@ export default function CustomerForm({ defaultValues, mode }: Props) {
 }
 
 function Field({
-  label, icon, error, children,
+  label,
+  icon,
+  error,
+  children,
 }: {
-  label: string; icon?: React.ReactNode; error?: string; children: React.ReactNode;
+  label: string;
+  icon?: React.ReactNode;
+  error?: string;
+  children: React.ReactNode;
 }) {
   return (
     <div className="space-y-1.5">

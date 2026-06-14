@@ -18,33 +18,51 @@ import { beräknaSummering, type Job } from "@/lib/job-schema";
 import { InfoItem, toTelHref } from "./job-overview-badges";
 
 export function ContactSection({ job }: { job: Job }) {
-  const phoneHref = job.telefon ? `tel:${toTelHref(job.telefon)}` : undefined;
-  const emailHref = job.epost ? `mailto:${job.epost}` : undefined;
+  const customer = job.customer;
+  const customerDisplayName =
+    customer?.foretagsnamn?.trim() || customer?.namn?.trim();
+
+  const phoneHref = customer?.telefon ? `tel:${toTelHref(customer.telefon)}` : undefined;
+  const emailHref = customer?.epost ? `mailto:${customer.epost}` : undefined;
+
+  const fullAddress = [customer?.adress, customer?.postnummer, customer?.ort]
+    .filter(Boolean)
+    .join(", ");
 
   return (
     <section className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
-      <InfoItem icon={<MapPinned />} label="Adress" value={job.adress} />
+      <InfoItem icon={<IdCard />} label="Kund" value={customerDisplayName} />
+      <InfoItem
+        icon={<MapPinned />}
+        label="Adress"
+        value={fullAddress}
+      />
       <InfoItem
         icon={<Phone />}
         label="Telefon"
-        value={job.telefon}
+        value={customer?.telefon}
         href={phoneHref}
       />
       <InfoItem
         icon={<Mail />}
         label="E-post"
-        value={job.epost}
+        value={customer?.epost}
         href={emailHref}
       />
       <InfoItem
-        icon={<IdCard />}
+        icon={<IdCard />} // Kan bytas mot User/Building2 om IdCard känns fel för kontaktperson
         label="Personnummer"
-        value={job.personnummer}
+        value={customer?.personnummer}
       />
       <InfoItem
         icon={<Home />}
-        label="Fastighetsbeteckning"
-        value={job.fastighetsbeteckning}
+        label="Kontaktperson"
+        value={customer?.kontaktperson}
+      />
+      <InfoItem
+        icon={<ClipboardList />}
+        label="Kund"
+        value={customerDisplayName}
       />
     </section>
   );

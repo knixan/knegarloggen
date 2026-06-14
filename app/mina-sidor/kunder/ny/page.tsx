@@ -11,7 +11,9 @@ export default async function NyKundPage() {
     <main className="container mx-auto max-w-3xl px-4 py-8">
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Ny kund</h1>
-        <p className="text-sm text-muted-foreground">Lägg till en ny kund i kundregistret.</p>
+        <p className="text-sm text-muted-foreground">
+          Lägg till en ny kund i kundregistret.
+        </p>
       </div>
       <CustomerForm mode="create" />
     </main>

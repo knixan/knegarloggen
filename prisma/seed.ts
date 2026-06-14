@@ -40,14 +40,38 @@ async function main() {
   });
 
   await prisma.job.deleteMany({ where: { companyId: company.id } });
+  await prisma.customer.deleteMany({ where: { companyId: company.id } });
+
+  const customer1 = await prisma.customer.create({
+    data: {
+      companyId: company.id,
+      namn: "Anna Andersson",
+      adress: "Storgatan 12",
+      postnummer: "753 31",
+      ort: "Uppsala",
+      telefon: "0701234567",
+      epost: "anna@example.com",
+      typ: "privat",
+    },
+  });
+
+  const customer2 = await prisma.customer.create({
+    data: {
+      companyId: company.id,
+      namn: "Bertil Berg",
+      adress: "Kvarnvägen 4",
+      postnummer: "722 11",
+      ort: "Västerås",
+      telefon: "0739876543",
+      epost: "bertil@example.com",
+      typ: "privat",
+    },
+  });
 
   const job1 = await prisma.job.create({
     data: {
       companyId: company.id,
-      kundNamn: "Anna Andersson",
-      adress: "Storgatan 12, Uppsala",
-      telefon: "0701234567",
-      epost: "anna@example.com",
+      customerId: customer1.id,
       rotAvdrag: true,
       utfort: true,
       fakturerat: false,
@@ -95,10 +119,7 @@ async function main() {
   await prisma.job.create({
     data: {
       companyId: company.id,
-      kundNamn: "Bertil Berg",
-      adress: "Kvarnvägen 4, Västerås",
-      telefon: "0739876543",
-      epost: "bertil@example.com",
+      customerId: customer2.id,
       rotAvdrag: false,
       utfort: false,
       fakturerat: false,

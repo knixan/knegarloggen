@@ -24,6 +24,20 @@ export function printJob(
       ? "#2563eb"
       : "#6b7280";
 
+  const customerName =
+    job.customer?.foretagsnamn?.trim() || job.customer?.namn?.trim() || "Jobb";
+
+  const customerAddress = [
+    job.customer?.adress,
+    job.customer?.postnummer,
+    job.customer?.ort,
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  const customerPhone = job.customer?.telefon?.trim() || "";
+  const customerEmail = job.customer?.epost?.trim() || "";
+
   const badges = [
     `<span class="badge" style="background:${statusFärg};color:white">${status}</span>`,
     job.rotAvdrag ? `<span class="badge">ROT-avdrag</span>` : "",
@@ -132,7 +146,7 @@ export function printJob(
 <html lang="sv">
 <head>
   <meta charset="UTF-8">
-  <title>Knegarloggen – ${job.namn}</title>
+  <title>Knegarloggen – ${customerName}</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Arial, sans-serif; font-size: 10pt; color: #1a1a1a; background: white; }
@@ -168,8 +182,8 @@ export function printJob(
 <div class="sida">
   <div class="header">
     <div class="header-left">
-      <h1>${job.namn}</h1>
-      <p>${job.adress ?? ""}</p>
+      <h1>${customerName}</h1>
+      <p>${customerAddress}</p>
     </div>
     <div class="header-right">
       <strong>Knegarloggen</strong>
@@ -178,9 +192,9 @@ export function printJob(
   </div>
   <div class="badges">${badges}</div>
   <div class="kontakt">
-    ${job.telefon ? `<div class="kontakt-item"><label>Telefon</label>${job.telefon}</div>` : ""}
-    ${job.epost ? `<div class="kontakt-item"><label>E-post</label>${job.epost}</div>` : ""}
-    ${job.adress ? `<div class="kontakt-item"><label>Adress</label>${job.adress}</div>` : ""}
+    ${customerPhone ? `<div class="kontakt-item"><label>Telefon</label>${customerPhone}</div>` : ""}
+    ${customerEmail ? `<div class="kontakt-item"><label>E-post</label>${customerEmail}</div>` : ""}
+    ${customerAddress ? `<div class="kontakt-item"><label>Adress</label>${customerAddress}</div>` : ""}
   </div>
   <div class="oversikt">
     <div class="oversikt-cell"><label>Arbetstid</label><span>${summary.totalTimmar} h</span></div>
@@ -195,7 +209,7 @@ export function printJob(
   ${job.arbetstider.length > 0 ? `<section><h4>Arbetstid</h4>${arbetstidHtml}</section>` : ""}
   ${job.anteckningar ? `<section><h4>Interna anteckningar</h4><p class="anteckningar">${job.anteckningar}</p></section>` : ""}
   <div class="sidfot">
-    <span>${job.namn} · ${job.adress ?? ""}</span>
+    <span>${customerName}${customerAddress ? ` · ${customerAddress}` : ""}</span>
     <span>Knegarloggen</span>
   </div>
 </div>

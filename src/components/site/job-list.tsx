@@ -35,6 +35,15 @@ export default function JobList({ jobs, onEdit, onDelete }: Props) {
     <div className="grid gap-3">
       {jobs.map((job) => {
         const summary = beräknaSummering(job);
+        const customerDisplayName = 
+          job.customer?.foretagsnamn?.trim() || job.customer?.namn?.trim();
+        const customerAddress = [
+          job.customer?.adress,
+          job.customer?.postnummer,
+          job.customer?.ort,
+        ]
+          .filter(Boolean)
+          .join(", ");
 
         return (
           <Card
@@ -44,9 +53,16 @@ export default function JobList({ jobs, onEdit, onDelete }: Props) {
           >
             <CardContent className="flex flex-col gap-3 pt-5 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0 space-y-1">
-                <div className="truncate text-lg font-bold">{job.namn}</div>
+                <div className="truncate text-lg font-bold">
+                  {customerDisplayName || "Jobb utan kundnamn"}
+                </div>
+                {customerDisplayName && (
+                  <div className="truncate text-sm font-medium text-foreground/80">
+                    {customerDisplayName}
+                  </div>
+                )}
                 <div className="truncate text-sm text-muted-foreground">
-                  {job.adress}
+                  {customerAddress || "Ingen adress angiven"}
                 </div>
 
                 <div className="flex flex-wrap gap-1.5 pt-1">

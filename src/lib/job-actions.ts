@@ -191,7 +191,9 @@ export async function updateCompanySettings(data: CompanyInput) {
   return { ok: true };
 }
 
-export async function updateCompanyLogo(logo: { url: string; key: string } | null) {
+export async function updateCompanyLogo(
+  logo: { url: string; key: string } | null,
+) {
   const session = await getSession();
   if (!session?.user) return { ok: false, error: "Inte inloggad" };
 
@@ -403,7 +405,13 @@ export async function getJobs() {
 
   const jobs = await prisma.job.findMany({
     where: { companyId: company.id },
-    include: { artiklar: true, resor: true, arbetspass: true, images: true, customer: true },
+    include: {
+      artiklar: true,
+      resor: true,
+      arbetspass: true,
+      images: true,
+      customer: true,
+    },
     orderBy: { skapad: "desc" },
   });
 
@@ -421,7 +429,13 @@ export async function getJob(id: string) {
 
   const j = await prisma.job.findFirst({
     where: { id, companyId: company.id },
-    include: { artiklar: true, resor: true, arbetspass: true, images: true, customer: true },
+    include: {
+      artiklar: true,
+      resor: true,
+      arbetspass: true,
+      images: true,
+      customer: true,
+    },
   });
   if (!j) return null;
 
@@ -505,7 +519,11 @@ export async function updateJob(
   const newImageKeys = bilder.map((b) => b.key);
   const toDelete = existingImageKeys.filter((k) => !newImageKeys.includes(k));
   if (toDelete.length > 0) {
-    try { await utapi.deleteFiles(toDelete); } catch { /* ignorera */ }
+    try {
+      await utapi.deleteFiles(toDelete);
+    } catch {
+      /* ignorera */
+    }
   }
 
   const existingArtiklarIds = ids(existing.artiklar);
@@ -533,31 +551,58 @@ export async function updateJob(
       a.id
         ? prisma.article.update({
             where: { id: a.id },
-            data: { namn: a.namn, artikelnr: a.artikelnr ?? "", aterforsaljare: a.aterforsaljare ?? "", pris: a.pris, antal: a.antal },
+            data: {
+              namn: a.namn,
+              artikelnr: a.artikelnr ?? "",
+              aterforsaljare: a.aterforsaljare ?? "",
+              pris: a.pris,
+              antal: a.antal,
+            },
           })
         : prisma.article.create({
-            data: { jobId: id, namn: a.namn, artikelnr: a.artikelnr ?? "", aterforsaljare: a.aterforsaljare ?? "", pris: a.pris, antal: a.antal },
+            data: {
+              jobId: id,
+              namn: a.namn,
+              artikelnr: a.artikelnr ?? "",
+              aterforsaljare: a.aterforsaljare ?? "",
+              pris: a.pris,
+              antal: a.antal,
+            },
           }),
     ),
     // Resor
     prisma.trip.deleteMany({ where: { id: { in: deleteResorIds } } }),
     ...data.resor.map((r) =>
       r.id
-        ? prisma.trip.update({ where: { id: r.id }, data: { datum: r.datum, stracka: r.stracka } })
-        : prisma.trip.create({ data: { jobId: id, datum: r.datum, stracka: r.stracka } }),
+        ? prisma.trip.update({
+            where: { id: r.id },
+            data: { datum: r.datum, stracka: r.stracka },
+          })
+        : prisma.trip.create({
+            data: { jobId: id, datum: r.datum, stracka: r.stracka },
+          }),
     ),
     // Arbetspass
-    prisma.workSession.deleteMany({ where: { id: { in: deleteArbetspassIds } } }),
+    prisma.workSession.deleteMany({
+      where: { id: { in: deleteArbetspassIds } },
+    }),
     ...data.arbetstider.map((w) =>
       w.id
-        ? prisma.workSession.update({ where: { id: w.id }, data: { datum: w.datum, timmar: w.timmar } })
-        : prisma.workSession.create({ data: { jobId: id, datum: w.datum, timmar: w.timmar } }),
+        ? prisma.workSession.update({
+            where: { id: w.id },
+            data: { datum: w.datum, timmar: w.timmar },
+          })
+        : prisma.workSession.create({
+            data: { jobId: id, datum: w.datum, timmar: w.timmar },
+          }),
     ),
     // Bilder
     prisma.jobImage.deleteMany({ where: { jobId: id, key: { in: toDelete } } }),
     ...bilder
       .filter((b) => !existingImageKeys.includes(b.key))
-      .map((b) => prisma.jobImage.create({ data: { jobId: id, url: b.url, key: b.key } })),
+      .map((b) =>
+        prisma.jobImage.create({ data: { jobId: id, url: b.url, key: b.key } }),
+      ),
     // Jobb-uppdatering
     prisma.job.update({
       where: { id },
@@ -599,7 +644,9 @@ export async function deleteJob(id: string) {
   if (job.images.length > 0) {
     try {
       await utapi.deleteFiles(job.images.map((i) => i.key));
-    } catch { /* ignorera */ }
+    } catch {
+      /* ignorera */
+    }
   }
 
   await prisma.job.delete({ where: { id } });

@@ -6,14 +6,25 @@ import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel,
-  AlertDialogContent, AlertDialogDescription,
-  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { deleteCustomer } from "@/lib/job-actions";
 
-export default function CustomerDeleteButton({ id, namn }: { id: string; namn: string }) {
+export default function CustomerDeleteButton({
+  id,
+  namn,
+}: {
+  id: string;
+  namn: string;
+}) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -32,7 +43,12 @@ export default function CustomerDeleteButton({ id, namn }: { id: string; namn: s
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Ta bort" disabled={isPending}>
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Ta bort"
+          disabled={isPending}
+        >
           <Trash2 className="h-4 w-4" />
         </Button>
       </AlertDialogTrigger>
@@ -41,9 +57,9 @@ export default function CustomerDeleteButton({ id, namn }: { id: string; namn: s
           <AlertDialogTitle>Ta bort kund?</AlertDialogTitle>
           <AlertDialogDescription>
             Du håller på att ta bort{" "}
-            <span className="font-medium text-foreground">{namn}</span>.
-            Kundens jobb påverkas inte men förlorar sin kundkoppling.
-            Åtgärden kan inte ångras.
+            <span className="font-medium text-foreground">{namn}</span>. Kundens
+            jobb påverkas inte men förlorar sin kundkoppling. Åtgärden kan inte
+            ångras.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

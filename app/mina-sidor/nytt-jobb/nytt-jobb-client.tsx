@@ -15,7 +15,10 @@ export default function NyttJobbClient({ customers }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  function handleSubmit(data: JobInput, bilder: { url: string; key: string }[]) {
+  function handleSubmit(
+    data: JobInput,
+    bilder: { url: string; key: string }[],
+  ) {
     startTransition(async () => {
       const result = await createJob(data, bilder);
       if (result.ok) {

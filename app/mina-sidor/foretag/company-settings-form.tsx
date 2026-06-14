@@ -52,36 +52,42 @@ export default function CompanySettingsForm({ company }: Props) {
   const [logo, setLogo] = useState<{ url: string; key: string } | null>(
     company.logoUrl && company.logoKey
       ? { url: company.logoUrl, key: company.logoKey }
-      : null
+      : null,
   );
   const [laddarUppLogga, setLaddarUppLogga] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { startUpload } = useUploadThing("companyLogo");
 
-  const { register, handleSubmit, control, setValue, formState: { errors } } =
-    useForm<CompanyInput>({
-      defaultValues: {
-        name: company.name,
-        orgNummer: company.orgNummer,
-        adress: company.adress,
-        postnummer: company.postnummer,
-        ort: company.ort,
-        telefon: company.telefon,
-        epost: company.epost,
-        fSkatt: company.fSkatt,
-        momsNummer: company.momsNummer,
-        bankgiro: company.bankgiro,
-        plusgiro: company.plusgiro,
-        swish: company.swish,
-        nastaFakturanummer: company.nastaFakturanummer,
-        forfallodagar: company.forfallodagar,
-        drojsmalsranta: company.drojsmalsranta,
-        fakturatext: company.fakturatext,
-      },
-    });
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    formState: { errors },
+  } = useForm<CompanyInput>({
+    defaultValues: {
+      name: company.name,
+      orgNummer: company.orgNummer,
+      adress: company.adress,
+      postnummer: company.postnummer,
+      ort: company.ort,
+      telefon: company.telefon,
+      epost: company.epost,
+      fSkatt: company.fSkatt,
+      momsNummer: company.momsNummer,
+      bankgiro: company.bankgiro,
+      plusgiro: company.plusgiro,
+      swish: company.swish,
+      nastaFakturanummer: company.nastaFakturanummer,
+      forfallodagar: company.forfallodagar,
+      drojsmalsranta: company.drojsmalsranta,
+      fakturatext: company.fakturatext,
+    },
+  });
 
   const fSkattWatch = useWatch({ control, name: "fSkatt" });
-  const fSkatt = typeof fSkattWatch === "boolean" ? fSkattWatch : company.fSkatt;
+  const fSkatt =
+    typeof fSkattWatch === "boolean" ? fSkattWatch : company.fSkatt;
 
   async function hanteraLoggaFil(e: React.ChangeEvent<HTMLInputElement>) {
     const filer = Array.from(e.target.files ?? []);
@@ -202,11 +208,21 @@ export default function CompanySettingsForm({ company }: Props) {
           </CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
-          <Field label="Företagsnamn" icon={<Building2 className="h-3.5 w-3.5" />} error={errors.name?.message}>
-            <Input {...register("name", { required: "Företagsnamn krävs" })} placeholder="Mitt Företag AB" />
+          <Field
+            label="Företagsnamn"
+            icon={<Building2 className="h-3.5 w-3.5" />}
+            error={errors.name?.message}
+          >
+            <Input
+              {...register("name", { required: "Företagsnamn krävs" })}
+              placeholder="Mitt Företag AB"
+            />
           </Field>
 
-          <Field label="Organisationsnummer" icon={<Hash className="h-3.5 w-3.5" />}>
+          <Field
+            label="Organisationsnummer"
+            icon={<Hash className="h-3.5 w-3.5" />}
+          >
             <Input {...register("orgNummer")} placeholder="556677-8899" />
           </Field>
 
@@ -214,7 +230,10 @@ export default function CompanySettingsForm({ company }: Props) {
             <Input {...register("adress")} placeholder="Storgatan 1" />
           </Field>
 
-          <Field label="Postnummer" icon={<MapPinned className="h-3.5 w-3.5" />}>
+          <Field
+            label="Postnummer"
+            icon={<MapPinned className="h-3.5 w-3.5" />}
+          >
             <Input {...register("postnummer")} placeholder="123 45" />
           </Field>
 
@@ -227,10 +246,17 @@ export default function CompanySettingsForm({ company }: Props) {
           </Field>
 
           <Field label="E-postadress" icon={<Mail className="h-3.5 w-3.5" />}>
-            <Input type="email" {...register("epost")} placeholder="info@mittforetag.se" />
+            <Input
+              type="email"
+              {...register("epost")}
+              placeholder="info@mittforetag.se"
+            />
           </Field>
 
-          <Field label="Momsregistreringsnummer (VAT)" icon={<Receipt className="h-3.5 w-3.5" />}>
+          <Field
+            label="Momsregistreringsnummer (VAT)"
+            icon={<Receipt className="h-3.5 w-3.5" />}
+          >
             <Input {...register("momsNummer")} placeholder="SE556677889901" />
           </Field>
 
@@ -238,7 +264,9 @@ export default function CompanySettingsForm({ company }: Props) {
             <Checkbox
               id="fSkatt"
               checked={fSkatt}
-              onCheckedChange={(v) => setValue("fSkatt", Boolean(v), { shouldDirty: true })}
+              onCheckedChange={(v) =>
+                setValue("fSkatt", Boolean(v), { shouldDirty: true })
+              }
             />
             <Label htmlFor="fSkatt" className="font-normal cursor-pointer">
               Innehar F-skatt
@@ -268,7 +296,10 @@ export default function CompanySettingsForm({ company }: Props) {
             <Input {...register("plusgiro")} placeholder="12 34 56-7" />
           </Field>
 
-          <Field label="Swish-nummer" icon={<Smartphone className="h-3.5 w-3.5" />}>
+          <Field
+            label="Swish-nummer"
+            icon={<Smartphone className="h-3.5 w-3.5" />}
+          >
             <Input {...register("swish")} placeholder="123 456 78 90" />
           </Field>
         </CardContent>
@@ -284,7 +315,10 @@ export default function CompanySettingsForm({ company }: Props) {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-3">
-            <Field label="Nästa fakturanummer" icon={<ListOrdered className="h-3.5 w-3.5" />}>
+            <Field
+              label="Nästa fakturanummer"
+              icon={<ListOrdered className="h-3.5 w-3.5" />}
+            >
               <Input
                 type="number"
                 step="1"
@@ -294,7 +328,10 @@ export default function CompanySettingsForm({ company }: Props) {
               />
             </Field>
 
-            <Field label="Standard förfallodagar" icon={<CalendarClock className="h-3.5 w-3.5" />}>
+            <Field
+              label="Standard förfallodagar"
+              icon={<CalendarClock className="h-3.5 w-3.5" />}
+            >
               <Input
                 type="number"
                 step="1"
@@ -304,7 +341,10 @@ export default function CompanySettingsForm({ company }: Props) {
               />
             </Field>
 
-            <Field label="Dröjsmålsränta (%)" icon={<Percent className="h-3.5 w-3.5" />}>
+            <Field
+              label="Dröjsmålsränta (%)"
+              icon={<Percent className="h-3.5 w-3.5" />}
+            >
               <Input
                 type="number"
                 step="0.1"

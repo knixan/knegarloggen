@@ -7,7 +7,7 @@ import JobList from "@/components/site/job-list";
 import { deleteJob } from "@/lib/job-actions";
 import type { Job } from "@/lib/job-schema";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -185,7 +185,9 @@ export default function JobDashboard({ jobs }: Props) {
             <AlertDialogDescription>
               Du håller på att ta bort jobbet för{" "}
               <span className="font-medium text-foreground">
-                {jobToDelete?.namn}
+                {jobToDelete?.customer?.foretagsnamn?.trim() ||
+                  jobToDelete?.customer?.namn?.trim() ||
+                  "detta jobb"}
               </span>
               . Detta raderar all information, inklusive artiklar, resor,
               arbetstid och uppladdade bilder. Åtgärden kan inte ångras.

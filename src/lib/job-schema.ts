@@ -84,9 +84,7 @@ export const jobSchema = z.object({
   utfortArbete: z.string().max(2000).optional().default(""),
   planeratArbete: z.string().max(2000).optional().default(""),
 
-  bilder: z
-    .array(z.object({ url: z.string(), key: z.string() }))
-    .default([]),
+  bilder: z.array(z.object({ url: z.string(), key: z.string() })).default([]),
 });
 
 export type JobInput = z.infer<typeof jobSchema>;
@@ -102,10 +100,7 @@ export function beräknaSummering(job: JobInput) {
     (sum, artikel) => sum + artikel.pris * artikel.antal,
     0,
   );
-  const totalTimmar = job.arbetstider.reduce(
-    (sum, a) => sum + a.timmar,
-    0,
-  );
+  const totalTimmar = job.arbetstider.reduce((sum, a) => sum + a.timmar, 0);
   const totalStracka = job.resor.reduce((sum, r) => sum + r.stracka, 0);
   const antalResor = job.resor.length;
 

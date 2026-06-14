@@ -19,7 +19,9 @@ export default async function KundregisterPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Kundregister</h1>
-          <p className="text-sm text-muted-foreground">{customers.length} kunder</p>
+          <p className="text-sm text-muted-foreground">
+            {customers.length} kunder
+          </p>
         </div>
         <Link href="/mina-sidor/kunder/ny">
           <Button>
@@ -33,7 +35,10 @@ export default async function KundregisterPage() {
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
             Inga kunder ännu.{" "}
-            <Link href="/mina-sidor/kunder/ny" className="underline hover:text-foreground">
+            <Link
+              href="/mina-sidor/kunder/ny"
+              className="underline hover:text-foreground"
+            >
               Lägg till din första kund
             </Link>
             .
@@ -52,31 +57,43 @@ export default async function KundregisterPage() {
                       <User className="h-4 w-4 shrink-0 text-muted-foreground" />
                     )}
                     <span className="font-semibold truncate">
-                      {c.typ === "foretag" && c.foretagsnamn ? c.foretagsnamn : c.namn}
+                      {c.typ === "foretag" && c.foretagsnamn
+                        ? c.foretagsnamn
+                        : c.namn}
                     </span>
-                    <span className={`text-[10px] font-bold rounded-full px-2 py-0.5 ${
-                      c.typ === "foretag"
-                        ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400"
-                        : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
-                    }`}>
+                    <span
+                      className={`text-[10px] font-bold rounded-full px-2 py-0.5 ${
+                        c.typ === "foretag"
+                          ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400"
+                          : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                      }`}
+                    >
                       {c.typ === "foretag" ? "Företag" : "Privat"}
                     </span>
                   </div>
                   {c.typ === "foretag" && c.kontaktperson && (
-                    <p className="text-sm text-muted-foreground">{c.kontaktperson}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {c.kontaktperson}
+                    </p>
                   )}
                   <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-muted-foreground">
                     {c.telefon && (
                       <span className="flex items-center gap-1">
-                        <Phone className="h-3 w-3" />{c.telefon}
+                        <Phone className="h-3 w-3" />
+                        {c.telefon}
                       </span>
                     )}
                     {c.epost && (
                       <span className="flex items-center gap-1">
-                        <Mail className="h-3 w-3" />{c.epost}
+                        <Mail className="h-3 w-3" />
+                        {c.epost}
                       </span>
                     )}
-                    {c.ort && <span>{c.postnummer} {c.ort}</span>}
+                    {c.ort && (
+                      <span>
+                        {c.postnummer} {c.ort}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
@@ -85,7 +102,14 @@ export default async function KundregisterPage() {
                       <Pencil className="h-4 w-4" />
                     </Button>
                   </Link>
-                  <CustomerDeleteButton id={c.id} namn={c.typ === "foretag" && c.foretagsnamn ? c.foretagsnamn : c.namn} />
+                  <CustomerDeleteButton
+                    id={c.id}
+                    namn={
+                      c.typ === "foretag" && c.foretagsnamn
+                        ? c.foretagsnamn
+                        : c.namn
+                    }
+                  />
                 </div>
               </CardContent>
             </Card>

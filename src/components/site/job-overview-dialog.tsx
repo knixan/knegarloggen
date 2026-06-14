@@ -45,7 +45,11 @@ export default function JobOverviewDialog({
           <div className="flex items-start gap-3 pr-8">
             <DialogTitle className="flex min-w-0 flex-1 items-center gap-2 text-lg sm:text-xl">
               <User className="h-5 w-5 shrink-0 text-muted-foreground" />
-              <span className="truncate">{job.namn}</span>
+              <span className="truncate">
+                {job.customer?.foretagsnamn?.trim() ||
+                  job.customer?.namn?.trim() ||
+                  "Jobböversikt"}
+              </span>
             </DialogTitle>
             <Button
               type="button"

@@ -9,13 +9,36 @@ import {
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  Plus, Trash2, Package, Tag, Store, Barcode, Layers2, Receipt,
-  StickyNote, MapPin, Calendar, Van, Clock, ClipboardList,
-  CheckCircle2, CreditCard, NotebookPen, TriangleAlert, Wrench,
-  User, Search, X as XIcon,
+  Plus,
+  Trash2,
+  Package,
+  Tag,
+  Store,
+  Barcode,
+  Layers2,
+  Receipt,
+  StickyNote,
+  MapPin,
+  Calendar,
+  Van,
+  Clock,
+  ClipboardList,
+  CheckCircle2,
+  CreditCard,
+  NotebookPen,
+  TriangleAlert,
+  Wrench,
+  User,
+  Search,
+  X as XIcon,
 } from "lucide-react";
 
-import { jobSchema, type JobInput, beräknaSummering, type Customer } from "@/lib/job-schema";
+import {
+  jobSchema,
+  type JobInput,
+  beräknaSummering,
+  type Customer,
+} from "@/lib/job-schema";
 import { useUploadThing } from "@/lib/uploadthing-client";
 import { ImagePlus, X } from "lucide-react";
 import { useState, useRef } from "react";
@@ -67,7 +90,13 @@ export default function JobForm({
     defaultValues: { ...tomDefaults, ...defaultValues },
   });
 
-  const { register, handleSubmit, control, setValue, formState: { errors } } = form;
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    formState: { errors },
+  } = form;
 
   const artiklar = useFieldArray({ control, name: "artiklar" });
   const resor = useFieldArray({ control, name: "resor" });
@@ -95,7 +124,7 @@ export default function JobForm({
 
   // Bilder
   const [bilder, setBilder] = useState<{ url: string; key: string }[]>(
-    defaultValues?.bilder ?? []
+    defaultValues?.bilder ?? [],
   );
   const [laddarUpp, setLaddarUpp] = useState(false);
   const [valdBild, setValdBild] = useState<string | null>(null);
@@ -108,14 +137,19 @@ export default function JobForm({
     setLaddarUpp(true);
     const res = await startUpload(filer);
     if (res) {
-      setBilder((prev) => [...prev, ...res.map((bild) => ({ url: bild.ufsUrl, key: bild.key }))]);
+      setBilder((prev) => [
+        ...prev,
+        ...res.map((bild) => ({ url: bild.ufsUrl, key: bild.key })),
+      ]);
     }
     setLaddarUpp(false);
   }
 
   return (
-    <form onSubmit={handleSubmit((data) => onSubmit(data, bilder))} className="space-y-6">
-
+    <form
+      onSubmit={handleSubmit((data) => onSubmit(data, bilder))}
+      className="space-y-6"
+    >
       {/* Kundväljare */}
       <Card>
         <CardHeader>
@@ -137,7 +171,9 @@ export default function JobForm({
                   {valdKund.typ === "foretag" && valdKund.kontaktperson
                     ? `${valdKund.kontaktperson} · `
                     : ""}
-                  {valdKund.telefon}{valdKund.telefon && valdKund.epost ? " · " : ""}{valdKund.epost}
+                  {valdKund.telefon}
+                  {valdKund.telefon && valdKund.epost ? " · " : ""}
+                  {valdKund.epost}
                 </p>
               </div>
               <Button
@@ -167,13 +203,19 @@ export default function JobForm({
               {customers.length === 0 ? (
                 <p className="text-xs text-muted-foreground">
                   Inga kunder i kundregistret ännu.{" "}
-                  <a href="/mina-sidor/kunder/ny" className="underline" target="_blank">
+                  <a
+                    href="/mina-sidor/kunder/ny"
+                    className="underline"
+                    target="_blank"
+                  >
                     Lägg till en kund
                   </a>
                   .
                 </p>
               ) : filtradeKunder.length === 0 ? (
-                <p className="text-xs text-muted-foreground">Inga kunder matchar sökningen.</p>
+                <p className="text-xs text-muted-foreground">
+                  Inga kunder matchar sökningen.
+                </p>
               ) : (
                 <div className="rounded-md border divide-y max-h-60 overflow-y-auto">
                   {filtradeKunder.map((c) => (
@@ -187,13 +229,17 @@ export default function JobForm({
                       }}
                     >
                       <p className="text-sm font-medium">
-                        {c.typ === "foretag" && c.foretagsnamn ? c.foretagsnamn : c.namn}
+                        {c.typ === "foretag" && c.foretagsnamn
+                          ? c.foretagsnamn
+                          : c.namn}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {c.typ === "foretag" && c.kontaktperson
                           ? `${c.kontaktperson} · `
                           : ""}
-                        {c.telefon}{c.telefon && c.epost ? " · " : ""}{c.epost}
+                        {c.telefon}
+                        {c.telefon && c.epost ? " · " : ""}
+                        {c.epost}
                       </p>
                     </button>
                   ))}
@@ -211,47 +257,104 @@ export default function JobForm({
             <Package className="h-5 w-5 text-muted-foreground" />
             Artiklar
           </CardTitle>
-          <Button type="button" size="sm" variant="outline"
-            onClick={() => artiklar.append({ namn: "", artikelnr: "", aterforsaljare: "", pris: 0, antal: 1 })}>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() =>
+              artiklar.append({
+                namn: "",
+                artikelnr: "",
+                aterforsaljare: "",
+                pris: 0,
+                antal: 1,
+              })
+            }
+          >
             <Plus className="mr-1 h-4 w-4" /> Lägg till
           </Button>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="hidden sm:grid sm:grid-cols-12 gap-2 text-xs font-medium text-muted-foreground px-1">
-            <div className="col-span-3 flex items-center gap-1.5"><Tag className="h-3.5 w-3.5" />Artikelnamn</div>
-            <div className="col-span-2 flex items-center gap-1.5"><Store className="h-3.5 w-3.5" />Återförsäljare</div>
-            <div className="col-span-3 flex items-center gap-1.5"><Barcode className="h-3.5 w-3.5" />Artikelnr</div>
-            <div className="col-span-1 flex items-center justify-center gap-1"><Layers2 className="h-3.5 w-3.5" />Antal</div>
-            <div className="col-span-2 flex items-center gap-1.5"><Receipt className="h-3.5 w-3.5" />Pris (kr)</div>
+            <div className="col-span-3 flex items-center gap-1.5">
+              <Tag className="h-3.5 w-3.5" />
+              Artikelnamn
+            </div>
+            <div className="col-span-2 flex items-center gap-1.5">
+              <Store className="h-3.5 w-3.5" />
+              Återförsäljare
+            </div>
+            <div className="col-span-3 flex items-center gap-1.5">
+              <Barcode className="h-3.5 w-3.5" />
+              Artikelnr
+            </div>
+            <div className="col-span-1 flex items-center justify-center gap-1">
+              <Layers2 className="h-3.5 w-3.5" />
+              Antal
+            </div>
+            <div className="col-span-2 flex items-center gap-1.5">
+              <Receipt className="h-3.5 w-3.5" />
+              Pris (kr)
+            </div>
             <div className="col-span-1" />
           </div>
           {artiklar.fields.map((field, i) => (
             <div key={field.id} className="grid grid-cols-12 gap-2 items-start">
               <div className="col-span-12 sm:col-span-3">
-                <Input {...register(`artiklar.${i}.namn`)} placeholder="Artikelnamn" />
+                <Input
+                  {...register(`artiklar.${i}.namn`)}
+                  placeholder="Artikelnamn"
+                />
                 {errors.artiklar?.[i]?.namn && (
-                  <p className="text-xs text-destructive mt-1">{errors.artiklar[i]?.namn?.message}</p>
+                  <p className="text-xs text-destructive mt-1">
+                    {errors.artiklar[i]?.namn?.message}
+                  </p>
                 )}
               </div>
               <div className="col-span-12 sm:col-span-2">
-                <Input {...register(`artiklar.${i}.aterforsaljare`)} placeholder="Återförsäljare" />
+                <Input
+                  {...register(`artiklar.${i}.aterforsaljare`)}
+                  placeholder="Återförsäljare"
+                />
               </div>
               <div className="col-span-6 sm:col-span-3">
-                <Input {...register(`artiklar.${i}.artikelnr`)} placeholder="Artikelnr" />
+                <Input
+                  {...register(`artiklar.${i}.artikelnr`)}
+                  placeholder="Artikelnr"
+                />
               </div>
               <div className="col-span-2 sm:col-span-1">
-                <Input type="number" step="1" min="1" {...register(`artiklar.${i}.antal`, { valueAsNumber: true })} placeholder="Ant." />
+                <Input
+                  type="number"
+                  step="1"
+                  min="1"
+                  {...register(`artiklar.${i}.antal`, { valueAsNumber: true })}
+                  placeholder="Ant."
+                />
               </div>
               <div className="col-span-3 sm:col-span-2">
-                <Input type="number" step="0.01" min="0" {...register(`artiklar.${i}.pris`, { valueAsNumber: true })} placeholder="Pris kr" />
-                {(live.artiklar?.[i]?.pris === 0 || live.artiklar?.[i]?.pris === undefined) && (
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  {...register(`artiklar.${i}.pris`, { valueAsNumber: true })}
+                  placeholder="Pris kr"
+                />
+                {(live.artiklar?.[i]?.pris === 0 ||
+                  live.artiklar?.[i]?.pris === undefined) && (
                   <p className="text-xs font-bold text-amber-600 dark:text-amber-400 mt-1 flex items-center gap-1">
-                    <TriangleAlert className="h-3 w-3" />Pris ej ifyllt
+                    <TriangleAlert className="h-3 w-3" />
+                    Pris ej ifyllt
                   </p>
                 )}
               </div>
               <div className="col-span-1 flex justify-end">
-                <Button type="button" size="icon" variant="ghost" onClick={() => artiklar.remove(i)}>
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => artiklar.remove(i)}
+                >
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
@@ -259,9 +362,14 @@ export default function JobForm({
           ))}
           <div className="space-y-1.5 pt-2">
             <Label className="text-sm font-medium flex items-center gap-1.5">
-              <StickyNote className="h-3.5 w-3.5 text-muted-foreground" />Övriga artiklar
+              <StickyNote className="h-3.5 w-3.5 text-muted-foreground" />
+              Övriga artiklar
             </Label>
-            <Textarea rows={3} {...register("ovrigaArtiklar")} placeholder="T.ex. förbrukningsmaterial, hyrd utrustning, övrigt..." />
+            <Textarea
+              rows={3}
+              {...register("ovrigaArtiklar")}
+              placeholder="T.ex. förbrukningsmaterial, hyrd utrustning, övrigt..."
+            />
           </div>
         </CardContent>
       </Card>
@@ -270,32 +378,64 @@ export default function JobForm({
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="flex items-center gap-2">
-            <Van className="h-5 w-5 text-muted-foreground" />Resor
+            <Van className="h-5 w-5 text-muted-foreground" />
+            Resor
           </CardTitle>
-          <Button type="button" size="sm" variant="outline" onClick={() => resor.append({ datum: idag(), stracka: 0 })}>
-            <Plus className="mr-1 h-4 w-4" />Lägg till resa
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => resor.append({ datum: idag(), stracka: 0 })}
+          >
+            <Plus className="mr-1 h-4 w-4" />
+            Lägg till resa
           </Button>
         </CardHeader>
         <CardContent className="space-y-4">
           {resor.fields.length > 0 && (
             <div className="hidden sm:grid sm:grid-cols-12 gap-2 text-xs font-medium text-muted-foreground px-1">
-              <div className="col-span-5 flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" />Datum</div>
-              <div className="col-span-6 flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" />Sträcka (km körd)</div>
+              <div className="col-span-5 flex items-center gap-1.5">
+                <Calendar className="h-3.5 w-3.5" />
+                Datum
+              </div>
+              <div className="col-span-6 flex items-center gap-1.5">
+                <MapPin className="h-3.5 w-3.5" />
+                Sträcka (km körd)
+              </div>
               <div className="col-span-1" />
             </div>
           )}
           {resor.fields.map((field, i) => (
             <div key={field.id} className="grid grid-cols-12 gap-2 items-end">
               <div className="col-span-7 sm:col-span-5 space-y-1">
-                <Label className="text-xs text-muted-foreground sm:hidden flex items-center gap-1"><Calendar className="h-3 w-3" />Datum</Label>
+                <Label className="text-xs text-muted-foreground sm:hidden flex items-center gap-1">
+                  <Calendar className="h-3 w-3" />
+                  Datum
+                </Label>
                 <Input type="date" {...register(`resor.${i}.datum`)} />
               </div>
               <div className="col-span-4 sm:col-span-6 space-y-1">
-                <Label className="text-xs text-muted-foreground sm:hidden flex items-center gap-1"><MapPin className="h-3 w-3" />Sträcka (km)</Label>
-                <Input type="number" step="0.1" min="0" {...register(`resor.${i}.stracka`, { valueAsNumber: true })} placeholder="0" />
+                <Label className="text-xs text-muted-foreground sm:hidden flex items-center gap-1">
+                  <MapPin className="h-3 w-3" />
+                  Sträcka (km)
+                </Label>
+                <Input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  {...register(`resor.${i}.stracka`, { valueAsNumber: true })}
+                  placeholder="0"
+                />
               </div>
               <div className="col-span-1 flex justify-end">
-                <Button type="button" size="icon" variant="ghost" onClick={() => resor.remove(i)}><Trash2 className="h-4 w-4" /></Button>
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => resor.remove(i)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           ))}
@@ -306,32 +446,66 @@ export default function JobForm({
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5 text-muted-foreground" />Arbetstid
+            <Clock className="h-5 w-5 text-muted-foreground" />
+            Arbetstid
           </CardTitle>
-          <Button type="button" size="sm" variant="outline" onClick={() => arbetstider.append({ datum: idag(), timmar: 0 })}>
-            <Plus className="mr-1 h-4 w-4" />Lägg till pass
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => arbetstider.append({ datum: idag(), timmar: 0 })}
+          >
+            <Plus className="mr-1 h-4 w-4" />
+            Lägg till pass
           </Button>
         </CardHeader>
         <CardContent className="space-y-4">
           {arbetstider.fields.length > 0 && (
             <div className="hidden sm:grid sm:grid-cols-12 gap-2 text-xs font-medium text-muted-foreground px-1">
-              <div className="col-span-5 flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" />Datum</div>
-              <div className="col-span-6 flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" />Antal timmar</div>
+              <div className="col-span-5 flex items-center gap-1.5">
+                <Calendar className="h-3.5 w-3.5" />
+                Datum
+              </div>
+              <div className="col-span-6 flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5" />
+                Antal timmar
+              </div>
               <div className="col-span-1" />
             </div>
           )}
           {arbetstider.fields.map((field, i) => (
             <div key={field.id} className="grid grid-cols-12 gap-2 items-end">
               <div className="col-span-7 sm:col-span-5 space-y-1">
-                <Label className="text-xs text-muted-foreground sm:hidden flex items-center gap-1"><Calendar className="h-3 w-3" />Datum</Label>
+                <Label className="text-xs text-muted-foreground sm:hidden flex items-center gap-1">
+                  <Calendar className="h-3 w-3" />
+                  Datum
+                </Label>
                 <Input type="date" {...register(`arbetstider.${i}.datum`)} />
               </div>
               <div className="col-span-4 sm:col-span-6 space-y-1">
-                <Label className="text-xs text-muted-foreground sm:hidden flex items-center gap-1"><Clock className="h-3 w-3" />Timmar</Label>
-                <Input type="number" step="0.25" min="0" {...register(`arbetstider.${i}.timmar`, { valueAsNumber: true })} placeholder="t.ex. 7.5" />
+                <Label className="text-xs text-muted-foreground sm:hidden flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  Timmar
+                </Label>
+                <Input
+                  type="number"
+                  step="0.25"
+                  min="0"
+                  {...register(`arbetstider.${i}.timmar`, {
+                    valueAsNumber: true,
+                  })}
+                  placeholder="t.ex. 7.5"
+                />
               </div>
               <div className="col-span-1 flex justify-end">
-                <Button type="button" size="icon" variant="ghost" onClick={() => arbetstider.remove(i)}><Trash2 className="h-4 w-4" /></Button>
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => arbetstider.remove(i)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           ))}
@@ -347,13 +521,31 @@ export default function JobForm({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Textarea rows={4} {...register("planeratArbete")} placeholder="Vad ska göras? T.ex. byta rör i kök, dra el till garage..." />
+          <Textarea
+            rows={4}
+            {...register("planeratArbete")}
+            placeholder="Vad ska göras? T.ex. byta rör i kök, dra el till garage..."
+          />
           <div className="space-y-2">
             <Label className="flex items-center gap-1.5">
-              <ImagePlus className="h-3.5 w-3.5 text-muted-foreground" />Bilder
+              <ImagePlus className="h-3.5 w-3.5 text-muted-foreground" />
+              Bilder
             </Label>
-            <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={hanteraFiler} />
-            <Button type="button" variant="outline" size="sm" disabled={laddarUpp} onClick={() => fileInputRef.current?.click()}>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={hanteraFiler}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={laddarUpp}
+              onClick={() => fileInputRef.current?.click()}
+            >
               <ImagePlus className="mr-1 h-4 w-4" />
               {laddarUpp ? "Laddar upp..." : "Lägg till bilder"}
             </Button>
@@ -361,11 +553,23 @@ export default function JobForm({
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-2">
                 {bilder.map((bild) => (
                   <div key={bild.key} className="relative group aspect-square">
-                    <Image src={bild.url} alt="Jobbild" fill sizes="(max-width: 640px) 33vw, 200px"
-                      className="object-cover rounded-md cursor-pointer" onClick={() => setValdBild(bild.url)} />
-                    <button type="button"
+                    <Image
+                      src={bild.url}
+                      alt="Jobbild"
+                      fill
+                      sizes="(max-width: 640px) 33vw, 200px"
+                      className="object-cover rounded-md cursor-pointer"
+                      onClick={() => setValdBild(bild.url)}
+                    />
+                    <button
+                      type="button"
                       className="absolute top-1 right-1 bg-black/60 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => setBilder((prev) => prev.filter((b) => b.key !== bild.key))}>
+                      onClick={() =>
+                        setBilder((prev) =>
+                          prev.filter((b) => b.key !== bild.key),
+                        )
+                      }
+                    >
                       <X className="h-3 w-3 text-white" />
                     </button>
                   </div>
@@ -380,11 +584,16 @@ export default function JobForm({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Wrench className="h-5 w-5 text-muted-foreground" />Utfört arbete
+            <Wrench className="h-5 w-5 text-muted-foreground" />
+            Utfört arbete
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Textarea rows={4} {...register("utfortArbete")} placeholder="Beskriv vad som har gjorts i projektet..." />
+          <Textarea
+            rows={4}
+            {...register("utfortArbete")}
+            placeholder="Beskriv vad som har gjorts i projektet..."
+          />
         </CardContent>
       </Card>
 
@@ -392,23 +601,47 @@ export default function JobForm({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <ClipboardList className="h-5 w-5 text-muted-foreground" />Hantverkarens status
+            <ClipboardList className="h-5 w-5 text-muted-foreground" />
+            Hantverkarens status
           </CardTitle>
-          <p className="text-xs text-muted-foreground">Välj aktuell status för jobbet.</p>
+          <p className="text-xs text-muted-foreground">
+            Välj aktuell status för jobbet.
+          </p>
         </CardHeader>
         <CardContent className="space-y-3">
-          <ToggleRow id="ej-paborjat" label="Ej påbörjat"
+          <ToggleRow
+            id="ej-paborjat"
+            label="Ej påbörjat"
             checked={!(live.pagaende ?? false) && !(live.utfort ?? false)}
-            onChange={() => { setValue("pagaende", false, { shouldDirty: true }); setValue("utfort", false, { shouldDirty: true }); }} />
-          <ToggleRow id="pagaende" label="Pågående"
+            onChange={() => {
+              setValue("pagaende", false, { shouldDirty: true });
+              setValue("utfort", false, { shouldDirty: true });
+            }}
+          />
+          <ToggleRow
+            id="pagaende"
+            label="Pågående"
             checked={(live.pagaende ?? false) && !(live.utfort ?? false)}
-            onChange={() => { setValue("pagaende", true, { shouldDirty: true }); setValue("utfort", false, { shouldDirty: true }); }} />
-          <ToggleRow id="utfort" label="Jobb utfört och klart"
+            onChange={() => {
+              setValue("pagaende", true, { shouldDirty: true });
+              setValue("utfort", false, { shouldDirty: true });
+            }}
+          />
+          <ToggleRow
+            id="utfort"
+            label="Jobb utfört och klart"
             checked={live.utfort ?? false}
-            onChange={() => { setValue("utfort", true, { shouldDirty: true }); setValue("pagaende", false, { shouldDirty: true }); }} />
-          <ToggleRow id="rot" label="ROT-avdrag ska tillämpas"
+            onChange={() => {
+              setValue("utfort", true, { shouldDirty: true });
+              setValue("pagaende", false, { shouldDirty: true });
+            }}
+          />
+          <ToggleRow
+            id="rot"
+            label="ROT-avdrag ska tillämpas"
             checked={live.rotAvdrag ?? false}
-            onChange={(v) => setValue("rotAvdrag", v, { shouldDirty: true })} />
+            onChange={(v) => setValue("rotAvdrag", v, { shouldDirty: true })}
+          />
         </CardContent>
       </Card>
 
@@ -416,15 +649,26 @@ export default function JobForm({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <CreditCard className="h-5 w-5 text-muted-foreground" />Faktura &amp; betalning
+            <CreditCard className="h-5 w-5 text-muted-foreground" />
+            Faktura &amp; betalning
           </CardTitle>
-          <p className="text-xs text-muted-foreground">Bockas av den som sköter fakturering och bokföring.</p>
+          <p className="text-xs text-muted-foreground">
+            Bockas av den som sköter fakturering och bokföring.
+          </p>
         </CardHeader>
         <CardContent className="space-y-3">
-          <ToggleRow id="fakturerat" label="Fakturerat" checked={live.fakturerat ?? false}
-            onChange={(v) => setValue("fakturerat", v, { shouldDirty: true })} />
-          <ToggleRow id="betalt" label="Betalt" checked={live.betalt ?? false}
-            onChange={(v) => setValue("betalt", v, { shouldDirty: true })} />
+          <ToggleRow
+            id="fakturerat"
+            label="Fakturerat"
+            checked={live.fakturerat ?? false}
+            onChange={(v) => setValue("fakturerat", v, { shouldDirty: true })}
+          />
+          <ToggleRow
+            id="betalt"
+            label="Betalt"
+            checked={live.betalt ?? false}
+            onChange={(v) => setValue("betalt", v, { shouldDirty: true })}
+          />
         </CardContent>
       </Card>
 
@@ -432,11 +676,16 @@ export default function JobForm({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <NotebookPen className="h-5 w-5 text-muted-foreground" />Övriga anteckningar
+            <NotebookPen className="h-5 w-5 text-muted-foreground" />
+            Övriga anteckningar
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Textarea rows={4} {...register("anteckningar")} placeholder="T.ex. tillval, garanti, kommande arbete..." />
+          <Textarea
+            rows={4}
+            {...register("anteckningar")}
+            placeholder="T.ex. tillval, garanti, kommande arbete..."
+          />
         </CardContent>
       </Card>
 
@@ -445,24 +694,47 @@ export default function JobForm({
         <CardContent className="pt-6 space-y-2 text-sm">
           {live.artiklar?.some((a) => !a.pris) && (
             <p className="text-xs text-amber-600 dark:text-amber-400 font-medium pb-1 flex items-center gap-1.5">
-              <TriangleAlert className="h-3.5 w-3.5" />En eller flera artiklar saknar pris — totalsumman är inte komplett.
+              <TriangleAlert className="h-3.5 w-3.5" />
+              En eller flera artiklar saknar pris — totalsumman är inte
+              komplett.
             </p>
           )}
           {live.ovrigaArtiklar && (
             <p className="text-xs text-amber-600 dark:text-amber-400 pt-1 italic flex items-center gap-1.5">
-              <StickyNote className="h-3.5 w-3.5" />* Det finns en notering under övriga artiklar.
+              <StickyNote className="h-3.5 w-3.5" />* Det finns en notering
+              under övriga artiklar.
             </p>
           )}
-          <SumRow label="Artiklar totalt" icon={<Package className="h-3.5 w-3.5" />}
-            value={summering.artiklarSum.toLocaleString("sv-SE", { style: "currency", currency: "SEK", maximumFractionDigits: 2 })} />
-          <SumRow label="Antal resor" icon={<Van className="h-3.5 w-3.5" />} value={`${summering.antalResor} st`} />
-          <SumRow label="Total sträcka" icon={<MapPin className="h-3.5 w-3.5" />} value={`${summering.totalStracka.toLocaleString("sv-SE")} km`} />
-          <SumRow label="Total arbetstid" icon={<Clock className="h-3.5 w-3.5" />} value={`${summering.totalTimmar.toLocaleString("sv-SE")} h`} />
+          <SumRow
+            label="Artiklar totalt"
+            icon={<Package className="h-3.5 w-3.5" />}
+            value={summering.artiklarSum.toLocaleString("sv-SE", {
+              style: "currency",
+              currency: "SEK",
+              maximumFractionDigits: 2,
+            })}
+          />
+          <SumRow
+            label="Antal resor"
+            icon={<Van className="h-3.5 w-3.5" />}
+            value={`${summering.antalResor} st`}
+          />
+          <SumRow
+            label="Total sträcka"
+            icon={<MapPin className="h-3.5 w-3.5" />}
+            value={`${summering.totalStracka.toLocaleString("sv-SE")} km`}
+          />
+          <SumRow
+            label="Total arbetstid"
+            icon={<Clock className="h-3.5 w-3.5" />}
+            value={`${summering.totalTimmar.toLocaleString("sv-SE")} h`}
+          />
           {live.rotAvdrag && (
             <>
               <Separator />
               <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5" />ROT-avdrag markerat — beräknas av den som fakturerar.
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                ROT-avdrag markerat — beräknas av den som fakturerar.
               </p>
             </>
           )}
@@ -476,13 +748,26 @@ export default function JobForm({
       </div>
 
       {valdBild && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" onClick={() => setValdBild(null)}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+          onClick={() => setValdBild(null)}
+        >
           <div className="relative max-w-3xl w-full max-h-[90vh] aspect-auto">
-            <button type="button" className="absolute -top-10 right-0 text-white" onClick={() => setValdBild(null)}>
+            <button
+              type="button"
+              className="absolute -top-10 right-0 text-white"
+              onClick={() => setValdBild(null)}
+            >
               <X className="h-6 w-6" />
             </button>
-            <Image src={valdBild} alt="Förstorad bild" width={1200} height={900}
-              className="object-contain w-full h-full rounded-md" onClick={(e) => e.stopPropagation()} />
+            <Image
+              src={valdBild}
+              alt="Förstorad bild"
+              width={1200}
+              height={900}
+              className="object-contain w-full h-full rounded-md"
+              onClick={(e) => e.stopPropagation()}
+            />
           </div>
         </div>
       )}
@@ -490,19 +775,46 @@ export default function JobForm({
   );
 }
 
-function ToggleRow({ id, label, checked, onChange }: { id: string; label: string; checked: boolean; onChange: (v: boolean) => void }) {
+function ToggleRow({
+  id,
+  label,
+  checked,
+  onChange,
+}: {
+  id: string;
+  label: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+}) {
   return (
     <div className="flex items-center gap-3">
-      <Checkbox id={id} checked={checked} onCheckedChange={(v) => onChange(Boolean(v))} />
-      <Label htmlFor={id} className="font-normal cursor-pointer">{label}</Label>
+      <Checkbox
+        id={id}
+        checked={checked}
+        onCheckedChange={(v) => onChange(Boolean(v))}
+      />
+      <Label htmlFor={id} className="font-normal cursor-pointer">
+        {label}
+      </Label>
     </div>
   );
 }
 
-function SumRow({ label, icon, value }: { label: string; icon?: React.ReactNode; value: string }) {
+function SumRow({
+  label,
+  icon,
+  value,
+}: {
+  label: string;
+  icon?: React.ReactNode;
+  value: string;
+}) {
   return (
     <div className="flex justify-between items-center">
-      <span className="text-muted-foreground flex items-center gap-1.5">{icon}{label}</span>
+      <span className="text-muted-foreground flex items-center gap-1.5">
+        {icon}
+        {label}
+      </span>
       <span className="tabular-nums font-medium">{value}</span>
     </div>
   );
