@@ -50,6 +50,7 @@ export const articleSchema = z.object({
   namn: z.string().trim().min(1, "Namn krävs").max(120),
   artikelnr: z.string().trim().max(50).optional().default(""),
   aterforsaljare: z.string().trim().max(120).optional().default(""),
+  inkopspris: z.coerce.number().min(0).optional().default(0),
   pris: z.coerce.number().min(0, "Pris får inte vara negativt"),
   antal: z.coerce.number().min(1, "Minst 1").default(1),
 });
@@ -66,6 +67,12 @@ export const arbetstidSchema = z.object({
   timmar: z.coerce.number().min(0, "Timmar får inte vara negativt"),
 });
 
+export const ovrigKostnadSchema = z.object({
+  id: z.string().optional(),
+  beskrivning: z.string().trim().min(1, "Beskrivning krävs").max(200),
+  pris: z.coerce.number().min(0, "Pris får inte vara negativt"),
+});
+
 export const jobSchema = z.object({
   customerId: z.string().optional(),
 
@@ -78,13 +85,15 @@ export const jobSchema = z.object({
   artiklar: z.array(articleSchema).default([]),
   resor: z.array(resaSchema).default([]),
   arbetstider: z.array(arbetstidSchema).default([]),
+  ovrigaKostnader: z.array(ovrigKostnadSchema).default([]),
 
   anteckningar: z.string().max(2000).optional().default(""),
-  ovrigaArtiklar: z.string().max(2000).optional().default(""),
   utfortArbete: z.string().max(2000).optional().default(""),
   planeratArbete: z.string().max(2000).optional().default(""),
 
-  bilder: z.array(z.object({ url: z.string(), key: z.string() })).default([]),
+  bilder: z
+    .array(z.object({ url: z.string(), key: z.string() }))
+    .default([]),
 });
 
 export type JobInput = z.infer<typeof jobSchema>;
@@ -97,12 +106,16 @@ export type Job = JobInput & {
 
 export function beräknaSummering(job: JobInput) {
   const artiklarSum = job.artiklar.reduce(
-    (sum, artikel) => sum + artikel.pris * artikel.antal,
+    (sum, a) => sum + a.pris * a.antal,
+    0,
+  );
+  const ovrigaSum = (job.ovrigaKostnader ?? []).reduce(
+    (sum, k) => sum + k.pris,
     0,
   );
   const totalTimmar = job.arbetstider.reduce((sum, a) => sum + a.timmar, 0);
   const totalStracka = job.resor.reduce((sum, r) => sum + r.stracka, 0);
   const antalResor = job.resor.length;
 
-  return { artiklarSum, totalTimmar, totalStracka, antalResor };
+  return { artiklarSum, ovrigaSum, totalTimmar, totalStracka, antalResor };
 }
