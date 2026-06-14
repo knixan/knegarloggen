@@ -22,7 +22,9 @@ export function ContactSection({ job }: { job: Job }) {
   const customerDisplayName =
     customer?.foretagsnamn?.trim() || customer?.namn?.trim();
 
-  const phoneHref = customer?.telefon ? `tel:${toTelHref(customer.telefon)}` : undefined;
+  const phoneHref = customer?.telefon
+    ? `tel:${toTelHref(customer.telefon)}`
+    : undefined;
   const emailHref = customer?.epost ? `mailto:${customer.epost}` : undefined;
 
   const fullAddress = [customer?.adress, customer?.postnummer, customer?.ort]
@@ -32,11 +34,7 @@ export function ContactSection({ job }: { job: Job }) {
   return (
     <section className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
       <InfoItem icon={<IdCard />} label="Kund" value={customerDisplayName} />
-      <InfoItem
-        icon={<MapPinned />}
-        label="Adress"
-        value={fullAddress}
-      />
+      <InfoItem icon={<MapPinned />} label="Adress" value={fullAddress} />
       <InfoItem
         icon={<Phone />}
         label="Telefon"

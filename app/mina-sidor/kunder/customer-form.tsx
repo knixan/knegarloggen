@@ -19,10 +19,7 @@ import {
   Key,
 } from "lucide-react";
 
-import {
-  createCustomer,
-  updateCustomer,
-} from "@/lib/job-actions";
+import { createCustomer, updateCustomer } from "@/lib/job-actions";
 import { customerSchema } from "@/lib/job-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 

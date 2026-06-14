@@ -35,7 +35,7 @@ export default function JobList({ jobs, onEdit, onDelete }: Props) {
     <div className="grid gap-3">
       {jobs.map((job) => {
         const summary = beräknaSummering(job);
-        const customerDisplayName = 
+        const customerDisplayName =
           job.customer?.foretagsnamn?.trim() || job.customer?.namn?.trim();
         const customerAddress = [
           job.customer?.adress,
