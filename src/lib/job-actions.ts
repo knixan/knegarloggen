@@ -18,6 +18,7 @@ type JobWithRelations = Prisma.JobGetPayload<{
     arbetspass: true;
     images: true;
     customer: true;
+    ovrigaKostnader: true;
   };
 }>;
 
@@ -68,7 +69,6 @@ function mapJob(j: JobWithRelations) {
     fakturerat: j.fakturerat,
     betalt: j.betalt,
     anteckningar: j.anteckningar,
-    ovrigaArtiklar: j.ovrigaArtiklar,
     utfortArbete: j.utfortArbete,
     planeratArbete: j.planeratArbete,
     artiklar: j.artiklar.map((a) => ({
@@ -76,6 +76,7 @@ function mapJob(j: JobWithRelations) {
       namn: a.namn,
       artikelnr: a.artikelnr,
       aterforsaljare: a.aterforsaljare,
+      inkopspris: a.inkopspris,
       pris: a.pris,
       antal: a.antal,
     })),
@@ -88,6 +89,11 @@ function mapJob(j: JobWithRelations) {
       id: w.id,
       datum: w.datum,
       timmar: w.timmar,
+    })),
+    ovrigaKostnader: j.ovrigaKostnader.map((k) => ({
+      id: k.id,
+      beskrivning: k.beskrivning,
+      pris: k.pris,
     })),
     bilder: j.images.map((img) => ({
       url: img.url,
@@ -461,14 +467,14 @@ export async function createJob(
       fakturerat: data.fakturerat,
       betalt: data.betalt,
       anteckningar: data.anteckningar ?? "",
-      ovrigaArtiklar: data.ovrigaArtiklar ?? "",
-      utfortArbete: data.utfortArbete ?? "",
+            utfortArbete: data.utfortArbete ?? "",
       planeratArbete: data.planeratArbete ?? "",
       artiklar: {
         create: data.artiklar.map((a) => ({
           namn: a.namn,
           artikelnr: a.artikelnr ?? "",
           aterforsaljare: a.aterforsaljare ?? "",
+          inkopspris: a.inkopspris ?? 0,
           pris: a.pris,
           antal: a.antal,
         })),
@@ -487,6 +493,12 @@ export async function createJob(
       },
       images: {
         create: bilder.map((b) => ({ url: b.url, key: b.key })),
+      },
+      ovrigaKostnader: {
+        create: (data.ovrigaKostnader ?? []).map((k) => ({
+          beskrivning: k.beskrivning,
+          pris: k.pris,
+        })),
       },
     },
   });
@@ -510,7 +522,7 @@ export async function updateJob(
 
   const existing = await prisma.job.findFirst({
     where: { id, companyId: company.id },
-    include: { artiklar: true, resor: true, arbetspass: true, images: true },
+    include: { artiklar: true, resor: true, arbetspass: true, images: true, ovrigaKostnader: true },
   });
   if (!existing) return { ok: false, error: "Jobb hittades inte" };
 
@@ -528,21 +540,19 @@ export async function updateJob(
 
   const existingArtiklarIds = ids(existing.artiklar);
   const keepArtiklarIds = ids(data.artiklar);
-  const deleteArtiklarIds = existingArtiklarIds.filter(
-    (i) => !keepArtiklarIds.includes(i),
-  );
+  const deleteArtiklarIds = existingArtiklarIds.filter((i) => !keepArtiklarIds.includes(i));
 
   const existingResorIds = ids(existing.resor);
   const keepResorIds = ids(data.resor);
-  const deleteResorIds = existingResorIds.filter(
-    (i) => !keepResorIds.includes(i),
-  );
+  const deleteResorIds = existingResorIds.filter((i) => !keepResorIds.includes(i));
 
   const existingArbetspassIds = ids(existing.arbetspass);
   const keepArbetspassIds = ids(data.arbetstider);
-  const deleteArbetspassIds = existingArbetspassIds.filter(
-    (i) => !keepArbetspassIds.includes(i),
-  );
+  const deleteArbetspassIds = existingArbetspassIds.filter((i) => !keepArbetspassIds.includes(i));
+
+  const existingKostnaderIds = ids(existing.ovrigaKostnader);
+  const keepKostnaderIds = ids(data.ovrigaKostnader ?? []);
+  const deleteKostnaderIds = existingKostnaderIds.filter((i) => !keepKostnaderIds.includes(i));
 
   await prisma.$transaction([
     // Artiklar
@@ -551,58 +561,38 @@ export async function updateJob(
       a.id
         ? prisma.article.update({
             where: { id: a.id },
-            data: {
-              namn: a.namn,
-              artikelnr: a.artikelnr ?? "",
-              aterforsaljare: a.aterforsaljare ?? "",
-              pris: a.pris,
-              antal: a.antal,
-            },
+            data: { namn: a.namn, artikelnr: a.artikelnr ?? "", aterforsaljare: a.aterforsaljare ?? "", inkopspris: a.inkopspris ?? 0, pris: a.pris, antal: a.antal },
           })
         : prisma.article.create({
-            data: {
-              jobId: id,
-              namn: a.namn,
-              artikelnr: a.artikelnr ?? "",
-              aterforsaljare: a.aterforsaljare ?? "",
-              pris: a.pris,
-              antal: a.antal,
-            },
+            data: { jobId: id, namn: a.namn, artikelnr: a.artikelnr ?? "", aterforsaljare: a.aterforsaljare ?? "", inkopspris: a.inkopspris ?? 0, pris: a.pris, antal: a.antal },
           }),
     ),
     // Resor
     prisma.trip.deleteMany({ where: { id: { in: deleteResorIds } } }),
     ...data.resor.map((r) =>
       r.id
-        ? prisma.trip.update({
-            where: { id: r.id },
-            data: { datum: r.datum, stracka: r.stracka },
-          })
-        : prisma.trip.create({
-            data: { jobId: id, datum: r.datum, stracka: r.stracka },
-          }),
+        ? prisma.trip.update({ where: { id: r.id }, data: { datum: r.datum, stracka: r.stracka } })
+        : prisma.trip.create({ data: { jobId: id, datum: r.datum, stracka: r.stracka } }),
     ),
     // Arbetspass
-    prisma.workSession.deleteMany({
-      where: { id: { in: deleteArbetspassIds } },
-    }),
+    prisma.workSession.deleteMany({ where: { id: { in: deleteArbetspassIds } } }),
     ...data.arbetstider.map((w) =>
       w.id
-        ? prisma.workSession.update({
-            where: { id: w.id },
-            data: { datum: w.datum, timmar: w.timmar },
-          })
-        : prisma.workSession.create({
-            data: { jobId: id, datum: w.datum, timmar: w.timmar },
-          }),
+        ? prisma.workSession.update({ where: { id: w.id }, data: { datum: w.datum, timmar: w.timmar } })
+        : prisma.workSession.create({ data: { jobId: id, datum: w.datum, timmar: w.timmar } }),
+    ),
+    // Övriga kostnader
+    prisma.ovrigKostnad.deleteMany({ where: { id: { in: deleteKostnaderIds } } }),
+    ...(data.ovrigaKostnader ?? []).map((k) =>
+      k.id
+        ? prisma.ovrigKostnad.update({ where: { id: k.id }, data: { beskrivning: k.beskrivning, pris: k.pris } })
+        : prisma.ovrigKostnad.create({ data: { jobId: id, beskrivning: k.beskrivning, pris: k.pris } }),
     ),
     // Bilder
     prisma.jobImage.deleteMany({ where: { jobId: id, key: { in: toDelete } } }),
     ...bilder
       .filter((b) => !existingImageKeys.includes(b.key))
-      .map((b) =>
-        prisma.jobImage.create({ data: { jobId: id, url: b.url, key: b.key } }),
-      ),
+      .map((b) => prisma.jobImage.create({ data: { jobId: id, url: b.url, key: b.key } })),
     // Jobb-uppdatering
     prisma.job.update({
       where: { id },
@@ -614,8 +604,7 @@ export async function updateJob(
         fakturerat: data.fakturerat,
         betalt: data.betalt,
         anteckningar: data.anteckningar ?? "",
-        ovrigaArtiklar: data.ovrigaArtiklar ?? "",
-        utfortArbete: data.utfortArbete ?? "",
+                utfortArbete: data.utfortArbete ?? "",
         planeratArbete: data.planeratArbete ?? "",
       },
     }),
