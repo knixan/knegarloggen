@@ -4,7 +4,7 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { getJobs } from "@/lib/job-actions";
 import { Button } from "@/components/ui/button";
-import { Plus, Building2 } from "lucide-react";
+import { Plus, Building2, Users } from "lucide-react";
 import JobDashboard from "./job-dashboard";
 
 export default async function MinaSidorPage() {
@@ -22,11 +22,17 @@ export default async function MinaSidorPage() {
             Välkommen, {session.user.name}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Link href="/mina-sidor/foretag">
             <Button variant="outline">
               <Building2 className="h-4 w-4 mr-2" />
               Företagsuppgifter
+            </Button>
+          </Link>
+          <Link href="/mina-sidor/kunder">
+            <Button variant="outline">
+              <Users className="h-4 w-4 mr-2" />
+              Kundregister
             </Button>
           </Link>
           <Link href="/mina-sidor/nytt-jobb">
