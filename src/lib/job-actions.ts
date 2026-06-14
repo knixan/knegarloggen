@@ -417,6 +417,7 @@ export async function getJobs() {
       arbetspass: true,
       images: true,
       customer: true,
+      ovrigaKostnader: true,
     },
     orderBy: { skapad: "desc" },
   });
@@ -441,6 +442,7 @@ export async function getJob(id: string) {
       arbetspass: true,
       images: true,
       customer: true,
+      ovrigaKostnader: true,
     },
   });
   if (!j) return null;
