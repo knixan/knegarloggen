@@ -1,10 +1,27 @@
 # Knegarloggen 🔧
 
-En jobblogg för hantverkare – håll koll på kunder, artiklar, resor, arbetstid och fakturastatus på ett och samma ställe.
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js)](https://nextjs.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
+[![Prisma](https://img.shields.io/badge/Prisma-v6-2D3748?style=flat-square&logo=prisma)](https://www.prisma.io/)
+[![License](https://img.shields.io/badge/License-Privat-gray?style=flat-square)](LICENSE)
+
+Effektivisera din vardag som hantverkare. Håll koll på kunder, artiklar, resor, arbetstid och fakturastatus – allt samlat på ett och samma ställe.
 
 ---
 
-## Vad är det här?
+## 📌 Innehållsförteckning
+- [Om projektet](#om-projektet)
+- [Funktioner](#funktioner)
+- [Teknisk stack](#teknisk-stack)
+- [Kom igång](#kom-igång)
+- [Projektstruktur](#projektstruktur)
+- [Databasmodeller](#databasmodeller)
+- [Scripts](#scripts)
+- [Roadmap](#roadmap)
+
+---
+
+## 🛠 Om projektet
 
 Knegarloggen är en webbaserad applikation byggd för mindre hantverksföretag. Du loggar varje jobb med kunduppgifter, material/artiklar, körda sträckor och arbetstid – och bockar av när jobbet är utfört, fakturerat och betalt. Stöd för ROT-avdrag ingår.
 
@@ -12,35 +29,35 @@ Appen är byggd med Next.js, Prisma och PostgreSQL, med inloggning via [better-a
 
 ---
 
-## Funktioner
+## ✨ Funktioner
 
-- **Jobbhantering** – skapa, redigera och ta bort jobb per företag
-- **Artiklar** – lägg till material med artikelnummer, antal och pris
-- **Resor** – logga körda sträckor och avstånd per datum
-- **Arbetstid** – registrera arbetspass i timmar per datum
-- **Status-bockar** – Utfört · ROT-avdrag · Fakturerat · Betalt
-- **Summering** – totaler för artiklar, resor och timmar beräknas live
-- **Autentisering** – registrering och inloggning med e-post/lösenord
-- **Multi-företag** – varje användare kan ha ett eller flera företag
+- 💼 **Jobbhantering** – Skapa, redigera och organisera jobb per företag.
+- 📦 **Artiklar** – Hantera material med artikelnummer, antal och priser.
+- 🚗 **Reslogg** – Logga körda sträckor och avstånd knutna till specifika datum.
+- ⏱️ **Arbetstid** – Enkel registrering av arbetspass i timmar.
+- ✅ **Statuskontroll** – Tydliga flaggor för Utfört, ROT, Fakturerat och Betalt.
+- 📊 **Livesummering** – Automatiska beräkningar av totaler för artiklar, resor och tid.
+- 🔐 **Säker Auth** – Robust autentisering via better-auth (E-post/Lösenord).
+- 🏢 **Multi-företag** – Stöd för att hantera flera olika företag på samma konto.
 
 ---
 
-## Teknisk stack
+## 💻 Teknisk stack
 
 | Lager     | Teknik                      |
 | --------- | --------------------------- |
-| Framework | Next.js 16 (App Router)     |
+| Framework | Next.js 15 (App Router)     |
 | Språk     | TypeScript                  |
 | Styling   | Tailwind CSS v4 + shadcn/ui |
 | Formulär  | React Hook Form + Zod       |
-| ORM       | Prisma 7                    |
+| ORM       | Prisma 6                    |
 | Databas   | PostgreSQL                  |
 | Auth      | better-auth                 |
 | Runtime   | Node.js                     |
 
 ---
 
-## Kom igång
+## 🚀 Kom igång
 
 ### Förutsättningar
 
@@ -65,7 +82,7 @@ cp .env.example .env
 
 ```env
 # Databas
-DATABASE_URL="postgresql://postgres:DITTLÖSENORD@localhost:5432/knegarloggen"
+DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/knegarloggen"
 
 # better-auth
 BETTER_AUTH_SECRET="generera-med-openssl-rand-base64-32"
@@ -102,7 +119,7 @@ npm run dev
 
 ---
 
-## Projektstruktur
+## 📂 Projektstruktur
 
 ```
 knegarloggen/
