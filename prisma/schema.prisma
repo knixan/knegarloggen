@@ -213,7 +213,6 @@ model Job {
 
   // Anteckningar
   anteckningar   String @default("")
-  ovrigaArtiklar String @default("")
   utfortArbete   String @default("")
   planeratArbete String @default("")
 
@@ -224,10 +223,11 @@ model Job {
   // Relationer
   company    Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
   customer   Customer?    @relation(fields: [customerId], references: [id], onDelete: SetNull)
-  artiklar   Article[]
-  resor      Trip[]
-  arbetspass WorkSession[]
-  images     JobImage[]
+  artiklar        Article[]
+  resor           Trip[]
+  arbetspass      WorkSession[]
+  images          JobImage[]
+  ovrigaKostnader OvrigKostnad[]
 
   @@index([companyId])
   @@index([companyId, fakturerat])
@@ -242,6 +242,7 @@ model Article {
   namn           String
   artikelnr      String @default("")
   aterforsaljare String @default("")
+  inkopspris     Float  @default(0)
   pris           Float
   antal          Int    @default(1)
 
@@ -288,4 +289,17 @@ model JobImage {
 
   @@index([jobId])
   @@map("job_image")
+}
+
+model OvrigKostnad {
+  id    String @id @default(cuid())
+  jobId String
+
+  beskrivning String
+  pris        Float  @default(0)
+
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@map("ovrig_kostnad")
 }
