@@ -6,13 +6,19 @@ import type { Prisma } from "@prisma/client";
 import { UTApi } from "uploadthing/server";
 import { auth } from "./auth";
 import { prisma } from "./prisma";
-import type { JobInput } from "./job-schema";
+import type { JobInput, CustomerInput } from "./job-schema";
 
 const utapi = new UTApi();
 const DEFAULT_COMPANY_NAME = "Mitt företag";
 
 type JobWithRelations = Prisma.JobGetPayload<{
-  include: { artiklar: true; resor: true; arbetspass: true; images: true };
+  include: {
+    artiklar: true;
+    resor: true;
+    arbetspass: true;
+    images: true;
+    customer: true;
+  };
 }>;
 
 async function getSession() {
@@ -29,15 +35,33 @@ async function getOrCreateCompany(userId: string) {
   });
 }
 
+function mapCustomer(c: NonNullable<JobWithRelations["customer"]>) {
+  return {
+    id: c.id,
+    companyId: c.companyId,
+    typ: c.typ as "privat" | "foretag",
+    namn: c.namn,
+    adress: c.adress,
+    postnummer: c.postnummer,
+    ort: c.ort,
+    telefon: c.telefon,
+    epost: c.epost,
+    personnummer: c.personnummer,
+    foretagsnamn: c.foretagsnamn,
+    kontaktperson: c.kontaktperson,
+    orgNummer: c.orgNummer,
+    fastighetsbeteckning: c.fastighetsbeteckning,
+    lagenhetsnummer: c.lagenhetsnummer,
+    bostadsrattsforening: c.bostadsrattsforening,
+    skapad: c.createdAt.toISOString(),
+  };
+}
+
 function mapJob(j: JobWithRelations) {
   return {
     id: j.id,
-    namn: j.kundNamn,
-    adress: j.adress,
-    telefon: j.telefon,
-    epost: j.epost,
-    personnummer: j.personnummer,
-    fastighetsbeteckning: j.fastighetsbeteckning,
+    customerId: j.customerId ?? undefined,
+    customer: j.customer ? mapCustomer(j.customer) : null,
     rotAvdrag: j.rotAvdrag,
     pagaende: j.pagaende,
     utfort: j.utfort,
@@ -76,6 +100,10 @@ function mapJob(j: JobWithRelations) {
 function ids<T extends { id?: string }>(rows: T[]) {
   return rows.flatMap((row) => (row.id ? [row.id] : []));
 }
+
+// ============================================================
+// FÖRETAGSUPPGIFTER
+// ============================================================
 
 export async function getCompanySettings() {
   const session = await getSession();
@@ -169,7 +197,6 @@ export async function updateCompanyLogo(logo: { url: string; key: string } | nul
 
   const company = await getOrCreateCompany(session.user.id);
 
-  // Rensa gammal logga från UploadThing om den byts ut eller tas bort
   if (company.logoKey && company.logoKey !== logo?.key) {
     try {
       await utapi.deleteFiles(company.logoKey);
@@ -191,6 +218,180 @@ export async function updateCompanyLogo(logo: { url: string; key: string } | nul
   return { ok: true };
 }
 
+// ============================================================
+// KUNDREGISTER
+// ============================================================
+
+export async function getCustomers() {
+  const session = await getSession();
+  if (!session?.user) return [];
+
+  const company = await prisma.company.findFirst({
+    where: { ownerId: session.user.id },
+  });
+  if (!company) return [];
+
+  const customers = await prisma.customer.findMany({
+    where: { companyId: company.id },
+    orderBy: { namn: "asc" },
+  });
+
+  return customers.map((c) => ({
+    id: c.id,
+    companyId: c.companyId,
+    typ: c.typ as "privat" | "foretag",
+    namn: c.namn,
+    adress: c.adress,
+    postnummer: c.postnummer,
+    ort: c.ort,
+    telefon: c.telefon,
+    epost: c.epost,
+    personnummer: c.personnummer,
+    foretagsnamn: c.foretagsnamn,
+    kontaktperson: c.kontaktperson,
+    orgNummer: c.orgNummer,
+    fastighetsbeteckning: c.fastighetsbeteckning,
+    lagenhetsnummer: c.lagenhetsnummer,
+    bostadsrattsforening: c.bostadsrattsforening,
+    skapad: c.createdAt.toISOString(),
+  }));
+}
+
+export async function getCustomer(id: string) {
+  const session = await getSession();
+  if (!session?.user) return null;
+
+  const company = await prisma.company.findFirst({
+    where: { ownerId: session.user.id },
+  });
+  if (!company) return null;
+
+  const c = await prisma.customer.findFirst({
+    where: { id, companyId: company.id },
+  });
+  if (!c) return null;
+
+  return {
+    id: c.id,
+    companyId: c.companyId,
+    typ: c.typ as "privat" | "foretag",
+    namn: c.namn,
+    adress: c.adress,
+    postnummer: c.postnummer,
+    ort: c.ort,
+    telefon: c.telefon,
+    epost: c.epost,
+    personnummer: c.personnummer,
+    foretagsnamn: c.foretagsnamn,
+    kontaktperson: c.kontaktperson,
+    orgNummer: c.orgNummer,
+    fastighetsbeteckning: c.fastighetsbeteckning,
+    lagenhetsnummer: c.lagenhetsnummer,
+    bostadsrattsforening: c.bostadsrattsforening,
+    skapad: c.createdAt.toISOString(),
+  };
+}
+
+export async function createCustomer(data: CustomerInput) {
+  const session = await getSession();
+  if (!session?.user) return { ok: false, error: "Inte inloggad" };
+
+  const company = await getOrCreateCompany(session.user.id);
+
+  const customer = await prisma.customer.create({
+    data: {
+      companyId: company.id,
+      typ: data.typ,
+      namn: data.namn.trim(),
+      adress: data.adress ?? "",
+      postnummer: data.postnummer ?? "",
+      ort: data.ort ?? "",
+      telefon: data.telefon ?? "",
+      epost: data.epost ?? "",
+      personnummer: data.personnummer ?? "",
+      foretagsnamn: data.foretagsnamn ?? "",
+      kontaktperson: data.kontaktperson ?? "",
+      orgNummer: data.orgNummer ?? "",
+      fastighetsbeteckning: data.fastighetsbeteckning ?? "",
+      lagenhetsnummer: data.lagenhetsnummer ?? "",
+      bostadsrattsforening: data.bostadsrattsforening ?? "",
+    },
+  });
+
+  revalidatePath("/mina-sidor/kunder");
+  return { ok: true, id: customer.id };
+}
+
+export async function updateCustomer(id: string, data: CustomerInput) {
+  const session = await getSession();
+  if (!session?.user) return { ok: false, error: "Inte inloggad" };
+
+  const company = await prisma.company.findFirst({
+    where: { ownerId: session.user.id },
+  });
+  if (!company) return { ok: false, error: "Inget företag hittat" };
+
+  const existing = await prisma.customer.findFirst({
+    where: { id, companyId: company.id },
+  });
+  if (!existing) return { ok: false, error: "Kund hittades inte" };
+
+  await prisma.customer.update({
+    where: { id },
+    data: {
+      typ: data.typ,
+      namn: data.namn.trim(),
+      adress: data.adress ?? "",
+      postnummer: data.postnummer ?? "",
+      ort: data.ort ?? "",
+      telefon: data.telefon ?? "",
+      epost: data.epost ?? "",
+      personnummer: data.personnummer ?? "",
+      foretagsnamn: data.foretagsnamn ?? "",
+      kontaktperson: data.kontaktperson ?? "",
+      orgNummer: data.orgNummer ?? "",
+      fastighetsbeteckning: data.fastighetsbeteckning ?? "",
+      lagenhetsnummer: data.lagenhetsnummer ?? "",
+      bostadsrattsforening: data.bostadsrattsforening ?? "",
+    },
+  });
+
+  revalidatePath("/mina-sidor/kunder");
+  revalidatePath(`/mina-sidor/kunder/${id}/redigera`);
+  return { ok: true };
+}
+
+export async function deleteCustomer(id: string) {
+  const session = await getSession();
+  if (!session?.user) return { ok: false, error: "Inte inloggad" };
+
+  const company = await prisma.company.findFirst({
+    where: { ownerId: session.user.id },
+  });
+  if (!company) return { ok: false, error: "Inget företag hittat" };
+
+  const existing = await prisma.customer.findFirst({
+    where: { id, companyId: company.id },
+  });
+  if (!existing) return { ok: false, error: "Kund hittades inte" };
+
+  // Koppla loss jobben (sätt customerId = null) istället för att radera dem
+  await prisma.job.updateMany({
+    where: { customerId: id },
+    data: { customerId: null },
+  });
+
+  await prisma.customer.delete({ where: { id } });
+
+  revalidatePath("/mina-sidor/kunder");
+  revalidatePath("/mina-sidor");
+  return { ok: true };
+}
+
+// ============================================================
+// JOBB
+// ============================================================
+
 export async function getJobs() {
   const session = await getSession();
   if (!session?.user) return [];
@@ -202,7 +403,7 @@ export async function getJobs() {
 
   const jobs = await prisma.job.findMany({
     where: { companyId: company.id },
-    include: { artiklar: true, resor: true, arbetspass: true, images: true },
+    include: { artiklar: true, resor: true, arbetspass: true, images: true, customer: true },
     orderBy: { skapad: "desc" },
   });
 
@@ -220,7 +421,7 @@ export async function getJob(id: string) {
 
   const j = await prisma.job.findFirst({
     where: { id, companyId: company.id },
-    include: { artiklar: true, resor: true, arbetspass: true, images: true },
+    include: { artiklar: true, resor: true, arbetspass: true, images: true, customer: true },
   });
   if (!j) return null;
 
@@ -239,12 +440,7 @@ export async function createJob(
   await prisma.job.create({
     data: {
       companyId: company.id,
-      kundNamn: data.namn,
-      adress: data.adress ?? "",
-      telefon: data.telefon ?? "",
-      epost: data.epost ?? "",
-      personnummer: data.personnummer ?? "",
-      fastighetsbeteckning: data.fastighetsbeteckning ?? "",
+      customerId: data.customerId ?? null,
       rotAvdrag: data.rotAvdrag,
       pagaende: data.pagaende,
       utfort: data.utfort,
@@ -296,119 +492,92 @@ export async function updateJob(
   const company = await prisma.company.findFirst({
     where: { ownerId: session.user.id },
   });
-  if (!company) return { ok: false, error: "Inget företag" };
+  if (!company) return { ok: false, error: "Inget företag hittat" };
 
-  const job = await prisma.job.findFirst({
+  const existing = await prisma.job.findFirst({
     where: { id, companyId: company.id },
-    include: { images: true },
+    include: { artiklar: true, resor: true, arbetspass: true, images: true },
   });
-  if (!job) return { ok: false, error: "Jobb hittades inte" };
+  if (!existing) return { ok: false, error: "Jobb hittades inte" };
 
-  // Identifiera bilder som tagits bort i formuläret och radera dem från UploadThing
-  const befintligaKeys = job.images.map((img) => img.key);
-  const nyaKeys = new Set(bilder.map((b) => b.key));
-  const keysAttRadera = befintligaKeys.filter((key) => !nyaKeys.has(key));
-
-  if (keysAttRadera.length > 0) {
-    try {
-      await utapi.deleteFiles(keysAttRadera);
-    } catch (error) {
-      console.error("Misslyckades att radera filer från UploadThing:", error);
-    }
+  // Bilder att radera från UploadThing
+  const existingImageKeys = existing.images.map((i) => i.key);
+  const newImageKeys = bilder.map((b) => b.key);
+  const toDelete = existingImageKeys.filter((k) => !newImageKeys.includes(k));
+  if (toDelete.length > 0) {
+    try { await utapi.deleteFiles(toDelete); } catch { /* ignorera */ }
   }
 
-  await prisma.job.update({
-    where: { id },
-    data: {
-      kundNamn: data.namn,
-      adress: data.adress ?? "",
-      telefon: data.telefon ?? "",
-      epost: data.epost ?? "",
-      personnummer: data.personnummer ?? "",
-      fastighetsbeteckning: data.fastighetsbeteckning ?? "",
-      rotAvdrag: data.rotAvdrag,
-      pagaende: data.pagaende,
-      utfort: data.utfort,
-      fakturerat: data.fakturerat,
-      betalt: data.betalt,
-      anteckningar: data.anteckningar ?? "",
-      ovrigaArtiklar: data.ovrigaArtiklar ?? "",
-      utfortArbete: data.utfortArbete ?? "",
-      planeratArbete: data.planeratArbete ?? "",
-      artiklar: {
-        deleteMany: ids(data.artiklar).length
-          ? { id: { notIn: ids(data.artiklar) } }
-          : {},
-        updateMany: data.artiklar
-          .filter((a) => a.id)
-          .map((a) => ({
+  const existingArtiklarIds = ids(existing.artiklar);
+  const keepArtiklarIds = ids(data.artiklar);
+  const deleteArtiklarIds = existingArtiklarIds.filter(
+    (i) => !keepArtiklarIds.includes(i),
+  );
+
+  const existingResorIds = ids(existing.resor);
+  const keepResorIds = ids(data.resor);
+  const deleteResorIds = existingResorIds.filter(
+    (i) => !keepResorIds.includes(i),
+  );
+
+  const existingArbetspassIds = ids(existing.arbetspass);
+  const keepArbetspassIds = ids(data.arbetstider);
+  const deleteArbetspassIds = existingArbetspassIds.filter(
+    (i) => !keepArbetspassIds.includes(i),
+  );
+
+  await prisma.$transaction([
+    // Artiklar
+    prisma.article.deleteMany({ where: { id: { in: deleteArtiklarIds } } }),
+    ...data.artiklar.map((a) =>
+      a.id
+        ? prisma.article.update({
             where: { id: a.id },
-            data: {
-              namn: a.namn,
-              artikelnr: a.artikelnr ?? "",
-              aterforsaljare: a.aterforsaljare ?? "",
-              pris: a.pris,
-              antal: a.antal,
-            },
-          })),
-        create: data.artiklar
-          .filter((a) => !a.id)
-          .map((a) => ({
-            namn: a.namn,
-            artikelnr: a.artikelnr ?? "",
-            aterforsaljare: a.aterforsaljare ?? "",
-            pris: a.pris,
-            antal: a.antal,
-          })),
+            data: { namn: a.namn, artikelnr: a.artikelnr ?? "", aterforsaljare: a.aterforsaljare ?? "", pris: a.pris, antal: a.antal },
+          })
+        : prisma.article.create({
+            data: { jobId: id, namn: a.namn, artikelnr: a.artikelnr ?? "", aterforsaljare: a.aterforsaljare ?? "", pris: a.pris, antal: a.antal },
+          }),
+    ),
+    // Resor
+    prisma.trip.deleteMany({ where: { id: { in: deleteResorIds } } }),
+    ...data.resor.map((r) =>
+      r.id
+        ? prisma.trip.update({ where: { id: r.id }, data: { datum: r.datum, stracka: r.stracka } })
+        : prisma.trip.create({ data: { jobId: id, datum: r.datum, stracka: r.stracka } }),
+    ),
+    // Arbetspass
+    prisma.workSession.deleteMany({ where: { id: { in: deleteArbetspassIds } } }),
+    ...data.arbetstider.map((w) =>
+      w.id
+        ? prisma.workSession.update({ where: { id: w.id }, data: { datum: w.datum, timmar: w.timmar } })
+        : prisma.workSession.create({ data: { jobId: id, datum: w.datum, timmar: w.timmar } }),
+    ),
+    // Bilder
+    prisma.jobImage.deleteMany({ where: { jobId: id, key: { in: toDelete } } }),
+    ...bilder
+      .filter((b) => !existingImageKeys.includes(b.key))
+      .map((b) => prisma.jobImage.create({ data: { jobId: id, url: b.url, key: b.key } })),
+    // Jobb-uppdatering
+    prisma.job.update({
+      where: { id },
+      data: {
+        customerId: data.customerId ?? null,
+        rotAvdrag: data.rotAvdrag,
+        pagaende: data.pagaende,
+        utfort: data.utfort,
+        fakturerat: data.fakturerat,
+        betalt: data.betalt,
+        anteckningar: data.anteckningar ?? "",
+        ovrigaArtiklar: data.ovrigaArtiklar ?? "",
+        utfortArbete: data.utfortArbete ?? "",
+        planeratArbete: data.planeratArbete ?? "",
       },
-      resor: {
-        deleteMany: ids(data.resor).length
-          ? { id: { notIn: ids(data.resor) } }
-          : {},
-        updateMany: data.resor
-          .filter((r) => r.id)
-          .map((r) => ({
-            where: { id: r.id },
-            data: {
-              datum: r.datum,
-              stracka: r.stracka,
-            },
-          })),
-        create: data.resor
-          .filter((r) => !r.id)
-          .map((r) => ({
-            datum: r.datum,
-            stracka: r.stracka,
-          })),
-      },
-      arbetspass: {
-        deleteMany: ids(data.arbetstider).length
-          ? { id: { notIn: ids(data.arbetstider) } }
-          : {},
-        updateMany: data.arbetstider
-          .filter((w) => w.id)
-          .map((w) => ({
-            where: { id: w.id },
-            data: {
-              datum: w.datum,
-              timmar: w.timmar,
-            },
-          })),
-        create: data.arbetstider
-          .filter((w) => !w.id)
-          .map((w) => ({
-            datum: w.datum,
-            timmar: w.timmar,
-          })),
-      },
-      images: {
-        deleteMany: {},
-        create: bilder.map((b) => ({ url: b.url, key: b.key })),
-      },
-    },
-  });
+    }),
+  ]);
 
   revalidatePath("/mina-sidor");
+  revalidatePath(`/mina-sidor/jobb/${id}/redigera`);
   return { ok: true };
 }
 
@@ -419,7 +588,7 @@ export async function deleteJob(id: string) {
   const company = await prisma.company.findFirst({
     where: { ownerId: session.user.id },
   });
-  if (!company) return { ok: false, error: "Inget företag" };
+  if (!company) return { ok: false, error: "Inget företag hittat" };
 
   const job = await prisma.job.findFirst({
     where: { id, companyId: company.id },
@@ -427,17 +596,10 @@ export async function deleteJob(id: string) {
   });
   if (!job) return { ok: false, error: "Jobb hittades inte" };
 
-  // Radera alla kopplade filer från UploadThing innan jobbet tas bort
-  const keys = job.images.map((img) => img.key);
-  if (keys.length > 0) {
+  if (job.images.length > 0) {
     try {
-      await utapi.deleteFiles(keys);
-    } catch (error) {
-      console.error(
-        "Misslyckades att radera filer från UploadThing vid borttagning av jobb:",
-        error,
-      );
-    }
+      await utapi.deleteFiles(job.images.map((i) => i.key));
+    } catch { /* ignorera */ }
   }
 
   await prisma.job.delete({ where: { id } });
