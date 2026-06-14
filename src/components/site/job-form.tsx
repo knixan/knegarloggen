@@ -66,13 +66,13 @@ const tomDefaults: JobInput = {
   artiklar: [],
   resor: [],
   arbetstider: [],
+  ovrigaKostnader: [],
   rotAvdrag: false,
   pagaende: false,
   utfort: false,
   fakturerat: false,
   betalt: false,
   anteckningar: "",
-  ovrigaArtiklar: "",
   utfortArbete: "",
   planeratArbete: "",
   bilder: [],
@@ -101,6 +101,7 @@ export default function JobForm({
   const artiklar = useFieldArray({ control, name: "artiklar" });
   const resor = useFieldArray({ control, name: "resor" });
   const arbetstider = useFieldArray({ control, name: "arbetstider" });
+  const ovrigaKostnader = useFieldArray({ control, name: "ovrigaKostnader" });
 
   const live = useWatch({ control }) as Partial<JobInput>;
   const summering = beräknaSummering({ ...tomDefaults, ...live } as JobInput);
@@ -266,6 +267,7 @@ export default function JobForm({
                 namn: "",
                 artikelnr: "",
                 aterforsaljare: "",
+                inkopspris: 0,
                 pris: 0,
                 antal: 1,
               })
@@ -284,17 +286,17 @@ export default function JobForm({
               <Store className="h-3.5 w-3.5" />
               Återförsäljare
             </div>
-            <div className="col-span-3 flex items-center gap-1.5">
-              <Barcode className="h-3.5 w-3.5" />
-              Artikelnr
-            </div>
             <div className="col-span-1 flex items-center justify-center gap-1">
               <Layers2 className="h-3.5 w-3.5" />
               Antal
             </div>
             <div className="col-span-2 flex items-center gap-1.5">
               <Receipt className="h-3.5 w-3.5" />
-              Pris (kr)
+              Inköpspris
+            </div>
+            <div className="col-span-2 flex items-center gap-1.5">
+              <Receipt className="h-3.5 w-3.5" />
+              Utpris (kr)
             </div>
             <div className="col-span-1" />
           </div>
@@ -317,12 +319,6 @@ export default function JobForm({
                   placeholder="Återförsäljare"
                 />
               </div>
-              <div className="col-span-6 sm:col-span-3">
-                <Input
-                  {...register(`artiklar.${i}.artikelnr`)}
-                  placeholder="Artikelnr"
-                />
-              </div>
               <div className="col-span-2 sm:col-span-1">
                 <Input
                   type="number"
@@ -332,19 +328,28 @@ export default function JobForm({
                   placeholder="Ant."
                 />
               </div>
-              <div className="col-span-3 sm:col-span-2">
+              <div className="col-span-4 sm:col-span-2">
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  {...register(`artiklar.${i}.inkopspris`, { valueAsNumber: true })}
+                  placeholder="Inköpspris"
+                />
+              </div>
+              <div className="col-span-5 sm:col-span-2">
                 <Input
                   type="number"
                   step="0.01"
                   min="0"
                   {...register(`artiklar.${i}.pris`, { valueAsNumber: true })}
-                  placeholder="Pris kr"
+                  placeholder="Utpris kr"
                 />
                 {(live.artiklar?.[i]?.pris === 0 ||
                   live.artiklar?.[i]?.pris === undefined) && (
                   <p className="text-xs font-bold text-amber-600 dark:text-amber-400 mt-1 flex items-center gap-1">
                     <TriangleAlert className="h-3 w-3" />
-                    Pris ej ifyllt
+                    Utpris ej ifyllt
                   </p>
                 )}
               </div>
@@ -360,17 +365,65 @@ export default function JobForm({
               </div>
             </div>
           ))}
-          <div className="space-y-1.5 pt-2">
-            <Label className="text-sm font-medium flex items-center gap-1.5">
-              <StickyNote className="h-3.5 w-3.5 text-muted-foreground" />
-              Övriga artiklar
-            </Label>
-            <Textarea
-              rows={3}
-              {...register("ovrigaArtiklar")}
-              placeholder="T.ex. förbrukningsmaterial, hyrd utrustning, övrigt..."
-            />
-          </div>
+        </CardContent>
+      </Card>
+
+      {/* Övriga kostnader */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <StickyNote className="h-5 w-5 text-muted-foreground" />
+            Övriga kostnader
+          </CardTitle>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => ovrigaKostnader.append({ beskrivning: "", pris: 0 })}
+          >
+            <Plus className="mr-1 h-4 w-4" /> Lägg till
+          </Button>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-xs text-muted-foreground">
+            T.ex. förbrukningsmaterial, hyrd utrustning, parkeringskostnad.
+          </p>
+          {ovrigaKostnader.fields.length > 0 && (
+            <div className="hidden sm:grid sm:grid-cols-12 gap-2 text-xs font-medium text-muted-foreground px-1">
+              <div className="col-span-9">Produkt / tjänst</div>
+              <div className="col-span-2">Pris (kr)</div>
+              <div className="col-span-1" />
+            </div>
+          )}
+          {ovrigaKostnader.fields.map((field, i) => (
+            <div key={field.id} className="grid grid-cols-12 gap-2 items-start">
+              <div className="col-span-9">
+                <Input
+                  {...register(`ovrigaKostnader.${i}.beskrivning`)}
+                  placeholder="T.ex. parkeringskostnad, hyrd utrustning..."
+                />
+              </div>
+              <div className="col-span-2">
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  {...register(`ovrigaKostnader.${i}.pris`, { valueAsNumber: true })}
+                  placeholder="0"
+                />
+              </div>
+              <div className="col-span-1 flex justify-end">
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => ovrigaKostnader.remove(i)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          ))}
         </CardContent>
       </Card>
 
@@ -636,12 +689,6 @@ export default function JobForm({
               setValue("pagaende", false, { shouldDirty: true });
             }}
           />
-          <ToggleRow
-            id="rot"
-            label="ROT-avdrag ska tillämpas"
-            checked={live.rotAvdrag ?? false}
-            onChange={(v) => setValue("rotAvdrag", v, { shouldDirty: true })}
-          />
         </CardContent>
       </Card>
 
@@ -657,6 +704,12 @@ export default function JobForm({
           </p>
         </CardHeader>
         <CardContent className="space-y-3">
+          <ToggleRow
+            id="rot"
+            label="ROT-avdrag ska tillämpas"
+            checked={live.rotAvdrag ?? false}
+            onChange={(v) => setValue("rotAvdrag", v, { shouldDirty: true })}
+          />
           <ToggleRow
             id="fakturerat"
             label="Fakturerat"
@@ -699,12 +752,6 @@ export default function JobForm({
               komplett.
             </p>
           )}
-          {live.ovrigaArtiklar && (
-            <p className="text-xs text-amber-600 dark:text-amber-400 pt-1 italic flex items-center gap-1.5">
-              <StickyNote className="h-3.5 w-3.5" />* Det finns en notering
-              under övriga artiklar.
-            </p>
-          )}
           <SumRow
             label="Artiklar totalt"
             icon={<Package className="h-3.5 w-3.5" />}
@@ -714,6 +761,17 @@ export default function JobForm({
               maximumFractionDigits: 2,
             })}
           />
+          {summering.ovrigaSum > 0 && (
+            <SumRow
+              label="Övriga kostnader"
+              icon={<StickyNote className="h-3.5 w-3.5" />}
+              value={summering.ovrigaSum.toLocaleString("sv-SE", {
+                style: "currency",
+                currency: "SEK",
+                maximumFractionDigits: 2,
+              })}
+            />
+          )}
           <SumRow
             label="Antal resor"
             icon={<Van className="h-3.5 w-3.5" />}
