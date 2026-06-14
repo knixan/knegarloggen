@@ -1,39 +1,19 @@
-"use client";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
+import { getCustomers } from "@/lib/job-actions";
+import NyttJobbClient from "./nytt-jobb-client";
 
-import { useRouter } from "next/navigation";
-import { useTransition } from "react";
-import { toast } from "sonner";
-import JobForm from "@/components/site/job-form";
-import { createJob } from "@/lib/job-actions";
-import type { JobInput } from "@/lib/job-schema";
+export default async function NyttJobbPage() {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user) redirect("/logga-in");
 
-export default function NyttJobbPage() {
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
-
-  function handleSubmit(
-    data: JobInput,
-    bilder: { url: string; key: string }[],
-  ) {
-    startTransition(async () => {
-      const result = await createJob(data, bilder);
-      if (result.ok) {
-        toast.success("Jobb sparat!");
-        router.push("/mina-sidor");
-      } else {
-        toast.error(result.error ?? "Kunde inte spara jobb");
-      }
-    });
-  }
+  const customers = await getCustomers();
 
   return (
     <main className="container mx-auto px-4 py-8 max-w-3xl">
       <h1 className="text-2xl font-bold mb-6">Nytt jobb</h1>
-      <JobForm
-        onSubmit={handleSubmit}
-        submitLabel="Spara jobb"
-        isPending={isPending}
-      />
+      <NyttJobbClient customers={customers} />
     </main>
   );
 }
