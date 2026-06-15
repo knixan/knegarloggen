@@ -211,6 +211,10 @@ model Job {
   fakturerat Boolean @default(false)
   betalt     Boolean @default(false)
 
+  // Prissättning
+  timpris       Float  @default(0)
+  milersattning Float  @default(0)
+
   // Anteckningar
   anteckningar   String @default("")
   utfortArbete   String @default("")
