@@ -67,6 +67,8 @@ const tomDefaults: JobInput = {
   resor: [],
   arbetstider: [],
   ovrigaKostnader: [],
+  timpris: 0,
+  milersattning: 0,
   rotAvdrag: false,
   pagaende: false,
   utfort: false,
@@ -650,6 +652,39 @@ export default function JobForm({
         </CardContent>
       </Card>
 
+      {/* Prissättning */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Receipt className="h-5 w-5 text-muted-foreground" />
+            Prissättning
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">
+            Används för att räkna ut kostnader för arbetstid och resor.
+          </p>
+        </CardHeader>
+        <CardContent className="grid gap-4 sm:grid-cols-2">
+          <Field label="Timpris (kr/h)" icon={<Clock className="h-3.5 w-3.5" />}>
+            <Input
+              type="number"
+              step="50"
+              min="0"
+              {...register("timpris", { valueAsNumber: true })}
+              placeholder="t.ex. 950"
+            />
+          </Field>
+          <Field label="Milersättning (kr/km)" icon={<Van className="h-3.5 w-3.5" />}>
+            <Input
+              type="number"
+              step="0.5"
+              min="0"
+              {...register("milersattning", { valueAsNumber: true })}
+              placeholder="t.ex. 25"
+            />
+          </Field>
+        </CardContent>
+      </Card>
+
       {/* Status */}
       <Card>
         <CardHeader>
@@ -753,12 +788,12 @@ export default function JobForm({
             </p>
           )}
           <SumRow
-            label="Artiklar totalt"
+            label="Artiklar"
             icon={<Package className="h-3.5 w-3.5" />}
             value={summering.artiklarSum.toLocaleString("sv-SE", {
               style: "currency",
               currency: "SEK",
-              maximumFractionDigits: 2,
+              maximumFractionDigits: 0,
             })}
           />
           {summering.ovrigaSum > 0 && (
@@ -768,24 +803,37 @@ export default function JobForm({
               value={summering.ovrigaSum.toLocaleString("sv-SE", {
                 style: "currency",
                 currency: "SEK",
-                maximumFractionDigits: 2,
+                maximumFractionDigits: 0,
               })}
             />
           )}
           <SumRow
-            label="Antal resor"
-            icon={<Van className="h-3.5 w-3.5" />}
-            value={`${summering.antalResor} st`}
-          />
-          <SumRow
-            label="Total sträcka"
-            icon={<MapPin className="h-3.5 w-3.5" />}
-            value={`${summering.totalStracka.toLocaleString("sv-SE")} km`}
-          />
-          <SumRow
-            label="Total arbetstid"
+            label={`Arbetstid (${summering.totalTimmar} h × ${summering.timpris} kr/h)`}
             icon={<Clock className="h-3.5 w-3.5" />}
-            value={`${summering.totalTimmar.toLocaleString("sv-SE")} h`}
+            value={summering.arbetstidSum.toLocaleString("sv-SE", {
+              style: "currency",
+              currency: "SEK",
+              maximumFractionDigits: 0,
+            })}
+          />
+          <SumRow
+            label={`Resor (${summering.totalStracka} km × ${summering.milersattning} kr/km)`}
+            icon={<Van className="h-3.5 w-3.5" />}
+            value={summering.resorSum.toLocaleString("sv-SE", {
+              style: "currency",
+              currency: "SEK",
+              maximumFractionDigits: 0,
+            })}
+          />
+          <Separator />
+          <SumRow
+            label="Totalt exkl. moms"
+            icon={<Receipt className="h-3.5 w-3.5" />}
+            value={summering.totalExklMoms.toLocaleString("sv-SE", {
+              style: "currency",
+              currency: "SEK",
+              maximumFractionDigits: 0,
+            })}
           />
           {live.rotAvdrag && (
             <>
