@@ -2,7 +2,8 @@
 "use client";
 
 import { useState } from "react";
-import { ClipboardList, Pencil, Trash2, X } from "lucide-react";
+import { ClipboardList, FileText, Pencil, Trash2, X } from "lucide-react";
+import Link from "next/link";
 import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
@@ -116,6 +117,16 @@ export default function JobList({ jobs, onEdit, onDelete }: Props) {
                     <ClipboardList className="h-4 w-4" />
                     Översikt
                   </Button>
+                  <Link
+                    href={`/mina-sidor/jobb/${job.id}/skriv-ut`}
+                    target="_blank"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Button variant="outline" size="sm">
+                      <FileText className="h-4 w-4" />
+                      Faktura
+                    </Button>
+                  </Link>
 
                   <Button
                     variant="outline"
