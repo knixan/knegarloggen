@@ -76,6 +76,9 @@ export const ovrigKostnadSchema = z.object({
 export const jobSchema = z.object({
   customerId: z.string().optional(),
 
+  timpris: z.coerce.number().min(0).default(0),
+  milersattning: z.coerce.number().min(0).default(0),
+
   rotAvdrag: z.boolean().default(false),
   pagaende: z.boolean().default(false),
   utfort: z.boolean().default(false),
@@ -117,5 +120,22 @@ export function beräknaSummering(job: JobInput) {
   const totalStracka = job.resor.reduce((sum, r) => sum + r.stracka, 0);
   const antalResor = job.resor.length;
 
-  return { artiklarSum, ovrigaSum, totalTimmar, totalStracka, antalResor };
+  const timpris = job.timpris ?? 0;
+  const milersattning = job.milersattning ?? 0;
+  const arbetstidSum = totalTimmar * timpris;
+  const resorSum = totalStracka * milersattning;
+  const totalExklMoms = artiklarSum + ovrigaSum + arbetstidSum + resorSum;
+
+  return {
+    artiklarSum,
+    ovrigaSum,
+    totalTimmar,
+    totalStracka,
+    antalResor,
+    timpris,
+    milersattning,
+    arbetstidSum,
+    resorSum,
+    totalExklMoms,
+  };
 }
