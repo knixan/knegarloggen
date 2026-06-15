@@ -33,18 +33,20 @@ export default function EditJobClient({ job, customers }: Props) {
 
   const defaultValues: Partial<JobInput> = {
     customerId: job.customerId,
+    timpris: job.timpris ?? 0,
+    milersattning: job.milersattning ?? 0,
     rotAvdrag: job.rotAvdrag,
     pagaende: job.pagaende,
     utfort: job.utfort,
     fakturerat: job.fakturerat,
     betalt: job.betalt,
     anteckningar: job.anteckningar,
-    ovrigaArtiklar: job.ovrigaArtiklar,
     utfortArbete: job.utfortArbete,
     planeratArbete: job.planeratArbete,
     artiklar: job.artiklar,
     resor: job.resor,
     arbetstider: job.arbetstider,
+    ovrigaKostnader: job.ovrigaKostnader ?? [],
     bilder: job.bilder ?? [],
   };
 
