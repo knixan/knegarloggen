@@ -881,6 +881,29 @@ export default function JobForm({
   );
 }
 
+function Field({
+  label,
+  icon,
+  error,
+  children,
+}: {
+  label: string;
+  icon?: React.ReactNode;
+  error?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="flex items-center gap-1.5">
+        {icon && <span className="text-muted-foreground">{icon}</span>}
+        {label}
+      </Label>
+      {children}
+      {error && <p className="text-xs text-destructive">{error}</p>}
+    </div>
+  );
+}
+
 function ToggleRow({
   id,
   label,
