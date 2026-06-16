@@ -78,6 +78,7 @@ const tomDefaults: JobInput = {
   utfortArbete: "",
   planeratArbete: "",
   bilder: [],
+  fastPris: undefined,
 };
 
 export default function JobForm({
@@ -663,25 +664,52 @@ export default function JobForm({
             Används för att räkna ut kostnader för arbetstid och resor.
           </p>
         </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2">
-          <Field label="Timpris (kr/h)" icon={<Clock className="h-3.5 w-3.5" />}>
-            <Input
-              type="number"
-              step="50"
-              min="0"
-              {...register("timpris", { valueAsNumber: true })}
-              placeholder="t.ex. 950"
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Timpris (kr/h)" icon={<Clock className="h-3.5 w-3.5" />}>
+              <Input
+                type="number"
+                step="50"
+                min="0"
+                {...register("timpris", { valueAsNumber: true })}
+                placeholder="t.ex. 950"
+              />
+            </Field>
+            <Field label="Milersättning (kr/km)" icon={<Van className="h-3.5 w-3.5" />}>
+              <Input
+                type="number"
+                step="0.5"
+                min="0"
+                {...register("milersattning", { valueAsNumber: true })}
+                placeholder="t.ex. 25"
+              />
+            </Field>
+          </div>
+          <div className="border-t pt-4 space-y-3">
+            <ToggleRow
+              id="fast-pris"
+              label="Fakturera fast pris (åsidosätter beräknad summa på fakturan)"
+              checked={!!(live.fastPris !== undefined && live.fastPris !== null)}
+              onChange={(v) => {
+                if (v) {
+                  setValue("fastPris", 0, { shouldDirty: true });
+                } else {
+                  setValue("fastPris", undefined, { shouldDirty: true });
+                }
+              }}
             />
-          </Field>
-          <Field label="Milersättning (kr/km)" icon={<Van className="h-3.5 w-3.5" />}>
-            <Input
-              type="number"
-              step="0.5"
-              min="0"
-              {...register("milersattning", { valueAsNumber: true })}
-              placeholder="t.ex. 25"
-            />
-          </Field>
+            {live.fastPris !== undefined && live.fastPris !== null && (
+              <Field label="Fast pris exkl. moms (kr)" icon={<Receipt className="h-3.5 w-3.5" />}>
+                <Input
+                  type="number"
+                  step="100"
+                  min="0"
+                  {...register("fastPris", { valueAsNumber: true })}
+                  placeholder="t.ex. 15000"
+                />
+              </Field>
+            )}
+          </div>
         </CardContent>
       </Card>
 

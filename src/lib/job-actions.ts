@@ -66,6 +66,7 @@ function mapJob(j: JobWithRelations) {
     rotAvdrag: j.rotAvdrag,
     timpris: j.timpris,
     milersattning: j.milersattning,
+    fastPris: j.fastPris ?? undefined,
     pagaende: j.pagaende,
     utfort: j.utfort,
     fakturerat: j.fakturerat,
@@ -461,6 +462,13 @@ export async function createJob(
 
   const company = await getOrCreateCompany(session.user.id);
 
+  if (data.customerId) {
+    const customer = await prisma.customer.findFirst({
+      where: { id: data.customerId, companyId: company.id },
+    });
+    if (!customer) return { ok: false, error: "Kund hittades inte" };
+  }
+
   await prisma.job.create({
     data: {
       companyId: company.id,
@@ -468,12 +476,13 @@ export async function createJob(
       rotAvdrag: data.rotAvdrag,
       timpris: data.timpris ?? 0,
       milersattning: data.milersattning ?? 0,
+      fastPris: data.fastPris ?? null,
       pagaende: data.pagaende,
       utfort: data.utfort,
       fakturerat: data.fakturerat,
       betalt: data.betalt,
       anteckningar: data.anteckningar ?? "",
-            utfortArbete: data.utfortArbete ?? "",
+      utfortArbete: data.utfortArbete ?? "",
       planeratArbete: data.planeratArbete ?? "",
       artiklar: {
         create: data.artiklar.map((a) => ({
@@ -531,6 +540,13 @@ export async function updateJob(
     include: { artiklar: true, resor: true, arbetspass: true, images: true, ovrigaKostnader: true },
   });
   if (!existing) return { ok: false, error: "Jobb hittades inte" };
+
+  if (data.customerId) {
+    const customer = await prisma.customer.findFirst({
+      where: { id: data.customerId, companyId: company.id },
+    });
+    if (!customer) return { ok: false, error: "Kund hittades inte" };
+  }
 
   // Bilder att radera från UploadThing
   const existingImageKeys = existing.images.map((i) => i.key);
@@ -607,12 +623,13 @@ export async function updateJob(
         rotAvdrag: data.rotAvdrag,
         timpris: data.timpris ?? 0,
         milersattning: data.milersattning ?? 0,
+        fastPris: data.fastPris ?? null,
         pagaende: data.pagaende,
         utfort: data.utfort,
         fakturerat: data.fakturerat,
         betalt: data.betalt,
         anteckningar: data.anteckningar ?? "",
-                utfortArbete: data.utfortArbete ?? "",
+        utfortArbete: data.utfortArbete ?? "",
         planeratArbete: data.planeratArbete ?? "",
       },
     }),

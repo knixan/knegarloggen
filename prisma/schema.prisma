@@ -214,6 +214,7 @@ model Job {
   // Prissättning
   timpris       Float  @default(0)
   milersattning Float  @default(0)
+  fastPris      Float?
 
   // Anteckningar
   anteckningar   String @default("")

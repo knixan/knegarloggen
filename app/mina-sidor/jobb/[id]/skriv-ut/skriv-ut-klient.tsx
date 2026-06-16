@@ -48,8 +48,9 @@ export default function SkrivUtKlient({ job, company, summary }: Props) {
   forfalloDate.setDate(forfalloDate.getDate() + (company.forfallodagar || 30));
   const forfalloStr = forfalloDate.toLocaleDateString("sv-SE");
 
-  const moms = summary.totalExklMoms * 0.25;
-  const totalInklMoms = summary.totalExklMoms + moms;
+  const exklMoms = job.fastPris !== undefined && job.fastPris !== null ? job.fastPris : summary.totalExklMoms;
+  const moms = exklMoms * 0.25;
+  const totalInklMoms = exklMoms + moms;
 
   const kund = job.customer;
   const kundNamn = kund
@@ -61,8 +62,15 @@ export default function SkrivUtKlient({ job, company, summary }: Props) {
   const kundPostOrt = [kund?.postnummer, kund?.ort].filter(Boolean).join(" ");
 
   useEffect(() => {
-    window.print();
-  }, []);
+    if (company.logoUrl) {
+      const img = new window.Image();
+      img.onload = () => window.print();
+      img.onerror = () => window.print();
+      img.src = company.logoUrl;
+    } else {
+      window.print();
+    }
+  }, [company.logoUrl]);
 
   return (
     <>
@@ -111,6 +119,7 @@ export default function SkrivUtKlient({ job, company, summary }: Props) {
           body { margin: 0; }
           .sida { padding: 1.5cm; }
           @page { margin: 0; size: A4; }
+          nav, footer { display: none !important; }
         }
       `}</style>
 
@@ -255,16 +264,16 @@ export default function SkrivUtKlient({ job, company, summary }: Props) {
           <table>
             <tbody>
               <tr>
-                <td>Summa exkl. moms</td>
-                <td>{summary.totalExklMoms.toLocaleString("sv-SE", { minimumFractionDigits: 2 })} kr</td>
+                <td>{job.fastPris !== undefined && job.fastPris !== null ? "Fast pris exkl. moms" : "Summa exkl. moms"}</td>
+                <td>{exklMoms.toLocaleString("sv-SE", { minimumFractionDigits: 2 })} kr</td>
               </tr>
               <tr className="moms-rad">
                 <td>Moms 25%</td>
                 <td>{moms.toLocaleString("sv-SE", { minimumFractionDigits: 2 })} kr</td>
               </tr>
-              {job.rotAvdrag && (
+              {job.rotAvdrag && summary.arbetstidSum > 0 && (
                 <tr className="moms-rad">
-                  <td>ROT-avdrag (30% av arbetskostnad)*</td>
+                  <td>ROT-avdrag 30% (av {summary.arbetstidSum.toLocaleString("sv-SE", { minimumFractionDigits: 2 })} kr arbete exkl. moms)*</td>
                   <td style={{ color: "#dc2626" }}>
                     −{(summary.arbetstidSum * 0.3).toLocaleString("sv-SE", { minimumFractionDigits: 2 })} kr
                   </td>
@@ -273,7 +282,7 @@ export default function SkrivUtKlient({ job, company, summary }: Props) {
               <tr className="total-rad">
                 <td>Att betala</td>
                 <td>
-                  {(job.rotAvdrag
+                  {(job.rotAvdrag && summary.arbetstidSum > 0
                     ? totalInklMoms - summary.arbetstidSum * 0.3
                     : totalInklMoms
                   ).toLocaleString("sv-SE", { minimumFractionDigits: 2 })} kr
@@ -308,7 +317,7 @@ export default function SkrivUtKlient({ job, company, summary }: Props) {
         )}
         {job.rotAvdrag && (
           <p className="fskatt" style={{ marginTop: 4 }}>
-            * ROT-avdrag: kunden ansöker om avdraget hos Skatteverket. Hantverkaren fakturerar det reducerade beloppet.
+            * ROT-avdrag: Avser 30% av arbetskostnad exkl. moms. Hantverkaren ansöker om utbetalning hos Skatteverket.
           </p>
         )}
       </div>

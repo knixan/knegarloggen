@@ -97,6 +97,8 @@ export const jobSchema = z.object({
   bilder: z
     .array(z.object({ url: z.string(), key: z.string() }))
     .default([]),
+
+  fastPris: z.coerce.number().min(0).optional(),
 });
 
 export type JobInput = z.infer<typeof jobSchema>;
