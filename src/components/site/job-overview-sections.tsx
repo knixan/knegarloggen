@@ -135,7 +135,7 @@ export function WorkDescriptionSection({ job }: { job: Job }) {
 }
 
 export function MaterialSection({ job }: { job: Job }) {
-  if (job.artiklar.length === 0 && !job.ovrigaArtiklar) return null;
+  if (job.artiklar.length === 0) return null;
 
   return (
     <section className="space-y-3">
@@ -189,11 +189,6 @@ export function MaterialSection({ job }: { job: Job }) {
         </div>
       )}
 
-      {job.ovrigaArtiklar && (
-        <p className="whitespace-pre-wrap rounded-md bg-muted/30 p-3 text-sm text-muted-foreground">
-          {job.ovrigaArtiklar}
-        </p>
-      )}
     </section>
   );
 }

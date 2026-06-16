@@ -10,6 +10,7 @@ Effektivisera din vardag som hantverkare. Håll koll på kunder, artiklar, resor
 ---
 
 ## 📌 Innehållsförteckning
+
 - [Om projektet](#om-projektet)
 - [Funktioner](#funktioner)
 - [Teknisk stack](#teknisk-stack)

@@ -14,7 +14,6 @@ import {
   Package,
   Tag,
   Store,
-  Barcode,
   Layers2,
   Receipt,
   StickyNote,
@@ -336,7 +335,9 @@ export default function JobForm({
                   type="number"
                   step="0.01"
                   min="0"
-                  {...register(`artiklar.${i}.inkopspris`, { valueAsNumber: true })}
+                  {...register(`artiklar.${i}.inkopspris`, {
+                    valueAsNumber: true,
+                  })}
                   placeholder="Inköpspris"
                 />
               </div>
@@ -411,7 +412,9 @@ export default function JobForm({
                   type="number"
                   step="0.01"
                   min="0"
-                  {...register(`ovrigaKostnader.${i}.pris`, { valueAsNumber: true })}
+                  {...register(`ovrigaKostnader.${i}.pris`, {
+                    valueAsNumber: true,
+                  })}
                   placeholder="0"
                 />
               </div>
@@ -666,7 +669,10 @@ export default function JobForm({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Timpris (kr/h)" icon={<Clock className="h-3.5 w-3.5" />}>
+            <Field
+              label="Timpris (kr/h)"
+              icon={<Clock className="h-3.5 w-3.5" />}
+            >
               <Input
                 type="number"
                 step="50"
@@ -675,7 +681,10 @@ export default function JobForm({
                 placeholder="t.ex. 950"
               />
             </Field>
-            <Field label="Milersättning (kr/km)" icon={<Van className="h-3.5 w-3.5" />}>
+            <Field
+              label="Milersättning (kr/km)"
+              icon={<Van className="h-3.5 w-3.5" />}
+            >
               <Input
                 type="number"
                 step="0.5"
@@ -689,7 +698,9 @@ export default function JobForm({
             <ToggleRow
               id="fast-pris"
               label="Fakturera fast pris (åsidosätter beräknad summa på fakturan)"
-              checked={!!(live.fastPris !== undefined && live.fastPris !== null)}
+              checked={
+                !!(live.fastPris !== undefined && live.fastPris !== null)
+              }
               onChange={(v) => {
                 if (v) {
                   setValue("fastPris", 0, { shouldDirty: true });
@@ -699,7 +710,10 @@ export default function JobForm({
               }}
             />
             {live.fastPris !== undefined && live.fastPris !== null && (
-              <Field label="Fast pris exkl. moms (kr)" icon={<Receipt className="h-3.5 w-3.5" />}>
+              <Field
+                label="Fast pris exkl. moms (kr)"
+                icon={<Receipt className="h-3.5 w-3.5" />}
+              >
                 <Input
                   type="number"
                   step="100"

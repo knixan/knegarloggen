@@ -48,7 +48,10 @@ export default function SkrivUtKlient({ job, company, summary }: Props) {
   forfalloDate.setDate(forfalloDate.getDate() + (company.forfallodagar || 30));
   const forfalloStr = forfalloDate.toLocaleDateString("sv-SE");
 
-  const exklMoms = job.fastPris !== undefined && job.fastPris !== null ? job.fastPris : summary.totalExklMoms;
+  const exklMoms =
+    job.fastPris !== undefined && job.fastPris !== null
+      ? job.fastPris
+      : summary.totalExklMoms;
   const moms = exklMoms * 0.25;
   const totalInklMoms = exklMoms + moms;
 
@@ -137,24 +140,60 @@ export default function SkrivUtKlient({ job, company, summary }: Props) {
               <div>
                 <div className="company-name">{company.name}</div>
                 <div className="company-details">
-                  {company.orgNummer && <span>Org.nr {company.orgNummer}<br /></span>}
-                  {company.adress && <span>{company.adress}<br /></span>}
-                  {(company.postnummer || company.ort) && (
-                    <span>{company.postnummer} {company.ort}<br /></span>
+                  {company.orgNummer && (
+                    <span>
+                      Org.nr {company.orgNummer}
+                      <br />
+                    </span>
                   )}
-                  {company.telefon && <span>{company.telefon}<br /></span>}
+                  {company.adress && (
+                    <span>
+                      {company.adress}
+                      <br />
+                    </span>
+                  )}
+                  {(company.postnummer || company.ort) && (
+                    <span>
+                      {company.postnummer} {company.ort}
+                      <br />
+                    </span>
+                  )}
+                  {company.telefon && (
+                    <span>
+                      {company.telefon}
+                      <br />
+                    </span>
+                  )}
                   {company.epost && <span>{company.epost}</span>}
                 </div>
               </div>
             )}
             {!company.logoUrl && (
               <div className="company-details">
-                {company.orgNummer && <span>Org.nr {company.orgNummer}<br /></span>}
-                {company.adress && <span>{company.adress}<br /></span>}
-                {(company.postnummer || company.ort) && (
-                  <span>{company.postnummer} {company.ort}<br /></span>
+                {company.orgNummer && (
+                  <span>
+                    Org.nr {company.orgNummer}
+                    <br />
+                  </span>
                 )}
-                {company.telefon && <span>{company.telefon}<br /></span>}
+                {company.adress && (
+                  <span>
+                    {company.adress}
+                    <br />
+                  </span>
+                )}
+                {(company.postnummer || company.ort) && (
+                  <span>
+                    {company.postnummer} {company.ort}
+                    <br />
+                  </span>
+                )}
+                {company.telefon && (
+                  <span>
+                    {company.telefon}
+                    <br />
+                  </span>
+                )}
                 {company.epost && <span>{company.epost}</span>}
               </div>
             )}
@@ -164,12 +203,27 @@ export default function SkrivUtKlient({ job, company, summary }: Props) {
             <h1>FAKTURA</h1>
             <table>
               <tbody>
-                <tr><td>Fakturanummer</td><td className="bold">{company.nastaFakturanummer}</td></tr>
-                <tr><td>Fakturadatum</td><td>{today}</td></tr>
-                <tr><td>Förfallodatum</td><td>{forfalloStr}</td></tr>
-                <tr><td>Betalningsvillkor</td><td>{company.forfallodagar} dagar netto</td></tr>
+                <tr>
+                  <td>Fakturanummer</td>
+                  <td className="bold">{company.nastaFakturanummer}</td>
+                </tr>
+                <tr>
+                  <td>Fakturadatum</td>
+                  <td>{today}</td>
+                </tr>
+                <tr>
+                  <td>Förfallodatum</td>
+                  <td>{forfalloStr}</td>
+                </tr>
+                <tr>
+                  <td>Betalningsvillkor</td>
+                  <td>{company.forfallodagar} dagar netto</td>
+                </tr>
                 {company.drojsmalsranta > 0 && (
-                  <tr><td>Dröjsmålsränta</td><td>{company.drojsmalsranta}%</td></tr>
+                  <tr>
+                    <td>Dröjsmålsränta</td>
+                    <td>{company.drojsmalsranta}%</td>
+                  </tr>
                 )}
               </tbody>
             </table>
@@ -180,13 +234,32 @@ export default function SkrivUtKlient({ job, company, summary }: Props) {
         <div className="kund-block">
           <h3>Faktureras till</h3>
           <p>
-            <strong>{kundNamn}</strong><br />
+            <strong>{kundNamn}</strong>
+            <br />
             {kund?.typ === "foretag" && kund.kontaktperson && (
-              <>{kund.kontaktperson}<br /></>
+              <>
+                {kund.kontaktperson}
+                <br />
+              </>
             )}
-            {kundAdress && <>{kundAdress}<br /></>}
-            {kundPostOrt && <>{kundPostOrt}<br /></>}
-            {kund?.epost && <>{kund.epost}<br /></>}
+            {kundAdress && (
+              <>
+                {kundAdress}
+                <br />
+              </>
+            )}
+            {kundPostOrt && (
+              <>
+                {kundPostOrt}
+                <br />
+              </>
+            )}
+            {kund?.epost && (
+              <>
+                {kund.epost}
+                <br />
+              </>
+            )}
             {kund?.telefon && <>{kund.telefon}</>}
           </p>
           {kund?.personnummer && (
@@ -217,12 +290,24 @@ export default function SkrivUtKlient({ job, company, summary }: Props) {
               <tr key={i}>
                 <td>
                   {a.namn}
-                  {a.artikelnr && <span style={{ color: "#888", fontSize: "8.5pt" }}> · {a.artikelnr}</span>}
-                  {a.aterforsaljare && <span style={{ color: "#888", fontSize: "8.5pt" }}> · {a.aterforsaljare}</span>}
+                  {a.artikelnr && (
+                    <span style={{ color: "#888", fontSize: "8.5pt" }}>
+                      {" "}
+                      · {a.artikelnr}
+                    </span>
+                  )}
+                  {a.aterforsaljare && (
+                    <span style={{ color: "#888", fontSize: "8.5pt" }}>
+                      {" "}
+                      · {a.aterforsaljare}
+                    </span>
+                  )}
                 </td>
                 <td className="right">{a.antal} st</td>
                 <td className="right">{a.pris.toLocaleString("sv-SE")} kr</td>
-                <td className="right bold">{(a.pris * a.antal).toLocaleString("sv-SE")} kr</td>
+                <td className="right bold">
+                  {(a.pris * a.antal).toLocaleString("sv-SE")} kr
+                </td>
               </tr>
             ))}
             {(job.ovrigaKostnader ?? []).map((k, i) => (
@@ -230,28 +315,46 @@ export default function SkrivUtKlient({ job, company, summary }: Props) {
                 <td>{k.beskrivning}</td>
                 <td className="right">1 st</td>
                 <td className="right">{k.pris.toLocaleString("sv-SE")} kr</td>
-                <td className="right bold">{k.pris.toLocaleString("sv-SE")} kr</td>
+                <td className="right bold">
+                  {k.pris.toLocaleString("sv-SE")} kr
+                </td>
               </tr>
             ))}
             {summary.totalTimmar > 0 && summary.timpris > 0 && (
               <tr>
                 <td>Arbetstid</td>
                 <td className="right">{summary.totalTimmar} h</td>
-                <td className="right">{summary.timpris.toLocaleString("sv-SE")} kr/h</td>
-                <td className="right bold">{summary.arbetstidSum.toLocaleString("sv-SE")} kr</td>
+                <td className="right">
+                  {summary.timpris.toLocaleString("sv-SE")} kr/h
+                </td>
+                <td className="right bold">
+                  {summary.arbetstidSum.toLocaleString("sv-SE")} kr
+                </td>
               </tr>
             )}
             {summary.totalStracka > 0 && summary.milersattning > 0 && (
               <tr>
                 <td>Resor / milersättning</td>
                 <td className="right">{summary.totalStracka} km</td>
-                <td className="right">{summary.milersattning.toLocaleString("sv-SE")} kr/km</td>
-                <td className="right bold">{summary.resorSum.toLocaleString("sv-SE")} kr</td>
+                <td className="right">
+                  {summary.milersattning.toLocaleString("sv-SE")} kr/km
+                </td>
+                <td className="right bold">
+                  {summary.resorSum.toLocaleString("sv-SE")} kr
+                </td>
               </tr>
             )}
             {job.utfortArbete && (
               <tr>
-                <td colSpan={4} style={{ paddingTop: 12, paddingBottom: 4, color: "#555", fontSize: "9pt" }}>
+                <td
+                  colSpan={4}
+                  style={{
+                    paddingTop: 12,
+                    paddingBottom: 4,
+                    color: "#555",
+                    fontSize: "9pt",
+                  }}
+                >
                   <strong>Utfört arbete:</strong> {job.utfortArbete}
                 </td>
               </tr>
@@ -264,18 +367,40 @@ export default function SkrivUtKlient({ job, company, summary }: Props) {
           <table>
             <tbody>
               <tr>
-                <td>{job.fastPris !== undefined && job.fastPris !== null ? "Fast pris exkl. moms" : "Summa exkl. moms"}</td>
-                <td>{exklMoms.toLocaleString("sv-SE", { minimumFractionDigits: 2 })} kr</td>
+                <td>
+                  {job.fastPris !== undefined && job.fastPris !== null
+                    ? "Fast pris exkl. moms"
+                    : "Summa exkl. moms"}
+                </td>
+                <td>
+                  {exklMoms.toLocaleString("sv-SE", {
+                    minimumFractionDigits: 2,
+                  })}{" "}
+                  kr
+                </td>
               </tr>
               <tr className="moms-rad">
                 <td>Moms 25%</td>
-                <td>{moms.toLocaleString("sv-SE", { minimumFractionDigits: 2 })} kr</td>
+                <td>
+                  {moms.toLocaleString("sv-SE", { minimumFractionDigits: 2 })}{" "}
+                  kr
+                </td>
               </tr>
               {job.rotAvdrag && summary.arbetstidSum > 0 && (
                 <tr className="moms-rad">
-                  <td>ROT-avdrag 30% (av {summary.arbetstidSum.toLocaleString("sv-SE", { minimumFractionDigits: 2 })} kr arbete exkl. moms)*</td>
+                  <td>
+                    ROT-avdrag 30% (av{" "}
+                    {summary.arbetstidSum.toLocaleString("sv-SE", {
+                      minimumFractionDigits: 2,
+                    })}{" "}
+                    kr arbete exkl. moms)*
+                  </td>
                   <td style={{ color: "#dc2626" }}>
-                    −{(summary.arbetstidSum * 0.3).toLocaleString("sv-SE", { minimumFractionDigits: 2 })} kr
+                    −
+                    {(summary.arbetstidSum * 0.3).toLocaleString("sv-SE", {
+                      minimumFractionDigits: 2,
+                    })}{" "}
+                    kr
                   </td>
                 </tr>
               )}
@@ -285,7 +410,8 @@ export default function SkrivUtKlient({ job, company, summary }: Props) {
                   {(job.rotAvdrag && summary.arbetstidSum > 0
                     ? totalInklMoms - summary.arbetstidSum * 0.3
                     : totalInklMoms
-                  ).toLocaleString("sv-SE", { minimumFractionDigits: 2 })} kr
+                  ).toLocaleString("sv-SE", { minimumFractionDigits: 2 })}{" "}
+                  kr
                 </td>
               </tr>
             </tbody>
@@ -297,8 +423,18 @@ export default function SkrivUtKlient({ job, company, summary }: Props) {
           <div className="betalning-block">
             <h4>Betalningsuppgifter</h4>
             <p>
-              {company.bankgiro && <>Bankgiro: {company.bankgiro}<br /></>}
-              {company.plusgiro && <>Plusgiro: {company.plusgiro}<br /></>}
+              {company.bankgiro && (
+                <>
+                  Bankgiro: {company.bankgiro}
+                  <br />
+                </>
+              )}
+              {company.plusgiro && (
+                <>
+                  Plusgiro: {company.plusgiro}
+                  <br />
+                </>
+              )}
               {company.swish && <>Swish: {company.swish}</>}
             </p>
           </div>
@@ -313,11 +449,15 @@ export default function SkrivUtKlient({ job, company, summary }: Props) {
           <p className="fakturatext">{company.fakturatext}</p>
         )}
         {company.fSkatt && (
-          <p className="fskatt">✓ Godkänd för F-skatt · Momsreg.nr: {company.momsNummer || `SE${company.orgNummer?.replace("-", "")}01`}</p>
+          <p className="fskatt">
+            ✓ Godkänd för F-skatt · Momsreg.nr:{" "}
+            {company.momsNummer || `SE${company.orgNummer?.replace("-", "")}01`}
+          </p>
         )}
         {job.rotAvdrag && (
           <p className="fskatt" style={{ marginTop: 4 }}>
-            * ROT-avdrag: Avser 30% av arbetskostnad exkl. moms. Hantverkaren ansöker om utbetalning hos Skatteverket.
+            * ROT-avdrag: Avser 30% av arbetskostnad exkl. moms. Hantverkaren
+            ansöker om utbetalning hos Skatteverket.
           </p>
         )}
       </div>

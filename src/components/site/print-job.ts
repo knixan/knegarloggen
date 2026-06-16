@@ -204,7 +204,7 @@ export function printJob(
   </div>
   ${job.planeratArbete ? `<section><h4>Planerat arbete</h4><div class="fritext">${job.planeratArbete}</div></section>` : ""}
   ${job.utfortArbete ? `<section><h4>Utfört arbete</h4><div class="fritext">${job.utfortArbete}</div></section>` : ""}
-  ${job.artiklar.length > 0 || job.ovrigaArtiklar ? `<section><h4>Inköpt material</h4>${artiklarHtml}${job.ovrigaArtiklar ? `<div class="fritext" style="margin-top:8px">${job.ovrigaArtiklar}</div>` : ""}</section>` : ""}
+  ${job.artiklar.length > 0 ? `<section><h4>Inköpt material</h4>${artiklarHtml}</section>` : ""}
   ${job.resor.length > 0 ? `<section><h4>Resor</h4>${resorHtml}</section>` : ""}
   ${job.arbetstider.length > 0 ? `<section><h4>Arbetstid</h4>${arbetstidHtml}</section>` : ""}
   ${job.anteckningar ? `<section><h4>Interna anteckningar</h4><p class="anteckningar">${job.anteckningar}</p></section>` : ""}

@@ -94,9 +94,7 @@ export const jobSchema = z.object({
   utfortArbete: z.string().max(2000).optional().default(""),
   planeratArbete: z.string().max(2000).optional().default(""),
 
-  bilder: z
-    .array(z.object({ url: z.string(), key: z.string() }))
-    .default([]),
+  bilder: z.array(z.object({ url: z.string(), key: z.string() })).default([]),
 
   fastPris: z.coerce.number().min(0).optional(),
 });
