@@ -73,37 +73,43 @@ export const ovrigKostnadSchema = z.object({
   pris: z.coerce.number().min(0, "Pris får inte vara negativt"),
 });
 
-export const jobSchema = z.object({
-  customerId: z.string().optional(),
+export const jobSchema = z
+  .object({
+    customerId: z.string().optional(),
 
-  timpris: z.coerce.number().min(0).default(0),
-  milersattning: z.coerce.number().min(0).default(0),
+    timpris: z.coerce.number().min(0).default(0),
+    milersattning: z.coerce.number().min(0).default(0),
 
-  rotAvdrag: z.boolean().default(false),
-  pagaende: z.boolean().default(false),
-  utfort: z.boolean().default(false),
-  fakturerat: z.boolean().default(false),
-  betalt: z.boolean().default(false),
+    rotAvdrag: z.boolean().default(false),
+    pagaende: z.boolean().default(false),
+    utfort: z.boolean().default(false),
+    fakturerat: z.boolean().default(false),
+    betalt: z.boolean().default(false),
 
-  artiklar: z.array(articleSchema).default([]),
-  resor: z.array(resaSchema).default([]),
-  arbetstider: z.array(arbetstidSchema).default([]),
-  ovrigaKostnader: z.array(ovrigKostnadSchema).default([]),
+    artiklar: z.array(articleSchema).default([]),
+    resor: z.array(resaSchema).default([]),
+    arbetstider: z.array(arbetstidSchema).default([]),
+    ovrigaKostnader: z.array(ovrigKostnadSchema).default([]),
 
-  anteckningar: z.string().max(2000).optional().default(""),
-  utfortArbete: z.string().max(2000).optional().default(""),
-  planeratArbete: z.string().max(2000).optional().default(""),
+    anteckningar: z.string().max(2000).optional().default(""),
+    utfortArbete: z.string().max(2000).optional().default(""),
+    planeratArbete: z.string().max(2000).optional().default(""),
 
-  bilder: z.array(z.object({ url: z.string(), key: z.string() })).default([]),
+    bilder: z.array(z.object({ url: z.string(), key: z.string() })).default([]),
 
-  fastPris: z.coerce.number().min(0).optional(),
-});
+    fastPris: z.coerce.number().min(0).optional(),
+  })
+  .refine((data) => !(data.betalt && !data.fakturerat), {
+    message: "Kan inte markera som betalt utan att ha fakturerat",
+    path: ["betalt"],
+  });
 
 export type JobInput = z.infer<typeof jobSchema>;
 
 export type Job = JobInput & {
   id: string;
   skapad: string;
+  fakturanummer?: number;
   customer?: Customer | null;
 };
 

@@ -211,6 +211,9 @@ model Job {
   fakturerat Boolean @default(false)
   betalt     Boolean @default(false)
 
+  // Fakturering
+  fakturanummer Int?
+
   // Prissättning
   timpris       Float  @default(0)
   milersattning Float  @default(0)
@@ -235,6 +238,7 @@ model Job {
   ovrigaKostnader OvrigKostnad[]
 
   @@index([companyId])
+  @@index([customerId])
   @@index([companyId, fakturerat])
   @@index([companyId, betalt])
   @@map("job")

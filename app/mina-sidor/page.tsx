@@ -4,8 +4,10 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { getJobs } from "@/lib/job-actions";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { Plus, Building2, Users } from "lucide-react";
 import JobDashboard from "./job-dashboard";
+import DeleteAccountButton from "./delete-account-button";
 
 export default async function MinaSidorPage() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -44,6 +46,20 @@ export default async function MinaSidorPage() {
         </div>
       </div>
       <JobDashboard jobs={jobs} />
+
+      <div className="mt-16 pt-8">
+        <Separator />
+        <div className="mt-8 flex flex-col gap-2">
+          <p className="text-sm font-medium text-destructive">Farlig zon</p>
+          <p className="text-xs text-muted-foreground">
+            Raderar ditt konto, alla jobb, kunder, bilder och företagsuppgifter
+            permanent.
+          </p>
+          <div className="mt-2">
+            <DeleteAccountButton />
+          </div>
+        </div>
+      </div>
     </main>
   );
 }

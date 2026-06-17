@@ -138,14 +138,19 @@ export default function JobForm({
     const filer = Array.from(e.target.files ?? []);
     if (!filer.length) return;
     setLaddarUpp(true);
-    const res = await startUpload(filer);
-    if (res) {
-      setBilder((prev) => [
-        ...prev,
-        ...res.map((bild) => ({ url: bild.ufsUrl, key: bild.key })),
-      ]);
+    try {
+      const res = await startUpload(filer);
+      if (res) {
+        setBilder((prev) => [
+          ...prev,
+          ...res.map((bild) => ({ url: bild.ufsUrl, key: bild.key })),
+        ]);
+      }
+    } catch {
+      alert("Bilduppladdning misslyckades. Försök igen.");
+    } finally {
+      setLaddarUpp(false);
     }
-    setLaddarUpp(false);
   }
 
   return (

@@ -188,7 +188,6 @@ export function MaterialSection({ job }: { job: Job }) {
           </div>
         </div>
       )}
-
     </section>
   );
 }

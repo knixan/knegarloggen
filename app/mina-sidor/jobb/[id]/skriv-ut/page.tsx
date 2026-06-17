@@ -1,7 +1,11 @@
 import { headers } from "next/headers";
 import { redirect, notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { getJob, getCompanySettings } from "@/lib/job-actions";
+import {
+  getJob,
+  getCompanySettings,
+  reserverFakturanummer,
+} from "@/lib/job-actions";
 import { beräknaSummering } from "@/lib/job-schema";
 import SkrivUtKlient from "./skriv-ut-klient";
 
@@ -19,7 +23,15 @@ export default async function SkrivUtPage({
   if (!job) notFound();
   if (!company) notFound();
 
+  const fakturanummer = await reserverFakturanummer(id);
   const summary = beräknaSummering(job);
 
-  return <SkrivUtKlient job={job} company={company} summary={summary} />;
+  return (
+    <SkrivUtKlient
+      job={job}
+      company={company}
+      summary={summary}
+      fakturanummer={fakturanummer}
+    />
+  );
 }

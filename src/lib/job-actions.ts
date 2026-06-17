@@ -64,6 +64,7 @@ function mapJob(j: JobWithRelations) {
     customerId: j.customerId ?? undefined,
     customer: j.customer ? mapCustomer(j.customer) : null,
     rotAvdrag: j.rotAvdrag,
+    fakturanummer: j.fakturanummer ?? undefined,
     timpris: j.timpris,
     milersattning: j.milersattning,
     fastPris: j.fastPris ?? undefined,
@@ -717,4 +718,71 @@ export async function deleteJob(id: string) {
 
   revalidatePath("/mina-sidor");
   return { ok: true };
+}
+
+export async function deleteAccount(): Promise<{
+  ok: boolean;
+  error?: string;
+}> {
+  const session = await getSession();
+  if (!session?.user) return { ok: false, error: "Inte inloggad" };
+
+  const userId = session.user.id;
+
+  const company = await prisma.company.findFirst({
+    where: { ownerId: userId },
+    select: {
+      logoKey: true,
+      jobs: { select: { images: { select: { key: true } } } },
+    },
+  });
+
+  const keys: string[] = [];
+  if (company?.logoKey) keys.push(company.logoKey);
+  company?.jobs.forEach((job) =>
+    job.images.forEach((img) => keys.push(img.key)),
+  );
+
+  if (keys.length > 0) {
+    try {
+      await utapi.deleteFiles(keys);
+    } catch {
+      // Fortsätt även om filradering misslyckas
+    }
+  }
+
+  await prisma.user.delete({ where: { id: userId } });
+
+  return { ok: true };
+}
+
+export async function reserverFakturanummer(jobId: string): Promise<number> {
+  const session = await getSession();
+  if (!session?.user) throw new Error("Inte inloggad");
+
+  return prisma.$transaction(async (tx) => {
+    const company = await tx.company.findFirst({
+      where: { ownerId: session.user.id },
+    });
+    if (!company) throw new Error("Inget företag hittat");
+
+    const job = await tx.job.findFirst({
+      where: { id: jobId, companyId: company.id },
+      select: { fakturanummer: true },
+    });
+    if (!job) throw new Error("Jobb hittades inte");
+
+    if (job.fakturanummer) return job.fakturanummer;
+
+    const nummer = company.nastaFakturanummer;
+    await tx.job.update({
+      where: { id: jobId },
+      data: { fakturanummer: nummer },
+    });
+    await tx.company.update({
+      where: { id: company.id },
+      data: { nastaFakturanummer: { increment: 1 } },
+    });
+    return nummer;
+  });
 }

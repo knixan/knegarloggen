@@ -1,69 +1,53 @@
-# Knegarloggen 🔧
+# Knegarloggen
 
-[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js)](https://nextjs.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
-[![Prisma](https://img.shields.io/badge/Prisma-v6-2D3748?style=flat-square&logo=prisma)](https://www.prisma.io/)
+[![Prisma](https://img.shields.io/badge/Prisma-v7-2D3748?style=flat-square&logo=prisma)](https://www.prisma.io/)
 [![License](https://img.shields.io/badge/License-Privat-gray?style=flat-square)](LICENSE)
 
-Effektivisera din vardag som hantverkare. Håll koll på kunder, artiklar, resor, arbetstid och fakturastatus – allt samlat på ett och samma ställe.
+Jobblogg och fakturaverktyg för hantverkare. Håll koll på kunder, material, resor, arbetstid och fakturor – allt på ett ställe.
 
 ---
 
-## 📌 Innehållsförteckning
+## Funktioner
 
-- [Om projektet](#om-projektet)
-- [Funktioner](#funktioner)
-- [Teknisk stack](#teknisk-stack)
-- [Kom igång](#kom-igång)
-- [Projektstruktur](#projektstruktur)
-- [Databasmodeller](#databasmodeller)
-- [Scripts](#scripts)
-- [Roadmap](#roadmap)
-
----
-
-## 🛠 Om projektet
-
-Knegarloggen är en webbaserad applikation byggd för mindre hantverksföretag. Du loggar varje jobb med kunduppgifter, material/artiklar, körda sträckor och arbetstid – och bockar av när jobbet är utfört, fakturerat och betalt. Stöd för ROT-avdrag ingår.
-
-Appen är byggd med Next.js, Prisma och PostgreSQL, med inloggning via [better-auth](https://better-auth.dev/).
+- **Jobbhantering** – Skapa och redigera jobb med status (ej påbörjat / pågående / utfört / fakturerat / betalt)
+- **Kundregister** – Privatpersoner och företagskunder med adress, personnummer och fastighetsbeteckning
+- **Artiklar** – Material med artikelnummer, återförsäljare, inköpspris och utpris
+- **Reslogg** – Körda sträckor per datum med automatisk milersättning
+- **Arbetstid** – Arbetspass per datum med automatisk timprisberäkning
+- **Övriga kostnader** – Fri rad för förbrukningsmaterial, hyrd utrustning m.m.
+- **Faktura** – Professionell utskriftsvy med logotyp, betalningsuppgifter, moms och ROT-avdrag
+- **ROT-avdrag** – Korrekt beräkning (30% av arbetskostnad inkl. moms) enligt Skatteverkets regler
+- **Fast pris** – Möjlighet att fakturera ett fast pris istället för beräknad summa
+- **Bilder** – Ladda upp jobbfoton via UploadThing
+- **Mörkt/ljust läge** – Systemanpassat tema
 
 ---
 
-## ✨ Funktioner
-
-- 💼 **Jobbhantering** – Skapa, redigera och organisera jobb per företag.
-- 📦 **Artiklar** – Hantera material med artikelnummer, antal och priser.
-- 🚗 **Reslogg** – Logga körda sträckor och avstånd knutna till specifika datum.
-- ⏱️ **Arbetstid** – Enkel registrering av arbetspass i timmar.
-- ✅ **Statuskontroll** – Tydliga flaggor för Utfört, ROT, Fakturerat och Betalt.
-- 📊 **Livesummering** – Automatiska beräkningar av totaler för artiklar, resor och tid.
-- 🔐 **Säker Auth** – Robust autentisering via better-auth (E-post/Lösenord).
-- 🏢 **Multi-företag** – Stöd för att hantera flera olika företag på samma konto.
-
----
-
-## 💻 Teknisk stack
+## Teknisk stack
 
 | Lager     | Teknik                      |
 | --------- | --------------------------- |
-| Framework | Next.js 15 (App Router)     |
+| Framework | Next.js 16 (App Router)     |
 | Språk     | TypeScript                  |
 | Styling   | Tailwind CSS v4 + shadcn/ui |
 | Formulär  | React Hook Form + Zod       |
-| ORM       | Prisma 6                    |
-| Databas   | PostgreSQL                  |
-| Auth      | better-auth                 |
-| Runtime   | Node.js                     |
+| ORM       | Prisma 7                    |
+| Databas   | PostgreSQL (Neon)           |
+| Auth      | Better Auth                 |
+| Filuppl.  | UploadThing                 |
+| Deploy    | Vercel                      |
 
 ---
 
-## 🚀 Kom igång
+## Kom igång
 
 ### Förutsättningar
 
 - Node.js 18+
-- PostgreSQL (t.ex. via pgAdmin 4 eller Docker)
+- PostgreSQL-databas (t.ex. [Neon](https://neon.tech))
+- [UploadThing](https://uploadthing.com)-konto för bilduppladdning
 
 ### Installation
 
@@ -75,39 +59,29 @@ npm install
 
 ### Miljövariabler
 
-Kopiera `.env.example` till `.env` och fyll i dina värden:
-
-```bash
-cp .env.example .env
-```
+Skapa en `.env`-fil i rooten:
 
 ```env
 # Databas
-DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/knegarloggen"
+DATABASE_URL="postgresql://USER:PASSWORD@HOST/knegarloggen?sslmode=require"
 
-# better-auth
+# Better Auth
 BETTER_AUTH_SECRET="generera-med-openssl-rand-base64-32"
 BETTER_AUTH_URL="http://localhost:3000"
 
-# App-URL
+# App-URL (används av auth-klienten)
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 
-# SMTP (valfritt – för e-postverifiering)
-SMTP_HOST=""
-SMTP_PORT="587"
-SMTP_USER=""
-SMTP_PASS=""
-SMTP_FROM="noreply@knegarloggen.se"
+# UploadThing
+UPLOADTHING_TOKEN="ditt-token-här"
 ```
+
+I produktion (Vercel) – uppdatera `BETTER_AUTH_URL` och `NEXT_PUBLIC_APP_URL` till din faktiska domän.
 
 ### Databas
 
 ```bash
-# Kör migrationer
 npx prisma migrate deploy
-
-# (Valfritt) Seed med testdata
-npm run db:seed
 ```
 
 ### Starta
@@ -120,49 +94,59 @@ npm run dev
 
 ---
 
-## 📂 Projektstruktur
+## Projektstruktur
 
 ```
 knegarloggen/
-├── app/                    # Next.js App Router
-│   ├── api/                # API-routes (auth, jobs)
-│   ├── logga-in/           # Inloggningssida
-│   ├── registrera/         # Registreringssida
-│   └── mina-sidor/         # Skyddade sidor (jobblogg)
+├── app/
+│   ├── api/                  # Auth- och UploadThing-routes
+│   ├── logga-in/             # Inloggning
+│   ├── registrera/           # Registrering
+│   └── mina-sidor/           # Skyddade sidor
+│       ├── jobb/[id]/        # Jobbdetalj, redigera, skriv ut
+│       ├── kunder/           # Kundregister
+│       └── foretag/          # Företagsuppgifter
 ├── src/
-│   ├── components/         # React-komponenter (JobForm, JobList m.fl.)
-│   ├── lib/                # Prisma-klient, auth, job-schema, actions
-│   └── types/              # TypeScript-typer
-└── prisma/
-    ├── schema.prisma        # Databasschema
-    └── seed.ts              # Seed-script
+│   ├── components/
+│   │   ├── site/             # JobForm, JobList, fakturakomponenter m.m.
+│   │   └── ui/               # shadcn/ui-komponenter
+│   └── lib/
+│       ├── auth.ts           # Better Auth-konfiguration
+│       ├── job-actions.ts    # Server actions (CRUD)
+│       ├── job-schema.ts     # Zod-schema och beräkningsfunktioner
+│       └── prisma.ts         # Prisma-klient
+├── prisma/
+│   └── schema.prisma         # Databasschema
+└── proxy.ts                  # Routeskydd (kräver inloggning för /mina-sidor)
 ```
 
 ---
 
 ## Databasmodeller
 
-- **User / Account / Session** – hanteras av better-auth
-- **Company** – ett företag kopplat till en användare
-- **Job** – ett jobb med kunduppgifter och statusflaggor
-- **Article** – material/artiklar kopplade till ett jobb
-- **Trip** – reslog per datum (sträcka + avstånd)
-- **WorkSession** – arbetspass per datum (timmar)
+- **User / Account / Session** – hanteras av Better Auth
+- **Company** – företagsuppgifter, fakturainställningar och logotyp
+- **Customer** – privat- eller företagskund kopplad till ett företag
+- **Job** – jobb med status, prissättning och ROT-flagga
+- **Article** – material per jobb
+- **Trip** – reslog per datum
+- **WorkSession** – arbetspass per datum
+- **OvrigKostnad** – övriga kostnader per jobb
+- **JobImage** – bilder uppladdade via UploadThing
 
 ---
 
 ## Scripts
 
 ```bash
-npm run dev        # Starta dev-server
+npm run dev        # Starta dev-server (Turbopack)
 npm run build      # Bygg för produktion
 npm run start      # Starta produktionsserver
 npm run lint       # Kör ESLint
-npm run db:seed    # Seed databasen med testdata
 ```
 
 ---
 
 ## Licens
 
-Privat projekt – ingen licens angiven.
+Privat projekt – alla rättigheter förbehållna.
