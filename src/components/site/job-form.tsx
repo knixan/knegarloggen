@@ -28,6 +28,7 @@ import {
   TriangleAlert,
   Wrench,
   User,
+  UserPlus,
   Search,
   X as XIcon,
 } from "lucide-react";
@@ -160,11 +161,17 @@ export default function JobForm({
     >
       {/* Kundväljare */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <User className="h-5 w-5 text-muted-foreground" />
             Kund
           </CardTitle>
+          <a href="/mina-sidor/kunder/ny" target="_blank" rel="noreferrer">
+            <Button type="button" variant="outline" size="sm">
+              <UserPlus className="h-4 w-4 mr-2" />
+              Skapa ny kund
+            </Button>
+          </a>
         </CardHeader>
         <CardContent className="space-y-3">
           {valdKund ? (
