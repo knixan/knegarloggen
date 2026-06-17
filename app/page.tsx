@@ -1,12 +1,12 @@
 import Image from "next/image";
-import { Camera } from "lucide-react";
 import Link from "next/link";
 import {
   CheckCircle2,
   Clock,
   Package,
-  Van,
-  FileText,
+  Users,
+  Receipt,
+  Camera,
   ArrowRight,
   ShieldCheck,
   Zap,
@@ -104,32 +104,32 @@ export default function Page() {
             <FeatureCard
               icon={<CheckCircle2 className="h-6 w-6 text-green-600" />}
               title="Jobbhantering"
-              description="Skapa jobb per kund och håll koll på status. Se direkt vad som är pågående, utfört eller fakturerat."
+              description="Skapa jobb och följ dem genom hela kedjan — ej påbörjat, pågående, utfört, fakturerat och betalt. Alltid koll på var varje jobb befinner sig."
             />
             <FeatureCard
-              icon={<Package className="h-6 w-6 text-blue-600" />}
-              title="Materialkoll"
-              description="Lägg till artiklar med pris och antal direkt i mobilen. Sluta gissa vad den där ventilen kostade."
+              icon={<Users className="h-6 w-6 text-blue-600" />}
+              title="Kundregister"
+              description="Hantera privat- och företagskunder med adress, personnummer, fastighetsbeteckning och organisationsnummer. Allt du behöver för faktura och ROT."
+            />
+            <FeatureCard
+              icon={<Package className="h-6 w-6 text-orange-600" />}
+              title="Material & kostnader"
+              description="Lägg till artiklar med artikelnummer, återförsäljare och pris. Sluta gissa vad den där ventilen kostade — lägg in den direkt på plats."
             />
             <FeatureCard
               icon={<Clock className="h-6 w-6 text-red-600" />}
-              title="Tidsrapportering"
-              description="Logga dina timmar på varje projekt. Perfekt för både löpande räkning och uppföljning av fastpris."
+              title="Tid & resor"
+              description="Logga arbetstimmar och körda mil per datum. Timpris och milersättning räknas ut automatiskt och följer med rakt in i fakturan."
             />
             <FeatureCard
-              icon={<Van className="h-6 w-6 text-orange-600" />}
-              title="Reselogg"
-              description="Glöm inte milersättningen. Logga datum och sträcka för varje resa kopplat till rätt jobb."
+              icon={<Receipt className="h-6 w-6 text-purple-600" />}
+              title="Faktura & ROT-avdrag"
+              description="Generera en professionell faktura med ett klick — med logotyp, automatiskt fakturanummer, moms och korrekt ROT-avdrag enligt Skatteverkets regler."
             />
             <FeatureCard
-              icon={<FileText className="h-6 w-6 text-purple-600" />}
-              title="Utskriftsvänligt"
-              description="Generera snygga sammanställningar för utskrift eller PDF. Proffsigt underlag till dina fakturor."
-            />
-            <FeatureCard
-              icon={<Camera className="h-6 w-6 text-purple-600" />}
-              title="Spara bilder på jobb"
-              description="Dokumentera arbetet direkt i appen. Perfekt för före- och efterbilder samt underlag till kund."
+              icon={<Camera className="h-6 w-6 text-teal-600" />}
+              title="Bildarkiv"
+              description="Fotografera och spara bilder direkt på jobbet. Perfekt för före- och efterdokumentation och som underlag vid eventuella reklamationer."
             />
           </div>
         </div>
