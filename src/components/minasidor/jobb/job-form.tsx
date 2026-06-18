@@ -111,6 +111,8 @@ export default function JobForm({
 
   // Kundväljare
   const [kundSok, setKundSok] = useState("");
+  const [kundFokus, setKundFokus] = useState(false);
+  const kundSokRef = useRef<HTMLInputElement>(null);
   const valdCustomerId = live.customerId;
   const valdKund = customers.find((c) => c.id === valdCustomerId) ?? null;
 
@@ -161,17 +163,11 @@ export default function JobForm({
     >
       {/* Kundväljare */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="h-5 w-5 text-muted-foreground" />
             Kund
           </CardTitle>
-          <a href="/mina-sidor/kunder/ny" target="_blank" rel="noreferrer">
-            <Button type="button" variant="outline" size="sm">
-              <UserPlus className="h-4 w-4 mr-2" />
-              Skapa ny kund
-            </Button>
-          </a>
         </CardHeader>
         <CardContent className="space-y-3">
           {valdKund ? (
@@ -205,61 +201,84 @@ export default function JobForm({
               </Button>
             </div>
           ) : (
-            <div className="space-y-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Sök på namn, telefon eller e-post..."
-                  value={kundSok}
-                  onChange={(e) => setKundSok(e.target.value)}
-                  className="pl-9"
-                />
+            <div className="space-y-3">
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => kundSokRef.current?.focus()}
+                >
+                  <User className="h-4 w-4 mr-2" />
+                  Befintlig kund
+                </Button>
+                <a href="/mina-sidor/kunder/ny" target="_blank" rel="noreferrer">
+                  <Button type="button" variant="outline" size="sm">
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Skapa ny kund
+                  </Button>
+                </a>
               </div>
-              {customers.length === 0 ? (
-                <p className="text-xs text-muted-foreground">
-                  Inga kunder i kundregistret ännu.{" "}
-                  <a
-                    href="/mina-sidor/kunder/ny"
-                    className="underline"
-                    target="_blank"
-                  >
-                    Lägg till en kund
-                  </a>
-                  .
-                </p>
-              ) : filtradeKunder.length === 0 ? (
-                <p className="text-xs text-muted-foreground">
-                  Inga kunder matchar sökningen.
-                </p>
-              ) : (
-                <div className="rounded-md border divide-y max-h-60 overflow-y-auto">
-                  {filtradeKunder.map((c) => (
-                    <button
-                      key={c.id}
-                      type="button"
-                      className="w-full text-left px-3 py-2.5 hover:bg-muted/50 transition-colors"
-                      onClick={() => {
-                        setValue("customerId", c.id, { shouldDirty: true });
-                        setKundSok("");
-                      }}
-                    >
-                      <p className="text-sm font-medium">
-                        {c.typ === "foretag" && c.foretagsnamn
-                          ? c.foretagsnamn
-                          : c.namn}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {c.typ === "foretag" && c.kontaktperson
-                          ? `${c.kontaktperson} · `
-                          : ""}
-                        {c.telefon}
-                        {c.telefon && c.epost ? " · " : ""}
-                        {c.epost}
-                      </p>
-                    </button>
-                  ))}
+              <div className="space-y-2">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    ref={kundSokRef}
+                    placeholder="Sök på namn, telefon eller e-post..."
+                    value={kundSok}
+                    onChange={(e) => setKundSok(e.target.value)}
+                    onFocus={() => setKundFokus(true)}
+                    onBlur={() => setTimeout(() => setKundFokus(false), 150)}
+                    className="pl-9"
+                  />
                 </div>
-              )}
+                {customers.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">
+                    Inga kunder i kundregistret ännu.{" "}
+                    <a
+                      href="/mina-sidor/kunder/ny"
+                      className="underline"
+                      target="_blank"
+                    >
+                      Lägg till en kund
+                    </a>
+                    .
+                  </p>
+                ) : (kundSok.trim() || kundFokus) && filtradeKunder.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">
+                    Inga kunder matchar sökningen.
+                  </p>
+                ) : (kundSok.trim() || kundFokus) ? (
+                  <div className="rounded-md border divide-y max-h-60 overflow-y-auto">
+                    {filtradeKunder.map((c) => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        className="w-full text-left px-3 py-2.5 hover:bg-muted/50 transition-colors"
+                        onClick={() => {
+                          setValue("customerId", c.id, { shouldDirty: true });
+                          setKundSok("");
+                          setKundFokus(false);
+                        }}
+                      >
+                        <p className="text-sm font-medium">
+                          {c.typ === "foretag" && c.foretagsnamn
+                            ? c.foretagsnamn
+                            : c.namn}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {c.typ === "foretag" && c.kontaktperson
+                            ? `${c.kontaktperson} · `
+                            : ""}
+                          {c.telefon}
+                          {c.telefon && c.epost ? " · " : ""}
+                          {c.epost}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
             </div>
           )}
         </CardContent>
