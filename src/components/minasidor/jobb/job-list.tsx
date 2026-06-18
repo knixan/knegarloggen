@@ -9,8 +9,8 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { beräknaSummering, type Job } from "@/lib/job-schema";
-import JobOverviewDialog from "./job-overview-dialog";
-import { StatusBadge, Badge } from "./job-overview-badges";
+import JobOverviewDialog from "../oversikt/job-overview-dialog";
+import { StatusBadge, Badge } from "../oversikt/job-overview-badges";
 
 interface Props {
   jobs: Job[];

@@ -14,7 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { beräknaSummering, type Job } from "@/lib/job-schema";
 
 import { Badge, StatusBadge } from "./job-overview-badges";
-import { printJob } from "./print-job";
+import { printJob } from "../faktura/print-job";
 import { JobOverviewImages } from "./job-overview-images";
 import {
   ContactSection,

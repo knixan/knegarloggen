@@ -7,7 +7,7 @@ import {
   reserverFakturanummer,
 } from "@/lib/job-actions";
 import { beräknaSummering } from "@/lib/job-schema";
-import SkrivUtKlient from "./skriv-ut-klient";
+import SkrivUtKlient from "@/components/minasidor/faktura/skriv-ut-klient";
 
 export default async function SkrivUtPage({
   params,

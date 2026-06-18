@@ -5,7 +5,7 @@ import { auth } from "@/lib/auth";
 import { getJobs } from "@/lib/job-actions";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import JobDashboard from "./job-dashboard";
+import JobDashboard from "@/components/minasidor/jobb/job-dashboard";
 
 export default async function MinaSidorPage() {
   const session = await auth.api.getSession({ headers: await headers() });

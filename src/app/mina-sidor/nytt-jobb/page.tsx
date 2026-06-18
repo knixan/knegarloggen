@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { getCustomers } from "@/lib/job-actions";
-import NyttJobbClient from "./nytt-jobb-client";
+import NyttJobbClient from "@/components/minasidor/jobb/nytt-jobb-client";
 
 export default async function NyttJobbPage() {
   const session = await auth.api.getSession({ headers: await headers() });

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Search } from "lucide-react";
-import JobList from "@/components/minasidor/job-list";
+import JobList from "@/components/minasidor/jobb/job-list";
 import { deleteJob } from "@/lib/job-actions";
 import type { Job } from "@/lib/job-schema";
 import { Input } from "@/components/ui/input";

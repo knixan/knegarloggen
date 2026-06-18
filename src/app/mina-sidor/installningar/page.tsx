@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
-import InstallningarKlient from "./installningar-klient";
+import InstallningarKlient from "@/components/minasidor/installningar/installningar-klient";
 
 export const metadata = { title: "Inställningar – Knegarloggen" };
 

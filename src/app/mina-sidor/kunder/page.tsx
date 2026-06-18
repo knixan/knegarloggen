@@ -6,7 +6,7 @@ import { getCustomers } from "@/lib/job-actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus, Pencil, User, Building2, Phone, Mail } from "lucide-react";
-import CustomerDeleteButton from "./customer-delete-button";
+import CustomerDeleteButton from "@/components/minasidor/kunder/customer-delete-button";
 
 export default async function KundregisterPage() {
   const session = await auth.api.getSession({ headers: await headers() });

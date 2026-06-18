@@ -1,4 +1,4 @@
-import { MinaSidorSidebar, MinaSidorMobileNav } from "./mina-sidor-nav";
+import { MinaSidorSidebar, MinaSidorMobileNav } from "../../components/minasidor/mina-sidor-nav";
 
 export default function MinaSidorLayout({
   children,

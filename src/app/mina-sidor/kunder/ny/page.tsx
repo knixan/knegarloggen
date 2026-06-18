@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
-import CustomerForm from "../customer-form";
+import CustomerForm from "@/components/minasidor/kunder/customer-form";
 
 export default async function NyKundPage() {
   const session = await auth.api.getSession({ headers: await headers() });

@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import { redirect, notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { getJob, getCustomers } from "@/lib/job-actions";
-import EditJobClient from "./edit-job-client";
+import EditJobClient from "@/components/minasidor/jobb/edit-job-client";
 
 export default async function RedigeraJobbPage({
   params,

@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { getCompanySettings } from "@/lib/job-actions";
-import CompanySettingsForm from "./company-settings-form";
+import CompanySettingsForm from "@/components/minasidor/foretag/company-settings-form";
 
 export default async function ForetagsuppgifterPage() {
   const session = await auth.api.getSession({ headers: await headers() });

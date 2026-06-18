@@ -104,29 +104,37 @@ npm run dev
 knegarloggen/
 ├── src/
 │   ├── app/
-│   │   ├── api/                    # Auth- och UploadThing-routes
-│   │   ├── logga-in/               # Inloggning
-│   │   ├── registrera/             # Registrering
-│   │   ├── admin/                  # Adminpanel (kräver roll "admin")
-│   │   └── mina-sidor/             # Skyddade sidor
-│   │       ├── installningar/      # Lösenord, prenumeration, kontoborttagning
-│   │       ├── jobb/[id]/          # Jobbdetalj, redigera, skriv ut/faktura
-│   │       ├── kunder/             # Kundregister
-│   │       └── foretag/            # Företagsuppgifter
+│   │   ├── api/                       # Auth- och UploadThing-routes
+│   │   ├── logga-in/                  # Inloggning
+│   │   ├── registrera/                # Registrering
+│   │   ├── admin/                     # Adminpanel (kräver roll "admin")
+│   │   └── mina-sidor/                # Skyddade sidor (enbart page/layout-filer)
+│   │       ├── foretag/               # Företagsuppgifter
+│   │       ├── installningar/         # Lösenord, prenumeration, kontoborttagning
+│   │       ├── jobb/[id]/             # Jobbdetalj, redigera, skriv ut/faktura
+│   │       ├── kunder/                # Kundregister
+│   │       └── nytt-jobb/             # Skapa nytt jobb
 │   ├── components/
-│   │   ├── site/                   # Globala komponenter (navbar, footer, hero m.m.)
-│   │   ├── minasidor/              # Jobbformulär, jobblista, fakturakomponenter
-│   │   └── ui/                     # shadcn/ui-komponenter
+│   │   ├── site/                      # Publika sidor (hero, features, cta, navbar, footer)
+│   │   ├── minasidor/                 # Komponenter för inloggade sidor
+│   │   │   ├── faktura/               # Utskriftsvy och print-helper
+│   │   │   ├── foretag/               # Företagsinställningar
+│   │   │   ├── installningar/         # Lösenord och kontoborttagning
+│   │   │   ├── jobb/                  # Jobbformulär, jobblista och dashboard
+│   │   │   ├── kunder/                # Kundformulär och borttagning
+│   │   │   ├── oversikt/              # Jobböversikt, dialog, bilder och badges
+│   │   │   └── mina-sidor-nav.tsx     # Sidebar och mobilmeny
+│   │   └── ui/                        # shadcn/ui-komponenter
 │   └── lib/
-│       ├── auth.ts                 # Better Auth-konfiguration
-│       ├── auth-client.ts          # Auth-klient (React)
-│       ├── admin-actions.ts        # Server actions för adminpanelen
-│       ├── job-actions.ts          # Server actions (CRUD jobb, faktura, konton)
-│       ├── job-schema.ts           # Zod-schema och beräkningsfunktioner
-│       └── prisma.ts               # Prisma-klient
+│       ├── auth.ts                    # Better Auth-konfiguration
+│       ├── auth-client.ts             # Auth-klient (React)
+│       ├── admin-actions.ts           # Server actions för adminpanelen
+│       ├── job-actions.ts             # Server actions (CRUD jobb, faktura, konton)
+│       ├── job-schema.ts              # Zod-schema och beräkningsfunktioner
+│       └── prisma.ts                  # Prisma-klient
 ├── prisma/
-│   └── schema.prisma               # Databasschema
-└── proxy.ts                        # Routeskydd (/mina-sidor och /admin)
+│   └── schema.prisma                  # Databasschema
+└── proxy.ts                           # Routeskydd (/mina-sidor och /admin)
 ```
 
 ---

@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import authClient from "@/lib/auth-client";
-import DeleteAccountButton from "../delete-account-button";
+import DeleteAccountButton from "./delete-account-button";
 
 export default function InstallningarKlient() {
   return (
