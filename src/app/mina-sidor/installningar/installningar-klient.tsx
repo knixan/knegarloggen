@@ -7,7 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import authClient from "@/lib/auth-client";
 import DeleteAccountButton from "../delete-account-button";
@@ -121,16 +127,24 @@ function PrenumerationSection() {
         <CardTitle className="flex items-center gap-2 text-base">
           <CreditCard className="h-4 w-4" />
           Prenumeration
-          <Badge variant="secondary" className="ml-1">Kommer snart</Badge>
+          <Badge variant="secondary" className="ml-1">
+            Kommer snart
+          </Badge>
         </CardTitle>
         <CardDescription>
-          Knegarloggen kommer att kosta 99 kr/månad. Under betaperioden är tjänsten gratis.
+          Knegarloggen kommer att kosta 99 kr/månad. Under betaperioden är
+          tjänsten gratis.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="rounded-md bg-muted/50 p-4 text-sm text-muted-foreground">
-          <p className="font-medium text-foreground">Beta – kostnadsfri tillgång</p>
-          <p className="mt-1">Du har full tillgång till alla funktioner utan kostnad under betaperioden. Betalning aktiveras med förvarning innan lansering.</p>
+          <p className="font-medium text-foreground">
+            Beta – kostnadsfri tillgång
+          </p>
+          <p className="mt-1">
+            Du har full tillgång till alla funktioner utan kostnad under
+            betaperioden. Betalning aktiveras med förvarning innan lansering.
+          </p>
         </div>
       </CardContent>
     </Card>
@@ -142,7 +156,8 @@ function FarligZonSection() {
     <div className="space-y-2">
       <p className="text-sm font-medium text-destructive">Farlig zon</p>
       <p className="text-xs text-muted-foreground">
-        Raderar ditt konto, alla jobb, kunder, bilder och företagsuppgifter permanent.
+        Raderar ditt konto, alla jobb, kunder, bilder och företagsuppgifter
+        permanent.
       </p>
       <div className="mt-2">
         <DeleteAccountButton />

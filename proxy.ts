@@ -12,4 +12,6 @@ export function proxy(request: NextRequest) {
   }
   return NextResponse.next();
 }
-export const config = { matcher: ["/mina-sidor/:path*"] };
+export const config = {
+  matcher: ["/mina-sidor/:path*", "/admin/:path*", "/admin"],
+};

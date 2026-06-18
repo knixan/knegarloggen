@@ -13,7 +13,9 @@ export default async function InstallningarPage() {
     <main className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-2xl font-bold">Inställningar</h1>
-        <p className="text-muted-foreground text-sm mt-1">{session.user.email}</p>
+        <p className="text-muted-foreground text-sm mt-1">
+          {session.user.email}
+        </p>
       </div>
       <InstallningarKlient />
     </main>

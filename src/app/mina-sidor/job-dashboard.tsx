@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import JobList from "@/components/site/job-list";
+import { Search } from "lucide-react";
+import JobList from "@/components/minasidor/job-list";
 import { deleteJob } from "@/lib/job-actions";
 import type { Job } from "@/lib/job-schema";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 
 import {
@@ -102,6 +104,7 @@ interface Props {
 export default function JobDashboard({ jobs }: Props) {
   const router = useRouter();
   const [active, setActive] = useState<Filter>("alla");
+  const [sok, setSok] = useState("");
   const [jobToDelete, setJobToDelete] = useState<Job | null>(null);
 
   async function confirmDelete() {
@@ -120,10 +123,33 @@ export default function JobDashboard({ jobs }: Props) {
     router.push(`/mina-sidor/jobb/${job.id}/redigera`);
   }
 
-  const filtered = applyFilter(jobs, active);
+  const afterStatus = applyFilter(jobs, active);
+  const filtered = sok.trim()
+    ? afterStatus.filter((j) => {
+        const q = sok.toLowerCase();
+        return (
+          j.customer?.namn?.toLowerCase().includes(q) ||
+          j.customer?.foretagsnamn?.toLowerCase().includes(q) ||
+          j.customer?.adress?.toLowerCase().includes(q) ||
+          j.customer?.ort?.toLowerCase().includes(q) ||
+          j.utfortArbete?.toLowerCase().includes(q) ||
+          j.planeratArbete?.toLowerCase().includes(q) ||
+          j.anteckningar?.toLowerCase().includes(q)
+        );
+      })
+    : afterStatus;
 
   return (
     <div className="space-y-4">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          placeholder="Sök kund, adress, utfört arbete..."
+          value={sok}
+          onChange={(e) => setSok(e.target.value)}
+          className="pl-9"
+        />
+      </div>
       <div className="flex flex-wrap gap-2">
         {filters.map((f) => {
           const count =
@@ -160,7 +186,7 @@ export default function JobDashboard({ jobs }: Props) {
                 .
               </>
             ) : (
-              `Inga jobb med status "${active}".`
+              `Inga jobb matchar${sok ? ` sökningen "${sok}"` : ""} med vald status.`
             )}
           </CardContent>
         </Card>

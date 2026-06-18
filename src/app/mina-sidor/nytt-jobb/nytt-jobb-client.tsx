@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
-import JobForm from "@/components/site/job-form";
+import JobForm from "@/components/minasidor/job-form";
 import { createJob } from "@/lib/job-actions";
 import type { JobInput, Customer } from "@/lib/job-schema";
 
