@@ -12,15 +12,19 @@ Jobblogg och fakturaverktyg för hantverkare. Håll koll på kunder, material, r
 ## Funktioner
 
 - **Jobbhantering** – Skapa och redigera jobb med status (ej påbörjat / pågående / utfört / fakturerat / betalt)
+- **Sökning & filtrering** – Sök på kund, adress och utfört arbete, kombinerat med statusfilter
 - **Kundregister** – Privatpersoner och företagskunder med adress, personnummer och fastighetsbeteckning
 - **Artiklar** – Material med artikelnummer, återförsäljare, inköpspris och utpris
 - **Reslogg** – Körda sträckor per datum med automatisk milersättning
 - **Arbetstid** – Arbetspass per datum med automatisk timprisberäkning
 - **Övriga kostnader** – Fri rad för förbrukningsmaterial, hyrd utrustning m.m.
-- **Faktura** – Professionell utskriftsvy med logotyp, betalningsuppgifter, moms och ROT-avdrag
+- **Faktura** – Professionell utskriftsvy med logotyp, automatiskt fakturanummer, moms och ROT-avdrag
 - **ROT-avdrag** – Korrekt beräkning (30% av arbetskostnad inkl. moms) enligt Skatteverkets regler
 - **Fast pris** – Möjlighet att fakturera ett fast pris istället för beräknad summa
 - **Bilder** – Ladda upp jobbfoton via UploadThing
+- **Inställningar** – Byt lösenord och hantera konto
+- **Kontoborttagning** – GDPR-kompatibel radering av all data
+- **Admin** – Rollbaserad adminpanel för användarhantering
 - **Mörkt/ljust läge** – Systemanpassat tema
 
 ---
@@ -76,7 +80,7 @@ NEXT_PUBLIC_APP_URL="http://localhost:3000"
 UPLOADTHING_TOKEN="ditt-token-här"
 ```
 
-I produktion (Vercel) – uppdatera `BETTER_AUTH_URL` och `NEXT_PUBLIC_APP_URL` till din faktiska domän.
+I produktion (Vercel) – sätt `BETTER_AUTH_URL` och `NEXT_PUBLIC_APP_URL` till din faktiska domän och kör en ny deploy. `NEXT_PUBLIC_`-variabler bäddas in vid byggtid.
 
 ### Databas
 
@@ -98,41 +102,56 @@ npm run dev
 
 ```
 knegarloggen/
-├── app/
-│   ├── api/                  # Auth- och UploadThing-routes
-│   ├── logga-in/             # Inloggning
-│   ├── registrera/           # Registrering
-│   └── mina-sidor/           # Skyddade sidor
-│       ├── jobb/[id]/        # Jobbdetalj, redigera, skriv ut
-│       ├── kunder/           # Kundregister
-│       └── foretag/          # Företagsuppgifter
 ├── src/
+│   ├── app/
+│   │   ├── api/                    # Auth- och UploadThing-routes
+│   │   ├── logga-in/               # Inloggning
+│   │   ├── registrera/             # Registrering
+│   │   ├── admin/                  # Adminpanel (kräver roll "admin")
+│   │   └── mina-sidor/             # Skyddade sidor
+│   │       ├── installningar/      # Lösenord, prenumeration, kontoborttagning
+│   │       ├── jobb/[id]/          # Jobbdetalj, redigera, skriv ut/faktura
+│   │       ├── kunder/             # Kundregister
+│   │       └── foretag/            # Företagsuppgifter
 │   ├── components/
-│   │   ├── site/             # JobForm, JobList, fakturakomponenter m.m.
-│   │   └── ui/               # shadcn/ui-komponenter
+│   │   ├── site/                   # Globala komponenter (navbar, footer, hero m.m.)
+│   │   ├── minasidor/              # Jobbformulär, jobblista, fakturakomponenter
+│   │   └── ui/                     # shadcn/ui-komponenter
 │   └── lib/
-│       ├── auth.ts           # Better Auth-konfiguration
-│       ├── job-actions.ts    # Server actions (CRUD)
-│       ├── job-schema.ts     # Zod-schema och beräkningsfunktioner
-│       └── prisma.ts         # Prisma-klient
+│       ├── auth.ts                 # Better Auth-konfiguration
+│       ├── auth-client.ts          # Auth-klient (React)
+│       ├── admin-actions.ts        # Server actions för adminpanelen
+│       ├── job-actions.ts          # Server actions (CRUD jobb, faktura, konton)
+│       ├── job-schema.ts           # Zod-schema och beräkningsfunktioner
+│       └── prisma.ts               # Prisma-klient
 ├── prisma/
-│   └── schema.prisma         # Databasschema
-└── proxy.ts                  # Routeskydd (kräver inloggning för /mina-sidor)
+│   └── schema.prisma               # Databasschema
+└── proxy.ts                        # Routeskydd (/mina-sidor och /admin)
 ```
 
 ---
 
 ## Databasmodeller
 
-- **User / Account / Session** – hanteras av Better Auth
+- **User / Account / Session** – hanteras av Better Auth (inkl. `role`-fält för admin)
 - **Company** – företagsuppgifter, fakturainställningar och logotyp
 - **Customer** – privat- eller företagskund kopplad till ett företag
-- **Job** – jobb med status, prissättning och ROT-flagga
+- **Job** – jobb med status, prissättning, fakturanummer och ROT-flagga
 - **Article** – material per jobb
 - **Trip** – reslog per datum
 - **WorkSession** – arbetspass per datum
 - **OvrigKostnad** – övriga kostnader per jobb
 - **JobImage** – bilder uppladdade via UploadThing
+
+---
+
+## Admin
+
+Adminpanelen nås på `/admin` och kräver `role = "admin"` i databasen. Första admin sätts direkt i databasen:
+
+```sql
+UPDATE "user" SET role = 'admin' WHERE email = 'din@epost.se';
+```
 
 ---
 
