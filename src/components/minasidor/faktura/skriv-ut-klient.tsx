@@ -1,7 +1,18 @@
 "use client";
 
-import { useEffect } from "react";
+import dynamic from "next/dynamic";
 import type { Job } from "@/lib/job-schema";
+import { Button } from "@/components/ui/button";
+import { Printer } from "lucide-react";
+
+const PdfKnapp = dynamic(() => import("./pdf-knapp").then((m) => m.PdfKnapp), {
+  ssr: false,
+  loading: () => (
+    <Button variant="outline" size="sm" disabled>
+      Laddar...
+    </Button>
+  ),
+});
 
 type Company = {
   name: string;
@@ -70,17 +81,6 @@ export default function SkrivUtKlient({
   const kundAdress = kund?.adress ?? "";
   const kundPostOrt = [kund?.postnummer, kund?.ort].filter(Boolean).join(" ");
 
-  useEffect(() => {
-    if (company.logoUrl) {
-      const img = new window.Image();
-      img.onload = () => window.print();
-      img.onerror = () => window.print();
-      img.src = company.logoUrl;
-    } else {
-      window.print();
-    }
-  }, [company.logoUrl]);
-
   return (
     <>
       <style>{`
@@ -128,9 +128,29 @@ export default function SkrivUtKlient({
           body { margin: 0; }
           .sida { padding: 1.5cm; }
           @page { margin: 0; size: A4; }
-          nav, footer { display: none !important; }
+          nav, footer, .no-print { display: none !important; }
         }
       `}</style>
+
+      <div
+        className="no-print"
+        style={{
+          display: "flex",
+          gap: 8,
+          padding: "12px 16px",
+          borderBottom: "1px solid #e5e7eb",
+          background: "#f9fafb",
+          position: "sticky",
+          top: 0,
+          zIndex: 10,
+        }}
+      >
+        <Button variant="outline" size="sm" onClick={() => window.print()}>
+          <Printer className="h-4 w-4 mr-2" />
+          Skriv ut
+        </Button>
+        <PdfKnapp job={job} company={company} fakturanummer={fakturanummer} />
+      </div>
 
       <div className="sida">
         {/* Header */}

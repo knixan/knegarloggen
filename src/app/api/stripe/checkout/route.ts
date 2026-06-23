@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
+import { env } from "@/lib/env";
 
 export async function POST() {
   try {
@@ -12,7 +13,7 @@ export async function POST() {
     }
 
     const user = session.user;
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    const appUrl = env.NEXT_PUBLIC_APP_URL;
 
     const existing = await prisma.subscription.findUnique({
       where: { userId: user.id },
@@ -49,7 +50,7 @@ export async function POST() {
       payment_method_types: ["card"],
       line_items: [
         {
-          price: process.env.STRIPE_PRICE_ID!,
+          price: env.STRIPE_PRICE_ID,
           quantity: 1,
         },
       ],

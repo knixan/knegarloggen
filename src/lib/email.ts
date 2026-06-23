@@ -1,15 +1,13 @@
 import { Resend } from "resend";
 import { type Job, type CompanyInput, beräknaSummering } from "./job-schema";
 import { escapeHtml as e } from "./utils";
+import { env } from "./env";
 
 const FROM_NOREPLY = "onboarding@resend.dev";
 const FROM_FAKTURA = "onboarding@resend.dev";
 
 function getResend() {
-  if (!process.env.RESEND_API_KEY) {
-    throw new Error("RESEND_API_KEY saknas i miljövariabler");
-  }
-  return new Resend(process.env.RESEND_API_KEY);
+  return new Resend(env.RESEND_API_KEY);
 }
 
 export async function sendVerificationEmail(email: string, url: string) {
