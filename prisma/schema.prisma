@@ -28,7 +28,6 @@ model User {
 
   accounts      Account[]
   sessions      Session[]
-  members       Member[]
   companies     Company[]
   subscription  Subscription?
 
@@ -65,8 +64,6 @@ model Session {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  activeOrganizationId String?
-
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("session")
@@ -81,23 +78,6 @@ model Verification {
   updatedAt  DateTime @updatedAt
 
   @@map("verification")
-}
-
-// ============================================================
-// TEAMS – Better-auth organization/team plugin
-// ============================================================
-
-model Organization {
-  id        String   @id @default(cuid())
-  name      String
-  slug      String   @unique
-  logo      String?
-  metadata  String?
-  createdAt DateTime @default(now())
-
-  members   Member[]
-
-  @@map("organization")
 }
 
 model Company {
@@ -132,33 +112,6 @@ model Company {
   customers Customer[]
 
   @@map("company")
-}
-
-model Member {
-  id             String   @id @default(cuid())
-  userId         String
-  organizationId String
-  role           String   @default("member")
-  createdAt      DateTime @default(now())
-
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, organizationId])
-  @@map("member")
-}
-
-model Invitation {
-  id             String   @id @default(cuid())
-  organizationId String
-  email          String
-  role           String   @default("member")
-  status         String   @default("pending")
-  expiresAt      DateTime
-  inviterId      String
-  createdAt      DateTime @default(now())
-
-  @@map("invitation")
 }
 
 // ============================================================

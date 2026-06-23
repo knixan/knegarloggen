@@ -8,6 +8,11 @@ export const auth = betterAuth({
     provider: "postgresql",
   }),
 
+  rateLimit: {
+    window: 60,
+    max: 10,
+  },
+
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 10,

@@ -36,6 +36,32 @@ async function getOrCreateCompany(userId: string) {
   });
 }
 
+type CompanyCtx = { company: Awaited<ReturnType<typeof getOrCreateCompany>> };
+type AuthError = { ok: false; error: string };
+
+async function requireCompany(): Promise<CompanyCtx | AuthError> {
+  const session = await getSession();
+  if (!session?.user) return { ok: false, error: "Inte inloggad" };
+  const company = await getOrCreateCompany(session.user.id);
+  return { company };
+}
+
+async function requireExistingCompany(): Promise<CompanyCtx | AuthError> {
+  const session = await getSession();
+  if (!session?.user) return { ok: false, error: "Inte inloggad" };
+  const company = await prisma.company.findFirst({
+    where: { ownerId: session.user.id },
+  });
+  if (!company) return { ok: false, error: "Inget företag hittat" };
+  return { company };
+}
+
+async function requireSession(): Promise<{ userId: string } | AuthError> {
+  const session = await getSession();
+  if (!session?.user) return { ok: false, error: "Inte inloggad" };
+  return { userId: session.user.id };
+}
+
 function mapCustomer(c: NonNullable<JobWithRelations["customer"]>) {
   return {
     id: c.id,
@@ -145,15 +171,15 @@ export async function getCompanySettings() {
 }
 
 export async function updateCompanySettings(data: CompanyInput) {
-  const session = await getSession();
-  if (!session?.user) return { ok: false, error: "Inte inloggad" };
+  const ctx = await requireCompany();
+  if ("error" in ctx) return ctx;
 
   const trimmedName = data.name.trim();
   if (!trimmedName) return { ok: false, error: "Företagsnamn krävs" };
   if (trimmedName.length > 120)
     return { ok: false, error: "Företagsnamnet är för långt" };
 
-  const company = await getOrCreateCompany(session.user.id);
+  const { company } = ctx;
 
   await prisma.company.update({
     where: { id: company.id },
@@ -179,22 +205,21 @@ export async function updateCompanySettings(data: CompanyInput) {
 
   revalidatePath("/mina-sidor");
   revalidatePath("/mina-sidor/foretag");
-  return { ok: true };
+  return { ok: true as const };
 }
 
 export async function updateCompanyLogo(
   logo: { url: string; key: string } | null,
 ) {
-  const session = await getSession();
-  if (!session?.user) return { ok: false, error: "Inte inloggad" };
-
-  const company = await getOrCreateCompany(session.user.id);
+  const ctx = await requireCompany();
+  if ("error" in ctx) return ctx;
+  const { company } = ctx;
 
   if (company.logoKey && company.logoKey !== logo?.key) {
     try {
       await utapi.deleteFiles(company.logoKey);
-    } catch {
-      // ignorera fel vid radering av gammal fil
+    } catch (err) {
+      console.error("Kunde inte radera gammal logotyp:", err);
     }
   }
 
@@ -208,7 +233,7 @@ export async function updateCompanyLogo(
 
   revalidatePath("/mina-sidor");
   revalidatePath("/mina-sidor/foretag");
-  return { ok: true };
+  return { ok: true as const };
 }
 
 // ============================================================
@@ -286,10 +311,9 @@ export async function getCustomer(id: string) {
 }
 
 export async function createCustomer(data: CustomerInput) {
-  const session = await getSession();
-  if (!session?.user) return { ok: false, error: "Inte inloggad" };
-
-  const company = await getOrCreateCompany(session.user.id);
+  const ctx = await requireCompany();
+  if ("error" in ctx) return ctx;
+  const { company } = ctx;
 
   const customer = await prisma.customer.create({
     data: {
@@ -312,17 +336,13 @@ export async function createCustomer(data: CustomerInput) {
   });
 
   revalidatePath("/mina-sidor/kunder");
-  return { ok: true, id: customer.id };
+  return { ok: true as const, id: customer.id };
 }
 
 export async function updateCustomer(id: string, data: CustomerInput) {
-  const session = await getSession();
-  if (!session?.user) return { ok: false, error: "Inte inloggad" };
-
-  const company = await prisma.company.findFirst({
-    where: { ownerId: session.user.id },
-  });
-  if (!company) return { ok: false, error: "Inget företag hittat" };
+  const ctx = await requireExistingCompany();
+  if ("error" in ctx) return ctx;
+  const { company } = ctx;
 
   const existing = await prisma.customer.findFirst({
     where: { id, companyId: company.id },
@@ -351,17 +371,13 @@ export async function updateCustomer(id: string, data: CustomerInput) {
 
   revalidatePath("/mina-sidor/kunder");
   revalidatePath(`/mina-sidor/kunder/${id}/redigera`);
-  return { ok: true };
+  return { ok: true as const };
 }
 
 export async function deleteCustomer(id: string) {
-  const session = await getSession();
-  if (!session?.user) return { ok: false, error: "Inte inloggad" };
-
-  const company = await prisma.company.findFirst({
-    where: { ownerId: session.user.id },
-  });
-  if (!company) return { ok: false, error: "Inget företag hittat" };
+  const ctx = await requireExistingCompany();
+  if ("error" in ctx) return ctx;
+  const { company } = ctx;
 
   const existing = await prisma.customer.findFirst({
     where: { id, companyId: company.id },
@@ -378,7 +394,7 @@ export async function deleteCustomer(id: string) {
 
   revalidatePath("/mina-sidor/kunder");
   revalidatePath("/mina-sidor");
-  return { ok: true };
+  return { ok: true as const };
 }
 
 // ============================================================
@@ -439,10 +455,9 @@ export async function createJob(
   data: JobInput,
   bilder: { url: string; key: string }[] = [],
 ) {
-  const session = await getSession();
-  if (!session?.user) return { ok: false, error: "Inte inloggad" };
-
-  const company = await getOrCreateCompany(session.user.id);
+  const ctx = await requireCompany();
+  if ("error" in ctx) return ctx;
+  const { company } = ctx;
 
   if (data.customerId) {
     const customer = await prisma.customer.findFirst({
@@ -501,7 +516,7 @@ export async function createJob(
   });
 
   revalidatePath("/mina-sidor");
-  return { ok: true };
+  return { ok: true as const };
 }
 
 export async function updateJob(
@@ -509,13 +524,9 @@ export async function updateJob(
   data: JobInput,
   bilder: { url: string; key: string }[] = [],
 ) {
-  const session = await getSession();
-  if (!session?.user) return { ok: false, error: "Inte inloggad" };
-
-  const company = await prisma.company.findFirst({
-    where: { ownerId: session.user.id },
-  });
-  if (!company) return { ok: false, error: "Inget företag hittat" };
+  const ctx = await requireExistingCompany();
+  if ("error" in ctx) return ctx;
+  const { company } = ctx;
 
   const existing = await prisma.job.findFirst({
     where: { id, companyId: company.id },
@@ -543,8 +554,8 @@ export async function updateJob(
   if (toDelete.length > 0) {
     try {
       await utapi.deleteFiles(toDelete);
-    } catch {
-      /* ignorera */
+    } catch (err) {
+      console.error("Kunde inte radera bilder från UploadThing:", err);
     }
   }
 
@@ -669,17 +680,13 @@ export async function updateJob(
 
   revalidatePath("/mina-sidor");
   revalidatePath(`/mina-sidor/jobb/${id}/redigera`);
-  return { ok: true };
+  return { ok: true as const };
 }
 
 export async function deleteJob(id: string) {
-  const session = await getSession();
-  if (!session?.user) return { ok: false, error: "Inte inloggad" };
-
-  const company = await prisma.company.findFirst({
-    where: { ownerId: session.user.id },
-  });
-  if (!company) return { ok: false, error: "Inget företag hittat" };
+  const ctx = await requireExistingCompany();
+  if ("error" in ctx) return ctx;
+  const { company } = ctx;
 
   const job = await prisma.job.findFirst({
     where: { id, companyId: company.id },
@@ -690,25 +697,24 @@ export async function deleteJob(id: string) {
   if (job.images.length > 0) {
     try {
       await utapi.deleteFiles(job.images.map((i) => i.key));
-    } catch {
-      /* ignorera */
+    } catch (err) {
+      console.error("Kunde inte radera jobbbilder:", err);
     }
   }
 
   await prisma.job.delete({ where: { id } });
 
   revalidatePath("/mina-sidor");
-  return { ok: true };
+  return { ok: true as const };
 }
 
 export async function deleteAccount(): Promise<{
   ok: boolean;
   error?: string;
 }> {
-  const session = await getSession();
-  if (!session?.user) return { ok: false, error: "Inte inloggad" };
-
-  const userId = session.user.id;
+  const ctx = await requireSession();
+  if ("error" in ctx) return ctx;
+  const { userId } = ctx;
 
   const company = await prisma.company.findFirst({
     where: { ownerId: userId },
@@ -727,14 +733,14 @@ export async function deleteAccount(): Promise<{
   if (keys.length > 0) {
     try {
       await utapi.deleteFiles(keys);
-    } catch {
-      // Fortsätt även om filradering misslyckas
+    } catch (err) {
+      console.error("Kunde inte radera filer vid kontoborttagning:", err);
     }
   }
 
   await prisma.user.delete({ where: { id: userId } });
 
-  return { ok: true };
+  return { ok: true as const };
 }
 
 export async function reserverFakturanummer(jobId: string): Promise<number> {
