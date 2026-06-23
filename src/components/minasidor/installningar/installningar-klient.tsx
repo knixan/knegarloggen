@@ -229,34 +229,16 @@ function PrenumerationSection({
     }
 
     if (status === "active") {
-      if (cancelAtPeriodEnd) {
-        return (
-          <>
-            <CardDescription>
-              Prenumerationen avslutas {formatDatum(currentPeriodEnd)}. Du har
-              tillgång till och med det datumet.
-            </CardDescription>
-            <CardContent className="pt-0">
-              <Button
-                variant="outline"
-                onClick={openPortal}
-                disabled={isPending}
-              >
-                {isPending ? "Laddar..." : "Förnya prenumeration"}
-              </Button>
-            </CardContent>
-          </>
-        );
-      }
       return (
         <>
           <CardDescription>
-            Din prenumeration är aktiv. Nästa faktura{" "}
-            {formatDatum(currentPeriodEnd)} — 99 kr.
+            {cancelAtPeriodEnd
+              ? `Prenumerationen avslutas ${formatDatum(currentPeriodEnd)}. Du har tillgång till och med det datumet.`
+              : `Din prenumeration är aktiv. Nästa faktura ${formatDatum(currentPeriodEnd)} — 99 kr.`}
           </CardDescription>
           <CardContent className="pt-0">
             <Button variant="outline" onClick={openPortal} disabled={isPending}>
-              {isPending ? "Laddar..." : "Avsluta prenumeration"}
+              {isPending ? "Laddar..." : "Hantera prenumeration"}
             </Button>
           </CardContent>
         </>
@@ -305,8 +287,11 @@ function PrenumerationSection({
     const { status } = subscription;
     if (status === "trialing")
       return <Badge variant="secondary">Provperiod</Badge>;
-    if (status === "active")
+    if (status === "active") {
+      if (subscription.cancelAtPeriodEnd)
+        return <Badge variant="secondary">Avslutas</Badge>;
       return <Badge className="bg-green-500 text-white">Aktiv</Badge>;
+    }
     if (status === "past_due" || status === "unpaid")
       return <Badge variant="destructive">Betalning misslyckad</Badge>;
     if (status === "canceled")
