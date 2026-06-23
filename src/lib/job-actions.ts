@@ -112,12 +112,12 @@ function mapJob(j: JobWithRelations) {
     })),
     resor: j.resor.map((r) => ({
       id: r.id,
-      datum: r.datum,
+      datum: r.datum.toISOString().slice(0, 10),
       stracka: r.stracka,
     })),
     arbetstider: j.arbetspass.map((w) => ({
       id: w.id,
-      datum: w.datum,
+      datum: w.datum.toISOString().slice(0, 10),
       timmar: w.timmar,
     })),
     ovrigaKostnader: j.ovrigaKostnader.map((k) => ({
@@ -493,13 +493,13 @@ export async function createJob(
       },
       resor: {
         create: data.resor.map((r) => ({
-          datum: r.datum,
+          datum: new Date(r.datum),
           stracka: r.stracka,
         })),
       },
       arbetspass: {
         create: data.arbetstider.map((w) => ({
-          datum: w.datum,
+          datum: new Date(w.datum),
           timmar: w.timmar,
         })),
       },
@@ -617,10 +617,10 @@ export async function updateJob(
       r.id
         ? prisma.trip.update({
             where: { id: r.id },
-            data: { datum: r.datum, stracka: r.stracka },
+            data: { datum: new Date(r.datum), stracka: r.stracka },
           })
         : prisma.trip.create({
-            data: { jobId: id, datum: r.datum, stracka: r.stracka },
+            data: { jobId: id, datum: new Date(r.datum), stracka: r.stracka },
           }),
     ),
     // Arbetspass
@@ -631,10 +631,10 @@ export async function updateJob(
       w.id
         ? prisma.workSession.update({
             where: { id: w.id },
-            data: { datum: w.datum, timmar: w.timmar },
+            data: { datum: new Date(w.datum), timmar: w.timmar },
           })
         : prisma.workSession.create({
-            data: { jobId: id, datum: w.datum, timmar: w.timmar },
+            data: { jobId: id, datum: new Date(w.datum), timmar: w.timmar },
           }),
     ),
     // Övriga kostnader

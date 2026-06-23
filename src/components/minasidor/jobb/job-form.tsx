@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import * as React from "react";
+import { toast } from "sonner";
 import {
   useFieldArray,
   useForm,
@@ -150,7 +151,7 @@ export default function JobForm({
         ]);
       }
     } catch {
-      alert("Bilduppladdning misslyckades. Försök igen.");
+      toast.error("Bilduppladdning misslyckades. Försök igen.");
     } finally {
       setLaddarUpp(false);
     }

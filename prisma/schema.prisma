@@ -221,8 +221,8 @@ model Trip {
   id    String @id @default(cuid())
   jobId String
 
-  datum   String
-  stracka Float  @default(0)
+  datum   DateTime @db.Date
+  stracka Float    @default(0)
 
   job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
 
@@ -234,7 +234,7 @@ model WorkSession {
   id    String @id @default(cuid())
   jobId String
 
-  datum  String
+  datum  DateTime @db.Date
   timmar Float
 
   job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
