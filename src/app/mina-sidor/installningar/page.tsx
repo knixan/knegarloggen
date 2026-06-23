@@ -5,9 +5,9 @@ import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
 import InstallningarKlient from "@/components/minasidor/installningar/installningar-klient";
 
+export const dynamic = "force-dynamic";
 export const metadata = { title: "Inställningar – Knegarloggen" };
 
-// Synka alltid mot Stripe vid sidladdning om kunden har en Stripe-koppling
 async function syncFromStripe(userId: string) {
   const sub = await prisma.subscription.findUnique({
     where: { userId },
@@ -21,23 +21,23 @@ async function syncFromStripe(userId: string) {
       limit: 1,
       status: "all",
     });
-    const stripeSub = stripeSubs.data[0];
-    if (!stripeSub) return;
+    const s = stripeSubs.data[0];
+    if (!s) return;
+
+    // Periodslutet: använd cancel_at om satt, annars billing_schedules
+    const periodEndTs =
+      s.cancel_at ??
+      s.billing_schedules?.[0]?.bill_until.computed_timestamp ??
+      null;
 
     await prisma.subscription.update({
       where: { userId },
       data: {
-        stripeSubscriptionId: stripeSub.id,
-        status: stripeSub.status,
-        trialEnd: stripeSub.trial_end
-          ? new Date(stripeSub.trial_end * 1000)
-          : null,
-        ...(stripeSub.billing_schedules?.[0]?.bill_until.computed_timestamp && {
-          currentPeriodEnd: new Date(
-            stripeSub.billing_schedules[0].bill_until.computed_timestamp * 1000
-          ),
-        }),
-        cancelAtPeriodEnd: stripeSub.cancel_at_period_end,
+        stripeSubscriptionId: s.id,
+        status: s.status,
+        cancelAtPeriodEnd: s.cancel_at_period_end,
+        trialEnd: s.trial_end ? new Date(s.trial_end * 1000) : null,
+        ...(periodEndTs && { currentPeriodEnd: new Date(periodEndTs * 1000) }),
       },
     });
   } catch (err) {
