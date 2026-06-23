@@ -27,8 +27,8 @@ import { useUploadThing } from "@/lib/uploadthing-client";
 import {
   updateCompanySettings,
   updateCompanyLogo,
-  type CompanyInput,
 } from "@/lib/job-actions";
+import { type CompanyInput } from "@/lib/job-schema";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

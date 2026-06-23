@@ -113,6 +113,25 @@ export type Job = JobInput & {
   customer?: Customer | null;
 };
 
+export type CompanyInput = {
+  name: string;
+  orgNummer: string;
+  adress: string;
+  postnummer: string;
+  ort: string;
+  telefon: string;
+  epost: string;
+  fSkatt: boolean;
+  momsNummer: string;
+  bankgiro: string;
+  plusgiro: string;
+  swish: string;
+  nastaFakturanummer: number;
+  forfallodagar: number;
+  drojsmalsranta: number;
+  fakturatext: string;
+};
+
 export function beräknaSummering(job: JobInput) {
   const artiklarSum = job.artiklar.reduce(
     (sum, a) => sum + a.pris * a.antal,

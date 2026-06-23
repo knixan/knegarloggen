@@ -6,7 +6,7 @@ import type { Prisma } from "@prisma/client";
 import { UTApi } from "uploadthing/server";
 import { auth } from "./auth";
 import { prisma } from "./prisma";
-import type { JobInput, CustomerInput } from "./job-schema";
+import type { JobInput, CustomerInput, CompanyInput } from "./job-schema";
 
 const utapi = new UTApi();
 const DEFAULT_COMPANY_NAME = "Mitt företag";
@@ -143,25 +143,6 @@ export async function getCompanySettings() {
     fakturatext: company.fakturatext,
   };
 }
-
-export type CompanyInput = {
-  name: string;
-  orgNummer: string;
-  adress: string;
-  postnummer: string;
-  ort: string;
-  telefon: string;
-  epost: string;
-  fSkatt: boolean;
-  momsNummer: string;
-  bankgiro: string;
-  plusgiro: string;
-  swish: string;
-  nastaFakturanummer: number;
-  forfallodagar: number;
-  drojsmalsranta: number;
-  fakturatext: string;
-};
 
 export async function updateCompanySettings(data: CompanyInput) {
   const session = await getSession();

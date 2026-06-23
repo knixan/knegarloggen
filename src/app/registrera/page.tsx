@@ -37,9 +37,7 @@ export default function RegistreraPage() {
       toast.error(result.error.message ?? "Registrering misslyckades");
       return;
     }
-    toast.success("Konto skapat! Välkommen.");
-    router.push("/mina-sidor");
-    router.refresh();
+    router.push("/registrera/bekrafta-epost");
   }
 
   return (
