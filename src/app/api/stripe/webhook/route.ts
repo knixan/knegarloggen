@@ -99,6 +99,18 @@ export async function POST(request: NextRequest) {
         });
         break;
       }
+
+      case "invoice.payment_failed": {
+        const invoice = event.data.object as Stripe.Invoice;
+        const sub = invoice.parent?.subscription_details?.subscription;
+        const subId = typeof sub === "string" ? sub : (sub?.id ?? null);
+        if (!subId) break;
+        await prisma.subscription.updateMany({
+          where: { stripeSubscriptionId: subId },
+          data: { status: "past_due" },
+        });
+        break;
+      }
     }
   } catch (err) {
     console.error("Webhook-fel:", err);

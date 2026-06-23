@@ -3,8 +3,8 @@ import { type Job, type CompanyInput, beräknaSummering } from "./job-schema";
 import { escapeHtml as e } from "./utils";
 import { env } from "./env";
 
-const FROM_NOREPLY = "onboarding@resend.dev";
-const FROM_FAKTURA = "onboarding@resend.dev";
+const FROM_NOREPLY = env.RESEND_FROM;
+const FROM_FAKTURA = env.RESEND_FROM;
 
 function getResend() {
   return new Resend(env.RESEND_API_KEY);

@@ -13,6 +13,8 @@ import {
   type CompanyInput,
 } from "./job-schema";
 
+import { stripe } from "./stripe";
+
 const utapi = new UTApi();
 const DEFAULT_COMPANY_NAME = "Mitt företag";
 
@@ -699,13 +701,19 @@ export async function deleteAccount(): Promise<{
   if ("error" in ctx) return ctx;
   const { userId } = ctx;
 
-  const company = await prisma.company.findFirst({
-    where: { ownerId: userId },
-    select: {
-      logoKey: true,
-      jobs: { select: { images: { select: { key: true } } } },
-    },
-  });
+  const [company, subscription] = await Promise.all([
+    prisma.company.findFirst({
+      where: { ownerId: userId },
+      select: {
+        logoKey: true,
+        jobs: { select: { images: { select: { key: true } } } },
+      },
+    }),
+    prisma.subscription.findUnique({
+      where: { userId },
+      select: { stripeSubscriptionId: true },
+    }),
+  ]);
 
   const keys: string[] = [];
   if (company?.logoKey) keys.push(company.logoKey);
@@ -718,6 +726,14 @@ export async function deleteAccount(): Promise<{
       await utapi.deleteFiles(keys);
     } catch (err) {
       console.error("Kunde inte radera filer vid kontoborttagning:", err);
+    }
+  }
+
+  if (subscription?.stripeSubscriptionId) {
+    try {
+      await stripe.subscriptions.cancel(subscription.stripeSubscriptionId);
+    } catch (err) {
+      console.error("Kunde inte avbryta Stripe-prenumeration:", err);
     }
   }
 
