@@ -25,7 +25,9 @@ export default function LoggaInPage() {
     setLoading(false);
     if (result.error) {
       if (result.error.status === 403) {
-        toast.error("Du behöver verifiera din e-postadress innan du kan logga in. Kolla din inkorg.");
+        toast.error(
+          "Du behöver verifiera din e-postadress innan du kan logga in. Kolla din inkorg.",
+        );
       } else {
         toast.error("Fel e-post eller lösenord");
       }

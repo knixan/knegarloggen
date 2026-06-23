@@ -24,10 +24,7 @@ import {
 } from "lucide-react";
 
 import { useUploadThing } from "@/lib/uploadthing-client";
-import {
-  updateCompanySettings,
-  updateCompanyLogo,
-} from "@/lib/job-actions";
+import { updateCompanySettings, updateCompanyLogo } from "@/lib/job-actions";
 import { type CompanyInput } from "@/lib/job-schema";
 
 import { Button } from "@/components/ui/button";

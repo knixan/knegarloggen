@@ -141,7 +141,11 @@ function formatDatum(date: Date | null) {
   return format(new Date(date), "d MMMM yyyy", { locale: sv });
 }
 
-function PrenumerationSection({ subscription }: { subscription: Subscription }) {
+function PrenumerationSection({
+  subscription,
+}: {
+  subscription: Subscription;
+}) {
   const [isPending, setIsPending] = useState(false);
 
   async function startCheckout() {
@@ -212,7 +216,11 @@ function PrenumerationSection({ subscription }: { subscription: Subscription }) 
             ännu.
           </CardDescription>
           <CardContent className="pt-0">
-            <Button onClick={startCheckout} disabled={isPending} variant="outline">
+            <Button
+              onClick={startCheckout}
+              disabled={isPending}
+              variant="outline"
+            >
               {isPending ? "Laddar..." : "Lägg till betalning nu"}
             </Button>
           </CardContent>
@@ -229,7 +237,11 @@ function PrenumerationSection({ subscription }: { subscription: Subscription }) 
               tillgång till och med det datumet.
             </CardDescription>
             <CardContent className="pt-0">
-              <Button variant="outline" onClick={openPortal} disabled={isPending}>
+              <Button
+                variant="outline"
+                onClick={openPortal}
+                disabled={isPending}
+              >
                 {isPending ? "Laddar..." : "Förnya prenumeration"}
               </Button>
             </CardContent>
@@ -326,14 +338,14 @@ function FarligZonSection({
       <p className="text-sm font-medium text-destructive">Farlig zon</p>
       {hasActiveStripeSub ? (
         <p className="text-xs text-muted-foreground">
-          Du måste avsluta din aktiva prenumeration innan du kan ta bort
-          kontot. Klicka på &quot;Avsluta prenumeration&quot; ovan.
+          Du måste avsluta din aktiva prenumeration innan du kan ta bort kontot.
+          Klicka på &quot;Avsluta prenumeration&quot; ovan.
         </p>
       ) : (
         <>
           <p className="text-xs text-muted-foreground">
-            Raderar ditt konto, alla jobb, kunder, bilder och
-            företagsuppgifter permanent.
+            Raderar ditt konto, alla jobb, kunder, bilder och företagsuppgifter
+            permanent.
           </p>
           <div className="mt-2">
             <DeleteAccountButton />

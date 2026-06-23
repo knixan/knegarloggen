@@ -49,7 +49,11 @@ export default function TrialGate({
               Knegarloggen. 99 kr/månad, ingen bindningstid.
             </p>
           </div>
-          <Button onClick={startCheckout} disabled={isPending} className="w-full">
+          <Button
+            onClick={startCheckout}
+            disabled={isPending}
+            className="w-full"
+          >
             {isPending ? "Laddar..." : "Lägg till betalning"}
           </Button>
         </div>
@@ -63,7 +67,8 @@ export default function TrialGate({
         <div className="mx-4 mt-4 flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-100">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
           <span>
-            Provperioden slutar om {daysLeft} {daysLeft === 1 ? "dag" : "dagar"}.{" "}
+            Provperioden slutar om {daysLeft} {daysLeft === 1 ? "dag" : "dagar"}
+            .{" "}
             <button
               onClick={startCheckout}
               disabled={isPending}

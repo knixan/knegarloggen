@@ -43,9 +43,7 @@ export async function sendJobEmail(
   const resend = getResend();
   const summary = beräknaSummering(job);
   const customerName =
-    job.customer?.foretagsnamn?.trim() ||
-    job.customer?.namn?.trim() ||
-    "Kund";
+    job.customer?.foretagsnamn?.trim() || job.customer?.namn?.trim() || "Kund";
 
   const subject = job.fakturanummer
     ? `Faktura #${job.fakturanummer} från ${company.name}`
@@ -55,13 +53,14 @@ export async function sendJobEmail(
     ? `<p style="margin:0"><strong>Fakturanummer:</strong> ${job.fakturanummer}</p>`
     : "";
 
-  const forfallodatum = job.fakturanummer && company.forfallodagar
-    ? (() => {
-        const d = new Date();
-        d.setDate(d.getDate() + company.forfallodagar);
-        return `<p style="margin:0"><strong>Förfallodatum:</strong> ${d.toLocaleDateString("sv-SE")}</p>`;
-      })()
-    : "";
+  const forfallodatum =
+    job.fakturanummer && company.forfallodagar
+      ? (() => {
+          const d = new Date();
+          d.setDate(d.getDate() + company.forfallodagar);
+          return `<p style="margin:0"><strong>Förfallodatum:</strong> ${d.toLocaleDateString("sv-SE")}</p>`;
+        })()
+      : "";
 
   const betalningsrader = [
     company.bankgiro && `Bankgiro: ${company.bankgiro}`,
@@ -152,9 +151,13 @@ export async function sendJobEmail(
       <div style="border-bottom:2px solid #1a1a1a;padding-bottom:16px;margin-bottom:20px;display:flex;justify-content:space-between">
         <div>
           <h1 style="font-size:22px;margin:0 0 4px">${customerName}</h1>
-          ${[job.customer?.adress, job.customer?.postnummer, job.customer?.ort].filter(Boolean).join(", ")
-            ? `<p style="font-size:13px;color:#666;margin:0">${[job.customer?.adress, job.customer?.postnummer, job.customer?.ort].filter(Boolean).join(", ")}</p>`
-            : ""}
+          ${
+            [job.customer?.adress, job.customer?.postnummer, job.customer?.ort]
+              .filter(Boolean)
+              .join(", ")
+              ? `<p style="font-size:13px;color:#666;margin:0">${[job.customer?.adress, job.customer?.postnummer, job.customer?.ort].filter(Boolean).join(", ")}</p>`
+              : ""
+          }
         </div>
         <div style="text-align:right;font-size:13px;color:#666">
           <strong style="display:block;color:#1a1a1a;font-size:15px">${company.name}</strong>
@@ -162,9 +165,11 @@ export async function sendJobEmail(
         </div>
       </div>
 
-      ${fakturaHuvud || forfallodatum
-        ? `<div style="font-size:13px;margin-bottom:16px;display:grid;gap:4px">${fakturaHuvud}${forfallodatum}</div>`
-        : ""}
+      ${
+        fakturaHuvud || forfallodatum
+          ? `<div style="font-size:13px;margin-bottom:16px;display:grid;gap:4px">${fakturaHuvud}${forfallodatum}</div>`
+          : ""
+      }
 
       ${utfortArbeteHtml}
       ${artiklarHtml}

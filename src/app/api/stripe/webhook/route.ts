@@ -3,6 +3,11 @@ import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import type Stripe from "stripe";
 
+function getPeriodEnd(sub: Stripe.Subscription): Date | null {
+  const ts = sub.billing_schedules?.[0]?.bill_until.computed_timestamp;
+  return ts ? new Date(ts * 1000) : null;
+}
+
 export async function POST(request: NextRequest) {
   const body = await request.text();
   const sig = request.headers.get("stripe-signature");
@@ -16,7 +21,7 @@ export async function POST(request: NextRequest) {
     event = stripe.webhooks.constructEvent(
       body,
       sig,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      process.env.STRIPE_WEBHOOK_SECRET!,
     );
   } catch {
     return NextResponse.json({ error: "Ogiltig signatur" }, { status: 400 });
@@ -44,7 +49,7 @@ export async function POST(request: NextRequest) {
             stripeSubscriptionId,
             status: sub.status,
             trialEnd: sub.trial_end ? new Date(sub.trial_end * 1000) : null,
-            currentPeriodEnd: new Date(sub.current_period_end * 1000),
+            currentPeriodEnd: getPeriodEnd(sub),
             cancelAtPeriodEnd: sub.cancel_at_period_end,
           },
           update: {
@@ -52,7 +57,7 @@ export async function POST(request: NextRequest) {
             stripeSubscriptionId,
             status: sub.status,
             trialEnd: sub.trial_end ? new Date(sub.trial_end * 1000) : null,
-            currentPeriodEnd: new Date(sub.current_period_end * 1000),
+            currentPeriodEnd: getPeriodEnd(sub),
             cancelAtPeriodEnd: sub.cancel_at_period_end,
           },
         });
@@ -72,13 +77,13 @@ export async function POST(request: NextRequest) {
             stripeSubscriptionId: sub.id,
             status: sub.status,
             trialEnd: sub.trial_end ? new Date(sub.trial_end * 1000) : null,
-            currentPeriodEnd: new Date(sub.current_period_end * 1000),
+            currentPeriodEnd: getPeriodEnd(sub),
             cancelAtPeriodEnd: sub.cancel_at_period_end,
           },
           update: {
             status: sub.status,
             trialEnd: sub.trial_end ? new Date(sub.trial_end * 1000) : null,
-            currentPeriodEnd: new Date(sub.current_period_end * 1000),
+            currentPeriodEnd: getPeriodEnd(sub),
             cancelAtPeriodEnd: sub.cancel_at_period_end,
           },
         });
@@ -87,9 +92,6 @@ export async function POST(request: NextRequest) {
 
       case "customer.subscription.deleted": {
         const sub = event.data.object as Stripe.Subscription;
-        const userId = sub.metadata?.userId;
-        if (!userId) break;
-
         await prisma.subscription.updateMany({
           where: { stripeSubscriptionId: sub.id },
           data: { status: "canceled", cancelAtPeriodEnd: false },

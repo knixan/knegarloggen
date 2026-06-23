@@ -15,10 +15,10 @@ export async function POST() {
     select: { stripeCustomerId: true },
   });
 
-  if (!subscription) {
+  if (!subscription?.stripeCustomerId) {
     return NextResponse.json(
-      { error: "Ingen prenumeration hittades" },
-      { status: 404 }
+      { error: "Ingen aktiv prenumeration hittades" },
+      { status: 404 },
     );
   }
 

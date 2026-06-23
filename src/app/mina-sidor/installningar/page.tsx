@@ -10,7 +10,7 @@ export const metadata = { title: "Inställningar – Knegarloggen" };
 export default async function InstallningarPage({
   searchParams,
 }: {
-  searchParams: Promise<{ checkout?: string }>;
+  searchParams: Promise<{ checkout?: string; portal?: string }>;
 }) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) redirect("/logga-in");
@@ -44,9 +44,11 @@ export default async function InstallningarPage({
               trialEnd: stripeSub.trial_end
                 ? new Date(stripeSub.trial_end * 1000)
                 : null,
-              ...(stripeSub.current_period_end && {
+              ...(stripeSub.billing_schedules?.[0]?.bill_until
+                .computed_timestamp && {
                 currentPeriodEnd: new Date(
-                  stripeSub.current_period_end * 1000
+                  stripeSub.billing_schedules[0].bill_until.computed_timestamp *
+                    1000,
                 ),
               }),
               cancelAtPeriodEnd: stripeSub.cancel_at_period_end,

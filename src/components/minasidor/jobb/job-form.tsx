@@ -212,7 +212,11 @@ export default function JobForm({
                   <User className="h-4 w-4 mr-2" />
                   Befintlig kund
                 </Button>
-                <a href="/mina-sidor/kunder/ny" target="_blank" rel="noreferrer">
+                <a
+                  href="/mina-sidor/kunder/ny"
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   <Button type="button" variant="outline" size="sm">
                     <UserPlus className="h-4 w-4 mr-2" />
                     Skapa ny kund
@@ -244,11 +248,12 @@ export default function JobForm({
                     </a>
                     .
                   </p>
-                ) : (kundSok.trim() || kundFokus) && filtradeKunder.length === 0 ? (
+                ) : (kundSok.trim() || kundFokus) &&
+                  filtradeKunder.length === 0 ? (
                   <p className="text-xs text-muted-foreground">
                     Inga kunder matchar sökningen.
                   </p>
-                ) : (kundSok.trim() || kundFokus) ? (
+                ) : kundSok.trim() || kundFokus ? (
                   <div className="rounded-md border divide-y max-h-60 overflow-y-auto">
                     {filtradeKunder.map((c) => (
                       <button
