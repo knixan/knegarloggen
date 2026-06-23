@@ -1,7 +1,7 @@
 import { Resend } from "resend";
 import { type Job, type CompanyInput, beräknaSummering } from "./job-schema";
 
-// Byt ut till noreply@knegarloggen.se / fakturor@knegarloggen.se när domänen är klar
+//TODO! Byt ut till verifierade avsändaradresser när domänen är verifierad i Resend (t.ex. noreply@knegarloggen.se och fakturor@knegarloggen.se)
 const FROM_NOREPLY = "onboarding@resend.dev";
 const FROM_FAKTURA = "onboarding@resend.dev";
 

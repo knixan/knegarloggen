@@ -49,7 +49,8 @@ export async function POST() {
       payment_method_types: ["card"],
       line_items: [
         {
-          price: process.env.STRIPE_PRICE_ID!,
+          //TODO! Byt STRIPE_PRICE_ID i .env till det riktiga pris-ID:t från din live-produkt i Stripe Dashboard
+      price: process.env.STRIPE_PRICE_ID!,
           quantity: 1,
         },
       ],
