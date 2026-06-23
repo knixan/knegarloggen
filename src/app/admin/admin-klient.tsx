@@ -282,10 +282,8 @@ function SubscriptionBadge({ sub }: { sub: SubInfo }) {
       "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400",
     trialing:
       "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400",
-    canceled:
-      "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400",
-    past_due:
-      "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400",
+    canceled: "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400",
+    past_due: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400",
   };
   const labels: Record<string, string> = {
     active: "Aktiv",
@@ -307,8 +305,7 @@ function SubscriptionBadge({ sub }: { sub: SubInfo }) {
 
 function SubscriptionDatum({ sub }: { sub: SubInfo }) {
   if (!sub) return null;
-  const date =
-    sub.status === "trialing" ? sub.trialEnd : sub.currentPeriodEnd;
+  const date = sub.status === "trialing" ? sub.trialEnd : sub.currentPeriodEnd;
   if (!date) return null;
   const label =
     sub.status === "trialing"

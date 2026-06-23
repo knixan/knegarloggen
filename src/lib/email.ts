@@ -1,7 +1,7 @@
 import { Resend } from "resend";
 import { type Job, type CompanyInput, beräknaSummering } from "./job-schema";
+import { escapeHtml as e } from "./utils";
 
-//TODO! Byt ut till verifierade avsändaradresser när domänen är verifierad i Resend (t.ex. noreply@knegarloggen.se och fakturor@knegarloggen.se)
 const FROM_NOREPLY = "onboarding@resend.dev";
 const FROM_FAKTURA = "onboarding@resend.dev";
 
@@ -42,8 +42,23 @@ export async function sendJobEmail(
 ) {
   const resend = getResend();
   const summary = beräknaSummering(job);
-  const customerName =
-    job.customer?.foretagsnamn?.trim() || job.customer?.namn?.trim() || "Kund";
+
+  const customerName = e(
+    job.customer?.foretagsnamn?.trim() || job.customer?.namn?.trim() || "Kund",
+  );
+  const customerAddr = [
+    job.customer?.adress,
+    job.customer?.postnummer,
+    job.customer?.ort,
+  ]
+    .filter((s): s is string => Boolean(s))
+    .map(e)
+    .join(", ");
+
+  const eCompanyName = e(company.name);
+  const eCompanyOrgNr = e(company.orgNummer);
+  const eCompanyAdress = e(company.adress);
+  const eCompanyTelefon = e(company.telefon);
 
   const subject = job.fakturanummer
     ? `Faktura #${job.fakturanummer} från ${company.name}`
@@ -63,9 +78,9 @@ export async function sendJobEmail(
       : "";
 
   const betalningsrader = [
-    company.bankgiro && `Bankgiro: ${company.bankgiro}`,
-    company.plusgiro && `Plusgiro: ${company.plusgiro}`,
-    company.swish && `Swish: ${company.swish}`,
+    company.bankgiro && `Bankgiro: ${e(company.bankgiro)}`,
+    company.plusgiro && `Plusgiro: ${e(company.plusgiro)}`,
+    company.swish && `Swish: ${e(company.swish)}`,
   ]
     .filter(Boolean)
     .join(" &nbsp;·&nbsp; ");
@@ -88,7 +103,7 @@ export async function sendJobEmail(
               .map(
                 (a) => `
               <tr style="border-top:1px solid #f0f0f0">
-                <td style="padding:5px 6px">${a.namn}</td>
+                <td style="padding:5px 6px">${e(a.namn)}</td>
                 <td style="text-align:right;padding:5px 6px">${a.antal} st</td>
                 <td style="text-align:right;padding:5px 6px">${a.pris.toLocaleString("sv-SE")} kr</td>
                 <td style="text-align:right;padding:5px 6px;font-weight:600">${(a.pris * a.antal).toLocaleString("sv-SE")} kr</td>
@@ -124,7 +139,7 @@ export async function sendJobEmail(
   const utfortArbeteHtml = job.utfortArbete
     ? `
         <h3 style="font-size:13px;text-transform:uppercase;color:#888;letter-spacing:.06em;border-bottom:1px solid #e5e7eb;padding-bottom:6px;margin:20px 0 10px">Utfört arbete</h3>
-        <p style="font-size:13px;margin:0;white-space:pre-wrap">${job.utfortArbete}</p>
+        <p style="font-size:13px;margin:0;white-space:pre-wrap">${e(job.utfortArbete)}</p>
       `
     : "";
 
@@ -143,7 +158,7 @@ export async function sendJobEmail(
     : "";
 
   const fakturatextHtml = company.fakturatext
-    ? `<p style="font-size:13px;color:#555;margin-top:20px">${company.fakturatext}</p>`
+    ? `<p style="font-size:13px;color:#555;margin-top:20px">${e(company.fakturatext)}</p>`
     : "";
 
   const html = `
@@ -151,17 +166,11 @@ export async function sendJobEmail(
       <div style="border-bottom:2px solid #1a1a1a;padding-bottom:16px;margin-bottom:20px;display:flex;justify-content:space-between">
         <div>
           <h1 style="font-size:22px;margin:0 0 4px">${customerName}</h1>
-          ${
-            [job.customer?.adress, job.customer?.postnummer, job.customer?.ort]
-              .filter(Boolean)
-              .join(", ")
-              ? `<p style="font-size:13px;color:#666;margin:0">${[job.customer?.adress, job.customer?.postnummer, job.customer?.ort].filter(Boolean).join(", ")}</p>`
-              : ""
-          }
+          ${customerAddr ? `<p style="font-size:13px;color:#666;margin:0">${customerAddr}</p>` : ""}
         </div>
         <div style="text-align:right;font-size:13px;color:#666">
-          <strong style="display:block;color:#1a1a1a;font-size:15px">${company.name}</strong>
-          ${company.orgNummer ? `Org.nr: ${company.orgNummer}` : ""}
+          <strong style="display:block;color:#1a1a1a;font-size:15px">${eCompanyName}</strong>
+          ${eCompanyOrgNr ? `Org.nr: ${eCompanyOrgNr}` : ""}
         </div>
       </div>
 
@@ -180,7 +189,7 @@ export async function sendJobEmail(
       ${fakturatextHtml}
 
       <div style="margin-top:32px;padding-top:12px;border-top:1px solid #e5e7eb;font-size:11px;color:#aaa">
-        ${company.name}${company.adress ? ` · ${company.adress}` : ""}${company.telefon ? ` · ${company.telefon}` : ""}
+        ${eCompanyName}${eCompanyAdress ? ` · ${eCompanyAdress}` : ""}${eCompanyTelefon ? ` · ${eCompanyTelefon}` : ""}
       </div>
     </div>
   `;

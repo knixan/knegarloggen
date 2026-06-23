@@ -23,7 +23,9 @@ function getPeriodEnd(s: Stripe.Subscription): Date | null {
   return ts ? new Date(ts * 1000) : null;
 }
 
-async function getSubscriptionData(userId: string): Promise<SubscriptionData | null> {
+async function getSubscriptionData(
+  userId: string,
+): Promise<SubscriptionData | null> {
   const localSub = await prisma.subscription.findUnique({
     where: { userId },
     select: {
@@ -56,16 +58,18 @@ async function getSubscriptionData(userId: string): Promise<SubscriptionData | n
     const currentPeriodEnd = getPeriodEnd(s);
 
     // Spara till DB i bakgrunden
-    prisma.subscription.update({
-      where: { userId },
-      data: {
-        stripeSubscriptionId: s.id,
-        status: s.status,
-        cancelAtPeriodEnd: s.cancel_at_period_end,
-        trialEnd: s.trial_end ? new Date(s.trial_end * 1000) : null,
-        ...(currentPeriodEnd && { currentPeriodEnd }),
-      },
-    }).catch(() => {});
+    prisma.subscription
+      .update({
+        where: { userId },
+        data: {
+          stripeSubscriptionId: s.id,
+          status: s.status,
+          cancelAtPeriodEnd: s.cancel_at_period_end,
+          trialEnd: s.trial_end ? new Date(s.trial_end * 1000) : null,
+          ...(currentPeriodEnd && { currentPeriodEnd }),
+        },
+      })
+      .catch(() => {});
 
     return {
       status: s.status,

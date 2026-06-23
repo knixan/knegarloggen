@@ -1,9 +1,6 @@
-// component som genererar en HTML-sträng och öppnar utskriftsfönstret för ett jobb, med all relevant information formaterad på ett snyggt sätt
 import { type Job } from "@/lib/job-schema";
+import { escapeHtml as e } from "@/lib/utils";
 
-/**
- * Genererar en HTML-sträng och öppnar utskriftsfönstret för ett jobb.
- */
 export function printJob(
   job: Job,
   summary: {
@@ -24,19 +21,21 @@ export function printJob(
       ? "#2563eb"
       : "#6b7280";
 
-  const customerName =
-    job.customer?.foretagsnamn?.trim() || job.customer?.namn?.trim() || "Jobb";
+  const customerName = e(
+    job.customer?.foretagsnamn?.trim() || job.customer?.namn?.trim() || "Jobb",
+  );
 
   const customerAddress = [
     job.customer?.adress,
     job.customer?.postnummer,
     job.customer?.ort,
   ]
-    .filter(Boolean)
+    .filter((s): s is string => Boolean(s))
+    .map(e)
     .join(", ");
 
-  const customerPhone = job.customer?.telefon?.trim() || "";
-  const customerEmail = job.customer?.epost?.trim() || "";
+  const customerPhone = e(job.customer?.telefon?.trim() || "");
+  const customerEmail = e(job.customer?.epost?.trim() || "");
 
   const badges = [
     `<span class="badge" style="background:${statusFärg};color:white">${status}</span>`,
@@ -70,9 +69,9 @@ export function printJob(
           .map(
             (a) => `
           <tr>
-            <td>${a.namn}</td>
-            <td class="muted">${a.aterforsaljare ?? ""}</td>
-            <td class="muted">${a.artikelnr ?? ""}</td>
+            <td>${e(a.namn)}</td>
+            <td class="muted">${e(a.aterforsaljare ?? "")}</td>
+            <td class="muted">${e(a.artikelnr ?? "")}</td>
             <td class="right">${a.antal} st</td>
             <td class="right">${a.pris.toLocaleString("sv-SE")} kr</td>
             <td class="right bold">${(a.pris * a.antal).toLocaleString("sv-SE")} kr</td>
@@ -99,7 +98,7 @@ export function printJob(
           .map(
             (r) => `
           <tr>
-            <td>${r.datum}</td>
+            <td>${e(r.datum)}</td>
             <td class="right">${r.stracka} km</td>
           </tr>
         `,
@@ -124,7 +123,7 @@ export function printJob(
           .map(
             (a) => `
           <tr>
-            <td>${a.datum}</td>
+            <td>${e(a.datum)}</td>
             <td class="right">${a.timmar} h</td>
           </tr>
         `,
@@ -200,14 +199,14 @@ export function printJob(
     <div class="oversikt-cell"><label>Arbetstid</label><span>${summary.totalTimmar} h</span></div>
     <div class="oversikt-cell"><label>Körd sträcka</label><span>${summary.totalStracka} km</span></div>
     <div class="oversikt-cell"><label>Material</label><span>${summary.artiklarSum.toLocaleString("sv-SE")} kr</span></div>
-   
+
   </div>
-  ${job.planeratArbete ? `<section><h4>Planerat arbete</h4><div class="fritext">${job.planeratArbete}</div></section>` : ""}
-  ${job.utfortArbete ? `<section><h4>Utfört arbete</h4><div class="fritext">${job.utfortArbete}</div></section>` : ""}
+  ${job.planeratArbete ? `<section><h4>Planerat arbete</h4><div class="fritext">${e(job.planeratArbete)}</div></section>` : ""}
+  ${job.utfortArbete ? `<section><h4>Utfört arbete</h4><div class="fritext">${e(job.utfortArbete)}</div></section>` : ""}
   ${job.artiklar.length > 0 ? `<section><h4>Inköpt material</h4>${artiklarHtml}</section>` : ""}
   ${job.resor.length > 0 ? `<section><h4>Resor</h4>${resorHtml}</section>` : ""}
   ${job.arbetstider.length > 0 ? `<section><h4>Arbetstid</h4>${arbetstidHtml}</section>` : ""}
-  ${job.anteckningar ? `<section><h4>Interna anteckningar</h4><p class="anteckningar">${job.anteckningar}</p></section>` : ""}
+  ${job.anteckningar ? `<section><h4>Interna anteckningar</h4><p class="anteckningar">${e(job.anteckningar)}</p></section>` : ""}
   <div class="sidfot">
     <span>${customerName}${customerAddress ? ` · ${customerAddress}` : ""}</span>
     <span>Knegarloggen</span>

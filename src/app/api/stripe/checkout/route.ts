@@ -50,7 +50,7 @@ export async function POST() {
       line_items: [
         {
           //TODO! Byt STRIPE_PRICE_ID i .env till det riktiga pris-ID:t från din live-produkt i Stripe Dashboard
-      price: process.env.STRIPE_PRICE_ID!,
+          price: process.env.STRIPE_PRICE_ID!,
           quantity: 1,
         },
       ],
