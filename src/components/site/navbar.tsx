@@ -4,7 +4,7 @@ import React, { useState, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, X, User, LogOut } from "lucide-react";
+import { Menu, X, User, LogOut, ShieldCheck } from "lucide-react";
 import authClient, { useSession } from "@/lib/auth-client";
 import { ModeToggle } from "../button/theme-button";
 
@@ -32,6 +32,7 @@ const useAuth = () => {
 
   const isAuthenticated = !!session?.user;
   const user = session?.user ?? null;
+  const isAdmin = user?.role === "admin";
 
   const handleLogin = useCallback(() => {
     router.push("/logga-in");
@@ -50,6 +51,7 @@ const useAuth = () => {
   return {
     isAuthenticated,
     user,
+    isAdmin,
     handleLogin,
     handleRegister,
     handleLogout,
@@ -125,6 +127,7 @@ const MobileNavLinks: React.FC<MobileNavLinksProps> = ({
 // Auth Buttons (Desktop)
 interface AuthButtonsProps {
   isAuthenticated: boolean;
+  isAdmin: boolean;
   onLogin: () => void;
   onRegister: () => void;
   onLogout: () => void;
@@ -132,6 +135,7 @@ interface AuthButtonsProps {
 
 const AuthButtons: React.FC<AuthButtonsProps> = ({
   isAuthenticated,
+  isAdmin,
   onLogin,
   onRegister,
   onLogout,
@@ -157,6 +161,15 @@ const AuthButtons: React.FC<AuthButtonsProps> = ({
 
   return (
     <>
+      {isAdmin && (
+        <Link
+          href="/admin"
+          className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-yellow-700 bg-yellow-100 rounded-md hover:bg-yellow-200 transition-colors dark:text-yellow-400 dark:bg-yellow-900/30 dark:hover:bg-yellow-900/50"
+        >
+          <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+          <span>Admin</span>
+        </Link>
+      )}
       <Link
         href="/mina-sidor"
         className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors dark:text-gray-300"
@@ -178,6 +191,7 @@ const AuthButtons: React.FC<AuthButtonsProps> = ({
 // Mobile Auth Section
 interface MobileAuthSectionProps {
   isAuthenticated: boolean;
+  isAdmin: boolean;
   user: { name?: string; email?: string } | null;
   onLogin: () => void;
   onRegister: () => void;
@@ -187,6 +201,7 @@ interface MobileAuthSectionProps {
 
 const MobileAuthSection: React.FC<MobileAuthSectionProps> = ({
   isAuthenticated,
+  isAdmin,
   user,
   onLogin,
   onRegister,
@@ -226,6 +241,16 @@ const MobileAuthSection: React.FC<MobileAuthSectionProps> = ({
           <p className="text-gray-500 text-xs">{user.email}</p>
         </div>
       )}
+      {isAdmin && (
+        <Link
+          href="/admin"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-yellow-700 bg-yellow-100 rounded-md hover:bg-yellow-200 transition-colors dark:text-yellow-400 dark:bg-yellow-900/30"
+          onClick={onNavigate}
+        >
+          <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+          <span>Admin</span>
+        </Link>
+      )}
       <Link
         href="/mina-sidor"
         className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md transition-colors dark:text-gray-300 dark:hover:bg-gray-800"
@@ -259,8 +284,14 @@ const Navbar: React.FC<NavbarProps> = ({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const [prevPathname, setPrevPathname] = useState(pathname);
-  const { isAuthenticated, user, handleLogin, handleRegister, handleLogout } =
-    useAuth();
+  const {
+    isAuthenticated,
+    user,
+    isAdmin,
+    handleLogin,
+    handleRegister,
+    handleLogout,
+  } = useAuth();
 
   if (pathname !== prevPathname) {
     setPrevPathname(pathname);
@@ -312,6 +343,7 @@ const Navbar: React.FC<NavbarProps> = ({
               {showThemeToggle && <ModeToggle />}
               <AuthButtons
                 isAuthenticated={isAuthenticated}
+                isAdmin={isAdmin}
                 onLogin={handleLogin}
                 onRegister={handleRegister}
                 onLogout={handleLogout}
@@ -354,6 +386,7 @@ const Navbar: React.FC<NavbarProps> = ({
 
                 <MobileAuthSection
                   isAuthenticated={isAuthenticated}
+                  isAdmin={isAdmin}
                   user={user}
                   onLogin={handleLogin}
                   onRegister={handleRegister}

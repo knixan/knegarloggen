@@ -17,9 +17,25 @@ export async function getAdminUsers() {
 
   const users = await prisma.user.findMany({
     orderBy: { createdAt: "asc" },
-    include: {
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      createdAt: true,
       companies: {
-        include: { _count: { select: { jobs: true } } },
+        select: {
+          name: true,
+          _count: { select: { jobs: true } },
+        },
+      },
+      subscription: {
+        select: {
+          status: true,
+          trialEnd: true,
+          currentPeriodEnd: true,
+          cancelAtPeriodEnd: true,
+        },
       },
     },
   });
@@ -32,6 +48,15 @@ export async function getAdminUsers() {
     createdAt: u.createdAt.toISOString(),
     jobCount: u.companies[0]?._count.jobs ?? 0,
     companyName: u.companies[0]?.name ?? null,
+    subscription: u.subscription
+      ? {
+          status: u.subscription.status,
+          trialEnd: u.subscription.trialEnd?.toISOString() ?? null,
+          currentPeriodEnd:
+            u.subscription.currentPeriodEnd?.toISOString() ?? null,
+          cancelAtPeriodEnd: u.subscription.cancelAtPeriodEnd,
+        }
+      : null,
   }));
 }
 

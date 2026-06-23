@@ -3,7 +3,16 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Shield, ShieldOff, Trash2, Users, Crown, Search } from "lucide-react";
+import {
+  Shield,
+  ShieldOff,
+  Trash2,
+  Users,
+  Crown,
+  Search,
+  CreditCard,
+  Clock,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,6 +45,12 @@ export default function AdminKlient({ initialUsers, currentUserId }: Props) {
 
   const [sok, setSok] = useState("");
   const adminCount = users.filter((u) => u.role === "admin").length;
+  const activeCount = users.filter(
+    (u) => u.subscription?.status === "active",
+  ).length;
+  const trialingCount = users.filter(
+    (u) => u.subscription?.status === "trialing",
+  ).length;
 
   const filtradeUsers = sok.trim()
     ? users.filter((u) => {
@@ -85,7 +100,7 @@ export default function AdminKlient({ initialUsers, currentUserId }: Props) {
   return (
     <div className="space-y-6">
       {/* Statistik */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <StatCard
           icon={<Users className="h-5 w-5 text-blue-600" />}
           label="Totalt användare"
@@ -95,6 +110,16 @@ export default function AdminKlient({ initialUsers, currentUserId }: Props) {
           icon={<Crown className="h-5 w-5 text-yellow-600" />}
           label="Admins"
           value={adminCount}
+        />
+        <StatCard
+          icon={<CreditCard className="h-5 w-5 text-green-600" />}
+          label="Aktiva prenumeranter"
+          value={activeCount}
+        />
+        <StatCard
+          icon={<Clock className="h-5 w-5 text-orange-500" />}
+          label="I testperiod"
+          value={trialingCount}
         />
       </div>
 
@@ -159,6 +184,10 @@ export default function AdminKlient({ initialUsers, currentUserId }: Props) {
                       {user.jobCount} jobb &middot; registrerad{" "}
                       {new Date(user.createdAt).toLocaleDateString("sv-SE")}
                     </p>
+                    <div className="mt-1 flex items-center gap-2">
+                      <SubscriptionBadge sub={user.subscription} />
+                      <SubscriptionDatum sub={user.subscription} />
+                    </div>
                   </div>
 
                   {/* Åtgärder */}
@@ -235,6 +264,62 @@ export default function AdminKlient({ initialUsers, currentUserId }: Props) {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+  );
+}
+
+type SubInfo = AdminUser["subscription"];
+
+function SubscriptionBadge({ sub }: { sub: SubInfo }) {
+  if (!sub) {
+    return (
+      <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-bold text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+        Ingen
+      </span>
+    );
+  }
+  const styles: Record<string, string> = {
+    active:
+      "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400",
+    trialing:
+      "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400",
+    canceled:
+      "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400",
+    past_due:
+      "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400",
+  };
+  const labels: Record<string, string> = {
+    active: "Aktiv",
+    trialing: "Testperiod",
+    canceled: "Avslutad",
+    past_due: "Förfallen",
+  };
+  const cls =
+    styles[sub.status] ??
+    "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400";
+  const label = labels[sub.status] ?? sub.status;
+  return (
+    <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${cls}`}>
+      {label}
+      {sub.status === "active" && sub.cancelAtPeriodEnd ? " (avslutas)" : ""}
+    </span>
+  );
+}
+
+function SubscriptionDatum({ sub }: { sub: SubInfo }) {
+  if (!sub) return null;
+  const date =
+    sub.status === "trialing" ? sub.trialEnd : sub.currentPeriodEnd;
+  if (!date) return null;
+  const label =
+    sub.status === "trialing"
+      ? "Trial t.o.m."
+      : sub.cancelAtPeriodEnd
+        ? "Avslutas"
+        : "Förnyar";
+  return (
+    <span className="text-[10px] text-muted-foreground">
+      {label} {new Date(date).toLocaleDateString("sv-SE")}
+    </span>
   );
 }
 
