@@ -5,43 +5,47 @@
 [![Prisma](https://img.shields.io/badge/Prisma-v7-2D3748?style=flat-square&logo=prisma)](https://www.prisma.io/)
 [![License](https://img.shields.io/badge/License-Privat-gray?style=flat-square)](LICENSE)
 
-Jobblogg och fakturaverktyg för hantverkare. Håll koll på kunder, material, resor, arbetstid och fakturor – allt på ett ställe.
+Jobblogg och fakturaverktyg för svenska hantverkare. Håll koll på kunder, material, resor, arbetstid och fakturor – allt på ett ställe.
 
 ---
 
 ## Funktioner
 
-- **Jobbhantering** – Skapa och redigera jobb med status (ej påbörjat / pågående / utfört / fakturerat / betalt)
-- **Sökning & filtrering** – Sök på kund, adress och utfört arbete, kombinerat med statusfilter
+- **Jobbhantering** – Skapa och redigera jobb med status (pågående / utfört / fakturerat / betalt)
 - **Kundregister** – Privatpersoner och företagskunder med adress, personnummer och fastighetsbeteckning
 - **Artiklar** – Material med artikelnummer, återförsäljare, inköpspris och utpris
 - **Reslogg** – Körda sträckor per datum med automatisk milersättning
 - **Arbetstid** – Arbetspass per datum med automatisk timprisberäkning
 - **Övriga kostnader** – Fri rad för förbrukningsmaterial, hyrd utrustning m.m.
-- **Faktura** – Professionell utskriftsvy med logotyp, automatiskt fakturanummer, moms och ROT-avdrag
-- **ROT-avdrag** – Korrekt beräkning (30% av arbetskostnad inkl. moms) enligt Skatteverkets regler
-- **Fast pris** – Möjlighet att fakturera ett fast pris istället för beräknad summa
+- **Faktura som PDF** – Professionell PDF med logotyp, automatiskt fakturanummer, moms och ROT-avdrag
+- **Skicka faktura via e-post** – Skickas med Resend, med ditt företags avsändare och svarskopia
+- **ROT-avdrag** – Korrekt beräkning (30 % av arbetskostnad inkl. moms) enligt Skatteverkets regler
+- **Fast pris** – Fakturera ett fast pris istället för beräknad summa
 - **Bilder** – Ladda upp jobbfoton via UploadThing
-- **Inställningar** – Byt lösenord och hantera konto
-- **Kontoborttagning** – GDPR-kompatibel radering av all data
+- **Prenumeration** – 30 dagars gratis provperiod, därefter via Stripe (99 kr/mån)
+- **Självbetjäning** – Stripe Billing Portal för att hantera/avsluta abonnemang
 - **Admin** – Rollbaserad adminpanel för användarhantering
+- **GDPR** – Kontoborttagning raderar all data inklusive filer
 - **Mörkt/ljust läge** – Systemanpassat tema
 
 ---
 
 ## Teknisk stack
 
-| Lager     | Teknik                      |
-| --------- | --------------------------- |
-| Framework | Next.js 16 (App Router)     |
-| Språk     | TypeScript                  |
-| Styling   | Tailwind CSS v4 + shadcn/ui |
-| Formulär  | React Hook Form + Zod       |
-| ORM       | Prisma 7                    |
-| Databas   | PostgreSQL (Neon)           |
-| Auth      | Better Auth                 |
-| Filuppl.  | UploadThing                 |
-| Deploy    | Vercel                      |
+| Lager       | Teknik                        |
+|-------------|-------------------------------|
+| Framework   | Next.js 16 (App Router)       |
+| Språk       | TypeScript                    |
+| Styling     | Tailwind CSS v4 + shadcn/ui   |
+| Formulär    | React Hook Form + Zod         |
+| ORM         | Prisma 7                      |
+| Databas     | PostgreSQL                    |
+| Auth        | Better Auth                   |
+| Betalning   | Stripe (subscriptions)        |
+| E-post      | Resend                        |
+| Filuppl.    | UploadThing                   |
+| PDF         | @react-pdf/renderer           |
+| Deploy      | Vercel                        |
 
 ---
 
@@ -49,9 +53,9 @@ Jobblogg och fakturaverktyg för hantverkare. Håll koll på kunder, material, r
 
 ### Förutsättningar
 
-- Node.js 18+
+- Node.js 20+
 - PostgreSQL-databas (t.ex. [Neon](https://neon.tech))
-- [UploadThing](https://uploadthing.com)-konto för bilduppladdning
+- Konton hos [Stripe](https://stripe.com), [Resend](https://resend.com) och [UploadThing](https://uploadthing.com)
 
 ### Installation
 
@@ -70,22 +74,33 @@ Skapa en `.env`-fil i rooten:
 DATABASE_URL="postgresql://USER:PASSWORD@HOST/knegarloggen?sslmode=require"
 
 # Better Auth
-BETTER_AUTH_SECRET="generera-med-openssl-rand-base64-32"
-BETTER_AUTH_URL="http://localhost:3000"
-
-# App-URL (används av auth-klienten)
+BETTER_AUTH_SECRET="minst-32-tecken-lång-hemlighet"  # openssl rand -base64 32
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 
-# UploadThing
-UPLOADTHING_TOKEN="ditt-token-här"
+# E-post (Resend) – verifiera din domän på resend.com/domains
+RESEND_API_KEY="re_..."
+
+# Betalning (Stripe)
+STRIPE_SECRET_KEY="sk_test_..."
+STRIPE_WEBHOOK_SECRET="whsec_..."   # från: stripe listen --print-secret
+STRIPE_PRICE_ID="price_..."
+
+# Filuppladdning (UploadThing)
+UPLOADTHING_TOKEN="..."
 ```
 
-I produktion (Vercel) – sätt `BETTER_AUTH_URL` och `NEXT_PUBLIC_APP_URL` till din faktiska domän och kör en ny deploy. `NEXT_PUBLIC_`-variabler bäddas in vid byggtid.
+I produktion – sätt `NEXT_PUBLIC_APP_URL` till din faktiska domän. `NEXT_PUBLIC_`-variabler bäddas in vid byggtid.
 
 ### Databas
 
 ```bash
 npx prisma migrate deploy
+```
+
+### Stripe webhook lokalt
+
+```bash
+stripe listen --forward-to localhost:3000/api/stripe/webhook
 ```
 
 ### Starta
@@ -104,58 +119,83 @@ npm run dev
 knegarloggen/
 ├── src/
 │   ├── app/
-│   │   ├── api/                       # Auth- och UploadThing-routes
-│   │   ├── logga-in/                  # Inloggning
-│   │   ├── registrera/                # Registrering
-│   │   ├── admin/                     # Adminpanel (kräver roll "admin")
-│   │   └── mina-sidor/                # Skyddade sidor (enbart page/layout-filer)
-│   │       ├── foretag/               # Företagsuppgifter
-│   │       ├── installningar/         # Lösenord, prenumeration, kontoborttagning
-│   │       ├── jobb/[id]/             # Jobbdetalj, redigera, skriv ut/faktura
-│   │       ├── kunder/                # Kundregister
-│   │       └── nytt-jobb/             # Skapa nytt jobb
+│   │   ├── api/
+│   │   │   ├── auth/[...all]/     # Better Auth handler
+│   │   │   ├── stripe/
+│   │   │   │   ├── checkout/      # Skapa Stripe Checkout-session
+│   │   │   │   ├── portal/        # Öppna Stripe Billing Portal
+│   │   │   │   └── webhook/       # Ta emot Stripe-events
+│   │   │   └── uploadthing/       # Filuppladdning
+│   │   ├── logga-in/
+│   │   ├── registrera/
+│   │   ├── admin/                 # Adminpanel (kräver roll "admin")
+│   │   └── mina-sidor/            # Skyddade sidor
+│   │       ├── foretag/           # Företagsuppgifter
+│   │       ├── installningar/     # Prenumeration, lösenord, konto
+│   │       ├── jobb/[id]/         # Jobbdetalj, redigera, faktura/utskrift
+│   │       ├── kunder/            # Kundregister
+│   │       └── nytt-jobb/
 │   ├── components/
-│   │   ├── site/                      # Publika sidor (hero, features, cta, navbar, footer)
-│   │   ├── minasidor/                 # Komponenter för inloggade sidor
-│   │   │   ├── faktura/               # Utskriftsvy och print-helper
-│   │   │   ├── foretag/               # Företagsinställningar
-│   │   │   ├── installningar/         # Lösenord och kontoborttagning
-│   │   │   ├── jobb/                  # Jobbformulär, jobblista och dashboard
-│   │   │   ├── kunder/                # Kundformulär och borttagning
-│   │   │   ├── oversikt/              # Jobböversikt, dialog, bilder och badges
-│   │   │   └── mina-sidor-nav.tsx     # Sidebar och mobilmeny
-│   │   └── ui/                        # shadcn/ui-komponenter
+│   │   ├── site/                  # Landningssida
+│   │   ├── minasidor/
+│   │   │   ├── faktura/           # PDF-komponent och e-postknapp
+│   │   │   ├── foretag/
+│   │   │   ├── installningar/
+│   │   │   ├── jobb/
+│   │   │   ├── kunder/
+│   │   │   ├── oversikt/
+│   │   │   ├── mina-sidor-nav.tsx
+│   │   │   └── trial-gate.tsx     # Spärrar UI när provperiod gått ut
+│   │   └── ui/                    # shadcn/ui-komponenter
 │   └── lib/
-│       ├── auth.ts                    # Better Auth-konfiguration
-│       ├── auth-client.ts             # Auth-klient (React)
-│       ├── admin-actions.ts           # Server actions för adminpanelen
-│       ├── job-actions.ts             # Server actions (CRUD jobb, faktura, konton)
-│       ├── job-schema.ts              # Zod-schema och beräkningsfunktioner
-│       └── prisma.ts                  # Prisma-klient
+│       ├── auth.ts                # Better Auth-konfiguration
+│       ├── auth-client.ts         # Auth-klient (React)
+│       ├── auth-server.ts         # Server actions för registrering/inloggning
+│       ├── admin-actions.ts       # Server actions för adminpanelen
+│       ├── email.ts               # Resend-mallar (verifiering + faktura)
+│       ├── env.ts                 # Validerade miljövariabler (Zod)
+│       ├── job-actions.ts         # Server actions (CRUD jobb/kunder/företag)
+│       ├── job-schema.ts          # Zod-scheman och beräkningsfunktioner
+│       ├── prisma.ts              # Prisma-klient
+│       └── stripe.ts              # Stripe-klient
 ├── prisma/
-│   └── schema.prisma                  # Databasschema
-└── proxy.ts                           # Routeskydd (/mina-sidor och /admin)
+│   └── schema.prisma
+└── package.json
 ```
 
 ---
 
 ## Databasmodeller
 
-- **User / Account / Session** – hanteras av Better Auth (inkl. `role`-fält för admin)
-- **Company** – företagsuppgifter, fakturainställningar och logotyp
-- **Customer** – privat- eller företagskund kopplad till ett företag
-- **Job** – jobb med status, prissättning, fakturanummer och ROT-flagga
-- **Article** – material per jobb
-- **Trip** – reslog per datum
-- **WorkSession** – arbetspass per datum
-- **OvrigKostnad** – övriga kostnader per jobb
-- **JobImage** – bilder uppladdade via UploadThing
+| Modell        | Beskrivning |
+|---------------|-------------|
+| `User`        | Hanteras av Better Auth. Har `role`-fält (`user` / `admin`). |
+| `Company`     | Företagsuppgifter, fakturainställningar och logotyp per användare. |
+| `Customer`    | Privat- eller företagskund kopplad till ett företag. |
+| `Job`         | Jobb med status, prissättning och fakturanummer. |
+| `Article`     | Materialrad per jobb. |
+| `Trip`        | Resrad per datum. |
+| `WorkSession` | Arbetspass per datum. |
+| `OvrigKostnad`| Övrig kostnad per jobb. |
+| `JobImage`    | Bild uppladdad via UploadThing. |
+| `Subscription`| Stripe-prenumeration med status och perioder. |
+
+---
+
+## Prenumerationsflöde
+
+1. Användare registrerar sig → 30 dagars provperiod skapas automatiskt
+2. Proven visas i layouten via `TrialGate` – spärrar UI när provperiod gått ut
+3. Användaren klickar "Lägg till betalning" → Stripe Checkout öppnas
+4. Stripe-webhook (`checkout.session.completed`) aktiverar prenumerationen i DB
+5. Löpande events (`customer.subscription.updated`, `customer.subscription.deleted`) håller DB synkad
+6. Stripe Billing Portal används för att ändra kortuppgifter eller avsluta
 
 ---
 
 ## Admin
 
-Adminpanelen nås på `/admin` och kräver `role = "admin"` i databasen. Första admin sätts direkt i databasen:
+Adminpanelen nås på `/admin` och kräver `role = "admin"`. Sätt första admin direkt i databasen:
 
 ```sql
 UPDATE "user" SET role = 'admin' WHERE email = 'din@epost.se';
@@ -166,10 +206,12 @@ UPDATE "user" SET role = 'admin' WHERE email = 'din@epost.se';
 ## Scripts
 
 ```bash
-npm run dev        # Starta dev-server (Turbopack)
-npm run build      # Bygg för produktion
-npm run start      # Starta produktionsserver
-npm run lint       # Kör ESLint
+npm run dev          # Starta dev-server
+npm run build        # Prisma generate + Next.js build
+npm run start        # Starta produktionsserver
+npm run lint         # ESLint
+npm run type-check   # TypeScript-kontroll
+npm run db:seed      # Seed-data (kräver prisma/seed.ts)
 ```
 
 ---
