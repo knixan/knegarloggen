@@ -7,59 +7,49 @@ import InstallningarKlient from "@/components/minasidor/installningar/installnin
 
 export const metadata = { title: "Inställningar – Knegarloggen" };
 
-export default async function InstallningarPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ checkout?: string; portal?: string }>;
-}) {
+// Synka alltid mot Stripe vid sidladdning om kunden har en Stripe-koppling
+async function syncFromStripe(userId: string) {
+  const sub = await prisma.subscription.findUnique({
+    where: { userId },
+    select: { stripeCustomerId: true },
+  });
+  if (!sub?.stripeCustomerId) return;
+
+  try {
+    const stripeSubs = await stripe.subscriptions.list({
+      customer: sub.stripeCustomerId,
+      limit: 1,
+      status: "all",
+    });
+    const stripeSub = stripeSubs.data[0];
+    if (!stripeSub) return;
+
+    await prisma.subscription.update({
+      where: { userId },
+      data: {
+        stripeSubscriptionId: stripeSub.id,
+        status: stripeSub.status,
+        trialEnd: stripeSub.trial_end
+          ? new Date(stripeSub.trial_end * 1000)
+          : null,
+        ...(stripeSub.billing_schedules?.[0]?.bill_until.computed_timestamp && {
+          currentPeriodEnd: new Date(
+            stripeSub.billing_schedules[0].bill_until.computed_timestamp * 1000
+          ),
+        }),
+        cancelAtPeriodEnd: stripeSub.cancel_at_period_end,
+      },
+    });
+  } catch (err) {
+    console.error("Stripe-sync misslyckades:", err);
+  }
+}
+
+export default async function InstallningarPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) redirect("/logga-in");
 
-  const params = await searchParams;
-
-  const shouldSync =
-    params.checkout === "success" || params.portal === "return";
-
-  // Synka mot Stripe direkt vid success/portal-redirect (fallback om webhook ej är konfigurerad)
-  if (shouldSync) {
-    const sub = await prisma.subscription.findUnique({
-      where: { userId: session.user.id },
-      select: { stripeCustomerId: true },
-    });
-
-    if (sub?.stripeCustomerId) {
-      try {
-        const stripeSubs = await stripe.subscriptions.list({
-          customer: sub.stripeCustomerId,
-          limit: 1,
-          status: "all",
-        });
-        const stripeSub = stripeSubs.data[0];
-        if (stripeSub) {
-          await prisma.subscription.update({
-            where: { userId: session.user.id },
-            data: {
-              stripeSubscriptionId: stripeSub.id,
-              status: stripeSub.status,
-              trialEnd: stripeSub.trial_end
-                ? new Date(stripeSub.trial_end * 1000)
-                : null,
-              ...(stripeSub.billing_schedules?.[0]?.bill_until
-                .computed_timestamp && {
-                currentPeriodEnd: new Date(
-                  stripeSub.billing_schedules[0].bill_until.computed_timestamp *
-                    1000,
-                ),
-              }),
-              cancelAtPeriodEnd: stripeSub.cancel_at_period_end,
-            },
-          });
-        }
-      } catch (err) {
-        console.error("Stripe-sync misslyckades:", err);
-      }
-    }
-  }
+  await syncFromStripe(session.user.id);
 
   const subscription = await prisma.subscription.findUnique({
     where: { userId: session.user.id },
@@ -74,7 +64,8 @@ export default async function InstallningarPage({
 
   const hasActiveStripeSub =
     !!subscription?.stripeSubscriptionId &&
-    (subscription.status === "active" || subscription.status === "trialing");
+    (subscription.status === "active" || subscription.status === "trialing") &&
+    !subscription.cancelAtPeriodEnd;
 
   return (
     <main className="container mx-auto px-4 py-8">
