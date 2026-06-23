@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Search } from "lucide-react";
 import JobList from "@/components/minasidor/jobb/job-list";
-import { deleteJob } from "@/lib/job-actions";
+import { deleteJob, getJobs } from "@/lib/job-actions";
 import type { Job } from "@/lib/job-schema";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 import {
@@ -99,10 +100,17 @@ function applyFilter(jobs: Job[], filter: Filter): Job[] {
 
 interface Props {
   jobs: Job[];
+  nextCursor: string | null;
 }
 
-export default function JobDashboard({ jobs }: Props) {
+export default function JobDashboard({
+  jobs: initialJobs,
+  nextCursor: initialCursor,
+}: Props) {
   const router = useRouter();
+  const [allJobs, setAllJobs] = useState<Job[]>(initialJobs);
+  const [cursor, setCursor] = useState<string | null>(initialCursor);
+  const [isPending, startTransition] = useTransition();
   const [active, setActive] = useState<Filter>("alla");
   const [sok, setSok] = useState("");
   const [jobToDelete, setJobToDelete] = useState<Job | null>(null);
@@ -112,7 +120,7 @@ export default function JobDashboard({ jobs }: Props) {
     const result = await deleteJob(jobToDelete.id);
     if (result.ok) {
       toast.success("Jobb borttaget");
-      router.refresh();
+      setAllJobs((prev) => prev.filter((j) => j.id !== jobToDelete.id));
     } else {
       toast.error(result.error ?? "Kunde inte ta bort jobb");
     }
@@ -123,7 +131,16 @@ export default function JobDashboard({ jobs }: Props) {
     router.push(`/mina-sidor/jobb/${job.id}/redigera`);
   }
 
-  const afterStatus = applyFilter(jobs, active);
+  function loadMore() {
+    if (!cursor) return;
+    startTransition(async () => {
+      const result = await getJobs(cursor);
+      setAllJobs((prev) => [...prev, ...result.jobs]);
+      setCursor(result.nextCursor);
+    });
+  }
+
+  const afterStatus = applyFilter(allJobs, active);
   const filtered = sok.trim()
     ? afterStatus.filter((j) => {
         const q = sok.toLowerCase();
@@ -154,8 +171,8 @@ export default function JobDashboard({ jobs }: Props) {
         {filters.map((f) => {
           const count =
             f.value === "alla"
-              ? jobs.length
-              : applyFilter(jobs, f.value).length;
+              ? allJobs.length
+              : applyFilter(allJobs, f.value).length;
           return (
             <button
               key={f.value}
@@ -174,7 +191,7 @@ export default function JobDashboard({ jobs }: Props) {
       {filtered.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            {jobs.length === 0 ? (
+            {allJobs.length === 0 ? (
               <>
                 Du har inga jobb ännu.{" "}
                 <a
@@ -195,10 +212,18 @@ export default function JobDashboard({ jobs }: Props) {
           jobs={filtered}
           onEdit={handleEdit}
           onDelete={(id) => {
-            const job = jobs.find((j) => j.id === id);
+            const job = allJobs.find((j) => j.id === id);
             if (job) setJobToDelete(job);
           }}
         />
+      )}
+
+      {cursor && (
+        <div className="flex justify-center pt-2">
+          <Button variant="outline" onClick={loadMore} disabled={isPending}>
+            {isPending ? "Laddar..." : "Ladda fler jobb"}
+          </Button>
+        </div>
       )}
 
       <AlertDialog

@@ -22,7 +22,7 @@ export default function TrialGate({
       const res = await fetch("/api/stripe/checkout", { method: "POST" });
       const data = await res.json();
       if (data.url) {
-        window.open(data.url, "_blank");
+        window.location.href = data.url;
       } else {
         toast.error("Kunde inte starta betalning");
       }

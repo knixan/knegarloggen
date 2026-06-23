@@ -1,8 +1,9 @@
 "use server";
-// Server-side helper for signing out users using BetterAuth
 import { auth } from "./auth";
 import { headers as getHeaders } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { addDays } from "date-fns";
+import { prisma } from "./prisma";
 
 const readNextHeaders = async (): Promise<Headers> =>
   new Headers(await getHeaders());
@@ -24,6 +25,18 @@ export async function signUpServer(data: {
         password: data.password,
       },
       headers: await readNextHeaders(),
+    });
+
+    const trialEnd = addDays(new Date(), 30);
+    await prisma.subscription.upsert({
+      where: { userId: response.user.id },
+      create: {
+        userId: response.user.id,
+        status: "trialing",
+        trialEnd,
+        currentPeriodEnd: trialEnd,
+      },
+      update: {},
     });
 
     return { ok: true, data: response };

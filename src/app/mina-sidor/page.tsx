@@ -11,7 +11,7 @@ export default async function MinaSidorPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) redirect("/logga-in");
 
-  const jobs = await getJobs();
+  const { jobs, nextCursor } = await getJobs();
 
   return (
     <main className="container mx-auto px-4 py-8">
@@ -29,7 +29,7 @@ export default async function MinaSidorPage() {
           </Button>
         </Link>
       </div>
-      <JobDashboard jobs={jobs} />
+      <JobDashboard jobs={jobs} nextCursor={nextCursor} />
     </main>
   );
 }

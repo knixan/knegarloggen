@@ -374,16 +374,18 @@ export async function deleteCustomer(id: string) {
 // JOBB
 // ============================================================
 
-export async function getJobs() {
+const JOBS_PER_PAGE = 50;
+
+export async function getJobs(cursor?: string) {
   const session = await getSession();
-  if (!session?.user) return [];
+  if (!session?.user) return { jobs: [], nextCursor: null };
 
   const company = await prisma.company.findFirst({
     where: { ownerId: session.user.id },
   });
-  if (!company) return [];
+  if (!company) return { jobs: [], nextCursor: null };
 
-  const jobs = await prisma.job.findMany({
+  const items = await prisma.job.findMany({
     where: { companyId: company.id },
     include: {
       artiklar: true,
@@ -394,9 +396,17 @@ export async function getJobs() {
       ovrigaKostnader: true,
     },
     orderBy: { skapad: "desc" },
+    take: JOBS_PER_PAGE + 1,
+    ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
   });
 
-  return jobs.map(mapJob);
+  const hasMore = items.length > JOBS_PER_PAGE;
+  if (hasMore) items.pop();
+
+  return {
+    jobs: items.map(mapJob),
+    nextCursor: hasMore ? (items[items.length - 1]?.id ?? null) : null,
+  };
 }
 
 export async function getJob(id: string) {
