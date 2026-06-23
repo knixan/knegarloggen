@@ -6,7 +6,12 @@ import type { Prisma } from "@prisma/client";
 import { UTApi } from "uploadthing/server";
 import { auth } from "./auth";
 import { prisma } from "./prisma";
-import type { JobInput, CustomerInput, CompanyInput } from "./job-schema";
+import {
+  companySchema,
+  type JobInput,
+  type CustomerInput,
+  type CompanyInput,
+} from "./job-schema";
 
 const utapi = new UTApi();
 const DEFAULT_COMPANY_NAME = "Mitt företag";
@@ -174,32 +179,36 @@ export async function updateCompanySettings(data: CompanyInput) {
   const ctx = await requireCompany();
   if ("error" in ctx) return ctx;
 
-  const trimmedName = data.name.trim();
-  if (!trimmedName) return { ok: false, error: "Företagsnamn krävs" };
-  if (trimmedName.length > 120)
-    return { ok: false, error: "Företagsnamnet är för långt" };
+  const parsed = companySchema.safeParse(data);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: parsed.error.issues[0]?.message ?? "Ogiltiga uppgifter",
+    };
+  }
+  const d = parsed.data;
 
   const { company } = ctx;
 
   await prisma.company.update({
     where: { id: company.id },
     data: {
-      name: trimmedName,
-      orgNummer: data.orgNummer.trim(),
-      adress: data.adress.trim(),
-      postnummer: data.postnummer.trim(),
-      ort: data.ort.trim(),
-      telefon: data.telefon.trim(),
-      epost: data.epost.trim(),
-      fSkatt: data.fSkatt,
-      momsNummer: data.momsNummer.trim(),
-      bankgiro: data.bankgiro.trim(),
-      plusgiro: data.plusgiro.trim(),
-      swish: data.swish.trim(),
-      nastaFakturanummer: Math.max(1, Math.floor(data.nastaFakturanummer || 1)),
-      forfallodagar: Math.max(0, Math.floor(data.forfallodagar || 0)),
-      drojsmalsranta: Math.max(0, data.drojsmalsranta || 0),
-      fakturatext: data.fakturatext,
+      name: d.name,
+      orgNummer: d.orgNummer,
+      adress: d.adress,
+      postnummer: d.postnummer,
+      ort: d.ort,
+      telefon: d.telefon,
+      epost: d.epost,
+      fSkatt: d.fSkatt,
+      momsNummer: d.momsNummer,
+      bankgiro: d.bankgiro,
+      plusgiro: d.plusgiro,
+      swish: d.swish,
+      nastaFakturanummer: d.nastaFakturanummer,
+      forfallodagar: d.forfallodagar,
+      drojsmalsranta: d.drojsmalsranta,
+      fakturatext: d.fakturatext,
     },
   });
 
@@ -254,25 +263,7 @@ export async function getCustomers() {
     orderBy: { namn: "asc" },
   });
 
-  return customers.map((c) => ({
-    id: c.id,
-    companyId: c.companyId,
-    typ: c.typ as "privat" | "foretag",
-    namn: c.namn,
-    adress: c.adress,
-    postnummer: c.postnummer,
-    ort: c.ort,
-    telefon: c.telefon,
-    epost: c.epost,
-    personnummer: c.personnummer,
-    foretagsnamn: c.foretagsnamn,
-    kontaktperson: c.kontaktperson,
-    orgNummer: c.orgNummer,
-    fastighetsbeteckning: c.fastighetsbeteckning,
-    lagenhetsnummer: c.lagenhetsnummer,
-    bostadsrattsforening: c.bostadsrattsforening,
-    skapad: c.createdAt.toISOString(),
-  }));
+  return customers.map(mapCustomer);
 }
 
 export async function getCustomer(id: string) {
@@ -289,25 +280,7 @@ export async function getCustomer(id: string) {
   });
   if (!c) return null;
 
-  return {
-    id: c.id,
-    companyId: c.companyId,
-    typ: c.typ as "privat" | "foretag",
-    namn: c.namn,
-    adress: c.adress,
-    postnummer: c.postnummer,
-    ort: c.ort,
-    telefon: c.telefon,
-    epost: c.epost,
-    personnummer: c.personnummer,
-    foretagsnamn: c.foretagsnamn,
-    kontaktperson: c.kontaktperson,
-    orgNummer: c.orgNummer,
-    fastighetsbeteckning: c.fastighetsbeteckning,
-    lagenhetsnummer: c.lagenhetsnummer,
-    bostadsrattsforening: c.bostadsrattsforening,
-    skapad: c.createdAt.toISOString(),
-  };
+  return mapCustomer(c);
 }
 
 export async function createCustomer(data: CustomerInput) {

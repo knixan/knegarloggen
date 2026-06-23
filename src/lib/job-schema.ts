@@ -113,24 +113,30 @@ export type Job = JobInput & {
   customer?: Customer | null;
 };
 
-export type CompanyInput = {
-  name: string;
-  orgNummer: string;
-  adress: string;
-  postnummer: string;
-  ort: string;
-  telefon: string;
-  epost: string;
-  fSkatt: boolean;
-  momsNummer: string;
-  bankgiro: string;
-  plusgiro: string;
-  swish: string;
-  nastaFakturanummer: number;
-  forfallodagar: number;
-  drojsmalsranta: number;
-  fakturatext: string;
-};
+export const companySchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, "Företagsnamn krävs")
+    .max(120, "Företagsnamnet är för långt"),
+  orgNummer: z.string().trim().max(30).default(""),
+  adress: z.string().trim().max(200).default(""),
+  postnummer: z.string().trim().max(10).default(""),
+  ort: z.string().trim().max(100).default(""),
+  telefon: z.string().trim().max(30).default(""),
+  epost: z.string().trim().max(200).default(""),
+  fSkatt: z.boolean().default(false),
+  momsNummer: z.string().trim().max(30).default(""),
+  bankgiro: z.string().trim().max(30).default(""),
+  plusgiro: z.string().trim().max(30).default(""),
+  swish: z.string().trim().max(30).default(""),
+  nastaFakturanummer: z.coerce.number().int().min(1).default(1),
+  forfallodagar: z.coerce.number().int().min(0).default(30),
+  drojsmalsranta: z.coerce.number().min(0).default(0),
+  fakturatext: z.string().max(1000).default(""),
+});
+
+export type CompanyInput = z.infer<typeof companySchema>;
 
 export function beräknaSummering(job: JobInput) {
   const artiklarSum = job.artiklar.reduce(

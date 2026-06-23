@@ -18,7 +18,6 @@ export async function POST(request: NextRequest) {
 
   let event: Stripe.Event;
   try {
-    //TODO! Sätt STRIPE_WEBHOOK_SECRET i .env till webhook-hemligheten från det riktiga live-endpointet i Stripe Dashboard
     event = stripe.webhooks.constructEvent(
       body,
       sig,
