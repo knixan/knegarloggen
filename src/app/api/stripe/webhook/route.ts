@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import type Stripe from "stripe";
 
 function getPeriodEnd(sub: Stripe.Subscription): Date | null {
-  const ts = sub.billing_schedules?.[0]?.bill_until.computed_timestamp;
+  const ts = sub.cancel_at ?? sub.items.data[0]?.current_period_end ?? null;
   return ts ? new Date(ts * 1000) : null;
 }
 

@@ -17,6 +17,12 @@ type SubscriptionData = {
   stripeSubscriptionId: string | null;
 };
 
+function getPeriodEnd(s: Stripe.Subscription): Date | null {
+  // cancel_at är satt när prenumerationen ska avslutas (cancel_at_period_end=true)
+  const ts = s.cancel_at ?? s.items.data[0]?.current_period_end ?? null;
+  return ts ? new Date(ts * 1000) : null;
+}
+
 async function getSubscriptionData(userId: string): Promise<SubscriptionData | null> {
   const localSub = await prisma.subscription.findUnique({
     where: { userId },
@@ -32,7 +38,6 @@ async function getSubscriptionData(userId: string): Promise<SubscriptionData | n
 
   if (!localSub) return null;
 
-  // Om ingen Stripe-koppling finns, returnera lokalt DB-värde (trial utan kort)
   if (!localSub.stripeCustomerId) {
     return localSub;
   }
@@ -48,12 +53,9 @@ async function getSubscriptionData(userId: string): Promise<SubscriptionData | n
     const s = stripeSubs.data[0] as Stripe.Subscription | undefined;
     if (!s) return localSub;
 
-    const periodEndTs =
-      s.cancel_at ??
-      s.billing_schedules?.[0]?.bill_until.computed_timestamp ??
-      null;
+    const currentPeriodEnd = getPeriodEnd(s);
 
-    // Spara uppdatering i bakgrunden (fire-and-forget)
+    // Spara till DB i bakgrunden
     prisma.subscription.update({
       where: { userId },
       data: {
@@ -61,7 +63,7 @@ async function getSubscriptionData(userId: string): Promise<SubscriptionData | n
         status: s.status,
         cancelAtPeriodEnd: s.cancel_at_period_end,
         trialEnd: s.trial_end ? new Date(s.trial_end * 1000) : null,
-        ...(periodEndTs && { currentPeriodEnd: new Date(periodEndTs * 1000) }),
+        ...(currentPeriodEnd && { currentPeriodEnd }),
       },
     }).catch(() => {});
 
@@ -69,11 +71,10 @@ async function getSubscriptionData(userId: string): Promise<SubscriptionData | n
       status: s.status,
       cancelAtPeriodEnd: s.cancel_at_period_end,
       trialEnd: s.trial_end ? new Date(s.trial_end * 1000) : null,
-      currentPeriodEnd: periodEndTs ? new Date(periodEndTs * 1000) : localSub.currentPeriodEnd,
+      currentPeriodEnd,
       stripeSubscriptionId: s.id,
     };
   } catch {
-    // Stripe inte tillgänglig — fall tillbaka på DB
     return localSub;
   }
 }
