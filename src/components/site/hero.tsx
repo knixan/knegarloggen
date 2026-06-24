@@ -1,75 +1,87 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ShieldCheck, CheckCircle2, Zap } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
 
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden bg-white dark:bg-gray-950 pt-12 pb-20 lg:pt-24 lg:pb-32">
-      <div className="container mx-auto px-4">
-        <div className="flex flex-col lg:flex-row items-center gap-16">
-          <div className="flex-1 text-center lg:text-left space-y-8 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm font-medium border border-blue-100 dark:border-blue-800">
-              <Zap className="h-4 w-4" />
-              <span>Enklare vardag för hantverkare</span>
-            </div>
-            <h1 className="text-4xl md:text-6xl font-black tracking-tight leading-[1.1]">
-              Håll koll på dina jobb –
-              <br />
-              från <span className="text-red-600">planering</span> till{" "}
-              <span className="text-blue-600">betalning</span>.
-            </h1>
-            <p className="text-xl text-muted-foreground leading-relaxed">
-              KnegarLoggen är det smarta verktyget för hantverkare som vill
-              slippa papperskaoset. Logga tid, material och resor direkt på
-              plats – och få betalt snabbare.
+    <section className="relative bg-white dark:bg-gray-950 overflow-hidden">
+      {/* Grid background */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#f3f4f6_1px,transparent_1px),linear-gradient(to_bottom,#f3f4f6_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#1f2937_1px,transparent_1px),linear-gradient(to_bottom,#1f2937_1px,transparent_1px)] bg-size-[48px_48px] opacity-60" />
+
+      <div className="relative container mx-auto px-4 pt-16 pb-24 lg:pt-28 lg:pb-40">
+        <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
+
+          {/* Left – content */}
+          <div className="flex-1 max-w-2xl space-y-8 text-center lg:text-left">
+            <p className="text-xs font-bold tracking-[0.25em] uppercase text-muted-foreground">
+              Jobblogg för hantverkare
             </p>
-            <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4 pt-4">
-              <Button
-                asChild
-                size="lg"
-                className="h-14 px-8 text-lg font-bold shadow-lg shadow-blue-500/20 bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-600 dark:hover:bg-blue-700 border-none"
+
+            <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-[1.05]">
+              Från{" "}
+              <span className="bg-linear-to-br from-red-600 to-red-400 bg-clip-text text-transparent">
+                jobb
+              </span>
+              <br />
+              till{" "}
+              <span className="bg-linear-to-br from-blue-600 to-blue-400 bg-clip-text text-transparent">
+                faktura.
+              </span>
+            </h1>
+
+            <p className="text-lg text-muted-foreground leading-relaxed max-w-lg mx-auto lg:mx-0">
+              Logga tid, material och resor direkt på plats. Skicka
+              professionella fakturor med ROT-avdrag – utan papperskrångel.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 pt-2">
+              <Link
+                href="/registrera"
+                className="inline-flex items-center gap-2 h-12 px-7 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-semibold rounded-lg hover:bg-gray-700 dark:hover:bg-gray-100 transition-colors text-sm"
               >
-                <Link href="/registrera">
-                  Prova en månad gratis
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-              <Button
-                asChild
-                variant="outline"
-                size="lg"
-                className="h-14 px-8 text-lg font-semibold"
+                Prova gratis i 30 dagar
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/logga-in"
+                className="inline-flex items-center h-12 px-5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
-                <Link href="/logga-in">Logga in</Link>
-              </Button>
+                Logga in →
+              </Link>
             </div>
-            <div className="flex items-center justify-center lg:justify-start gap-6 pt-4 text-sm text-muted-foreground">
-              <div className="flex items-center gap-1.5">
-                <ShieldCheck className="h-4 w-4 text-green-600" />
-                <span>Säker lagring</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4 text-green-600" />
-                <span>Ingen bindningstid</span>
-              </div>
+
+            <div className="flex items-center justify-center lg:justify-start gap-6 text-xs text-muted-foreground pt-2">
+              <span className="flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                99 kr/mån efter provperioden
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                Ingen bindningstid
+              </span>
             </div>
           </div>
 
-          <div className="flex-1 relative w-full lg:max-w-none">
-            <div className="relative z-10 w-full rounded-2xl shadow-2xl overflow-hidden border-4 border-white dark:border-gray-800 bg-muted">
+          {/* Right – screenshot */}
+          <div className="flex-1 w-full relative">
+            <div className="absolute -inset-6 bg-linear-to-br from-red-500/15 via-transparent to-blue-500/15 rounded-3xl blur-3xl" />
+            <div className="relative rounded-2xl overflow-hidden border border-gray-200/80 dark:border-gray-800 shadow-2xl shadow-black/10">
+              <div className="flex items-center gap-1.5 px-4 py-3 bg-gray-100 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+                <span className="h-3 w-3 rounded-full bg-red-400" />
+                <span className="h-3 w-3 rounded-full bg-yellow-400" />
+                <span className="h-3 w-3 rounded-full bg-green-400" />
+              </div>
               <Image
                 src="/Knegarloggen-hero.png"
-                alt="KnegarLoggen på dator, platta och mobil"
+                alt="KnegarLoggen – jobbvy"
                 width={1000}
                 height={600}
                 className="w-full h-auto object-cover"
                 priority
               />
             </div>
-            <div className="absolute -top-10 -right-10 w-64 h-64 bg-red-100 dark:bg-red-900/10 rounded-full blur-3xl -z-10" />
-            <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-blue-100 dark:bg-blue-900/10 rounded-full blur-3xl -z-10" />
           </div>
+
         </div>
       </div>
     </section>
