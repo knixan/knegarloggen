@@ -23,7 +23,9 @@ export default async function SkrivUtPage({
   if (!job) notFound();
   if (!company) notFound();
 
-  const fakturanummer = await reserverFakturanummer(id);
+  const fakturaResult = await reserverFakturanummer(id);
+  if (!fakturaResult.ok) notFound();
+  const fakturanummer = fakturaResult.nummer;
   const summary = beräknaSummering(job);
 
   return (

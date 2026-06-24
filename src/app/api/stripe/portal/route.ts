@@ -25,10 +25,15 @@ export async function POST() {
 
   const appUrl = env.NEXT_PUBLIC_APP_URL;
 
-  const portalSession = await stripe.billingPortal.sessions.create({
-    customer: subscription.stripeCustomerId,
-    return_url: `${appUrl}/mina-sidor/installningar?portal=return`,
-  });
-
-  return NextResponse.json({ url: portalSession.url });
+  try {
+    const portalSession = await stripe.billingPortal.sessions.create({
+      customer: subscription.stripeCustomerId,
+      return_url: `${appUrl}/mina-sidor/installningar?portal=return`,
+    });
+    return NextResponse.json({ url: portalSession.url });
+  } catch (err) {
+    console.error("Portal-fel:", err);
+    const message = err instanceof Error ? err.message : "Okänt fel";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }

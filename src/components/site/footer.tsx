@@ -1,5 +1,7 @@
 "use client";
 
+const CURRENT_YEAR = new Date().getFullYear();
+
 import Link from "next/link";
 import Image from "next/image";
 import { Mail, MapPin, ExternalLink, LogOut } from "lucide-react";
@@ -131,7 +133,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="border-t mt-12 pt-8 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} KnegarLoggen. Alla rättigheter
+          © {CURRENT_YEAR} KnegarLoggen. Alla rättigheter
           förbehållna.
         </div>
       </div>

@@ -6,7 +6,6 @@ import { stripe } from "@/lib/stripe";
 import InstallningarKlient from "@/components/minasidor/installningar/installningar-klient";
 import type Stripe from "stripe";
 
-export const dynamic = "force-dynamic";
 export const metadata = { title: "Inställningar – Knegarloggen" };
 
 type SubscriptionData = {

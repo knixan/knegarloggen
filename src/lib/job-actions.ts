@@ -742,33 +742,43 @@ export async function deleteAccount(): Promise<{
   return { ok: true as const };
 }
 
-export async function reserverFakturanummer(jobId: string): Promise<number> {
+export async function reserverFakturanummer(
+  jobId: string,
+): Promise<{ ok: true; nummer: number } | { ok: false; error: string }> {
   const session = await getSession();
-  if (!session?.user) throw new Error("Inte inloggad");
+  if (!session?.user) return { ok: false, error: "Inte inloggad" };
 
-  return prisma.$transaction(async (tx) => {
-    const company = await tx.company.findFirst({
-      where: { ownerId: session.user.id },
-    });
-    if (!company) throw new Error("Inget företag hittat");
+  try {
+    const nummer = await prisma.$transaction(async (tx) => {
+      const company = await tx.company.findFirst({
+        where: { ownerId: session.user.id },
+      });
+      if (!company) throw new Error("Inget företag hittat");
 
-    const job = await tx.job.findFirst({
-      where: { id: jobId, companyId: company.id },
-      select: { fakturanummer: true },
-    });
-    if (!job) throw new Error("Jobb hittades inte");
+      const job = await tx.job.findFirst({
+        where: { id: jobId, companyId: company.id },
+        select: { fakturanummer: true },
+      });
+      if (!job) throw new Error("Jobb hittades inte");
 
-    if (job.fakturanummer) return job.fakturanummer;
+      if (job.fakturanummer) return job.fakturanummer;
 
-    const nummer = company.nastaFakturanummer;
-    await tx.job.update({
-      where: { id: jobId },
-      data: { fakturanummer: nummer },
+      const n = company.nastaFakturanummer;
+      await tx.job.update({
+        where: { id: jobId },
+        data: { fakturanummer: n },
+      });
+      await tx.company.update({
+        where: { id: company.id },
+        data: { nastaFakturanummer: { increment: 1 } },
+      });
+      return n;
     });
-    await tx.company.update({
-      where: { id: company.id },
-      data: { nastaFakturanummer: { increment: 1 } },
-    });
-    return nummer;
-  });
+    return { ok: true, nummer };
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "Okänt fel",
+    };
+  }
 }

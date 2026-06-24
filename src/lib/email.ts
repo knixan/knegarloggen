@@ -37,6 +37,7 @@ export async function sendJobEmail(
   job: Job,
   company: CompanyInput,
   recipientEmail: string,
+  invoiceDate: Date = new Date(),
 ) {
   const resend = getResend();
   const summary = beräknaSummering(job);
@@ -69,7 +70,7 @@ export async function sendJobEmail(
   const forfallodatum =
     job.fakturanummer && company.forfallodagar
       ? (() => {
-          const d = new Date();
+          const d = new Date(invoiceDate);
           d.setDate(d.getDate() + company.forfallodagar);
           return `<p style="margin:0"><strong>Förfallodatum:</strong> ${d.toLocaleDateString("sv-SE")}</p>`;
         })()
