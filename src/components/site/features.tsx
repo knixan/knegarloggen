@@ -6,10 +6,10 @@ import {
   Receipt,
   Camera,
 } from "lucide-react";
+import AppCarousel from "@/components/site/carousel";
 
 const features = [
   {
-    number: "01",
     icon: CheckCircle2,
     color: "text-emerald-600",
     accent: "border-emerald-500",
@@ -19,7 +19,6 @@ const features = [
       "Följ varje jobb genom hela kedjan — pågående, utfört, fakturerat och betalt. Alltid koll på var varje jobb befinner sig.",
   },
   {
-    number: "02",
     icon: Users,
     color: "text-blue-600",
     accent: "border-blue-500",
@@ -29,7 +28,6 @@ const features = [
       "Privat- och företagskunder med adress, personnummer och fastighetsbeteckning. Allt du behöver för faktura och ROT.",
   },
   {
-    number: "03",
     icon: Package,
     color: "text-orange-600",
     accent: "border-orange-500",
@@ -39,7 +37,6 @@ const features = [
       "Lägg in artiklar med artikelnummer och pris direkt på plats. Sluta gissa vad den där ventilen kostade.",
   },
   {
-    number: "04",
     icon: Clock,
     color: "text-red-600",
     accent: "border-red-500",
@@ -49,7 +46,6 @@ const features = [
       "Logga arbetstimmar och körda mil per datum. Timpris och milersättning räknas ut automatiskt.",
   },
   {
-    number: "05",
     icon: Receipt,
     color: "text-purple-600",
     accent: "border-purple-500",
@@ -59,7 +55,6 @@ const features = [
       "Professionell faktura med ett klick — logotyp, automatiskt fakturanummer, moms och korrekt ROT-avdrag.",
   },
   {
-    number: "06",
     icon: Camera,
     color: "text-teal-600",
     accent: "border-teal-500",
@@ -96,23 +91,18 @@ export default function Features() {
             const Icon = f.icon;
             return (
               <div
-                key={f.number}
+                key={f.title}
                 className="group relative bg-white dark:bg-gray-950 p-8 flex flex-col gap-5 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors duration-200"
               >
-                {/* Decorative number */}
-                <span className="absolute top-5 right-6 text-6xl font-black text-gray-100 dark:text-gray-800/80 select-none leading-none group-hover:text-gray-200 dark:group-hover:text-gray-700 transition-colors">
-                  {f.number}
-                </span>
-
                 {/* Icon */}
                 <div
-                  className={`relative z-10 w-11 h-11 rounded-xl ${f.bg} flex items-center justify-center`}
+                  className={`w-11 h-11 rounded-xl ${f.bg} flex items-center justify-center`}
                 >
                   <Icon className={`h-5 w-5 ${f.color}`} />
                 </div>
 
                 {/* Text */}
-                <div className="relative z-10 space-y-2">
+                <div className="space-y-2">
                   <h3 className="text-lg font-bold">{f.title}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     {f.description}
@@ -126,6 +116,11 @@ export default function Features() {
               </div>
             );
           })}
+        </div>
+
+        {/* Carousel */}
+        <div className="mt-20">
+          <AppCarousel />
         </div>
 
       </div>

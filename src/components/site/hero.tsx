@@ -4,11 +4,18 @@ import { ArrowRight } from "lucide-react";
 
 export default function Hero() {
   return (
-    <section className="relative bg-white dark:bg-gray-950 overflow-hidden">
-      {/* Grid background */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#f3f4f6_1px,transparent_1px),linear-gradient(to_bottom,#f3f4f6_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#1f2937_1px,transparent_1px),linear-gradient(to_bottom,#1f2937_1px,transparent_1px)] bg-size-[48px_48px] opacity-60" />
+    <section className="relative bg-white dark:bg-gray-950 overflow-hidden min-h-screen flex flex-col justify-center">
+      {/* Background image */}
+      <Image
+        src="/hero-knegarloggen.png"
+        alt=""
+        fill
+        className="object-cover object-top scale-110 translate-y-16"
+        priority
+      />
+      <div className="absolute inset-0 bg-white/70 dark:bg-gray-950/75" />
 
-      <div className="relative container mx-auto px-4 pt-16 pb-24 lg:pt-28 lg:pb-40">
+      <div className="relative container mx-auto px-4 py-16 lg:py-24">
         <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
 
           {/* Left – content */}
@@ -28,6 +35,33 @@ export default function Hero() {
                 faktura.
               </span>
             </h1>
+
+            {/* Steps */}
+            <div className="flex items-start justify-center lg:justify-start gap-0">
+              {[
+                { n: 1, label: "Skapa jobb", color: "bg-blue-600" },
+                { n: 2, label: "Logga tid", color: "bg-red-600" },
+                { n: 3, label: "Material", color: "bg-blue-600" },
+                { n: 4, label: "Skapa faktura", color: "bg-red-600" },
+                { n: 5, label: "Få betalt", color: "bg-blue-600" },
+              ].map((step, i, arr) => (
+                <div key={step.n} className="flex items-start">
+                  <div className="flex flex-col items-center gap-2 w-20 sm:w-24">
+                    <div
+                      className={`${step.color} h-12 w-12 rounded-full flex items-center justify-center text-white font-black text-lg shrink-0`}
+                    >
+                      {step.n}
+                    </div>
+                    <span className="text-xs font-bold text-center leading-tight">
+                      {step.label}
+                    </span>
+                  </div>
+                  {i < arr.length - 1 && (
+                    <div className="mt-6 flex-1 h-px bg-gray-300 dark:bg-gray-700 min-w-2" />
+                  )}
+                </div>
+              ))}
+            </div>
 
             <p className="text-lg text-muted-foreground leading-relaxed max-w-lg mx-auto lg:mx-0">
               Logga tid, material och resor direkt på plats. Skicka
@@ -64,15 +98,9 @@ export default function Hero() {
 
           {/* Right – screenshot */}
           <div className="flex-1 w-full relative">
-            <div className="absolute -inset-6 bg-linear-to-br from-red-500/15 via-transparent to-blue-500/15 rounded-3xl blur-3xl" />
-            <div className="relative rounded-2xl overflow-hidden border border-gray-200/80 dark:border-gray-800 shadow-2xl shadow-black/10">
-              <div className="flex items-center gap-1.5 px-4 py-3 bg-gray-100 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-                <span className="h-3 w-3 rounded-full bg-red-400" />
-                <span className="h-3 w-3 rounded-full bg-yellow-400" />
-                <span className="h-3 w-3 rounded-full bg-green-400" />
-              </div>
+           
               <Image
-                src="/Knegarloggen-hero.png"
+                src="/knegarlogg-heroscreen.png"
                 alt="KnegarLoggen – jobbvy"
                 width={1000}
                 height={600}
@@ -83,7 +111,7 @@ export default function Hero() {
           </div>
 
         </div>
-      </div>
+      
     </section>
   );
 }
