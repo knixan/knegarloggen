@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -8,14 +9,24 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Plus, Pencil, User, Building2, Phone, Mail } from "lucide-react";
 import CustomerDeleteButton from "@/components/minasidor/kunder/customer-delete-button";
 
-export default async function KundregisterPage() {
+export default function KundregisterPage() {
+  return (
+    <main className="container mx-auto max-w-3xl px-4 py-8">
+      <Suspense fallback={<div className="animate-pulse h-8 w-48 bg-muted rounded" />}>
+        <KunderInnehall />
+      </Suspense>
+    </main>
+  );
+}
+
+async function KunderInnehall() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) redirect("/logga-in");
 
   const customers = await getCustomers();
 
   return (
-    <main className="container mx-auto max-w-3xl px-4 py-8">
+    <>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Kundregister</h1>
@@ -116,6 +127,6 @@ export default async function KundregisterPage() {
           ))}
         </div>
       )}
-    </main>
+    </>
   );
 }

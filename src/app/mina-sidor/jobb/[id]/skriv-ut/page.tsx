@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { headers } from "next/headers";
 import { redirect, notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
@@ -9,7 +10,19 @@ import {
 import { beräknaSummering } from "@/lib/job-schema";
 import SkrivUtKlient from "@/components/minasidor/faktura/skriv-ut-klient";
 
-export default async function SkrivUtPage({
+export default function SkrivUtPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  return (
+    <Suspense fallback={<div className="animate-pulse h-screen bg-muted" />}>
+      <SkrivUtInnehall params={params} />
+    </Suspense>
+  );
+}
+
+async function SkrivUtInnehall({
   params,
 }: {
   params: Promise<{ id: string }>;

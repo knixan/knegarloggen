@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { headers } from "next/headers";
 import { differenceInDays } from "date-fns";
 import { cacheLife } from "next/cache";
@@ -18,7 +19,25 @@ async function getSubscriptionStatus(userId: string) {
   });
 }
 
-export default async function MinaSidorLayout({
+export default function MinaSidorLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex min-h-[calc(100vh-4rem)]">
+      <MinaSidorSidebar />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <MinaSidorMobileNav />
+        <Suspense fallback={<div className="flex-1" />}>
+          <MinaSidorGate>{children}</MinaSidorGate>
+        </Suspense>
+      </div>
+    </div>
+  );
+}
+
+async function MinaSidorGate({
   children,
 }: {
   children: React.ReactNode;
@@ -50,14 +69,8 @@ export default async function MinaSidorLayout({
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)]">
-      <MinaSidorSidebar />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <MinaSidorMobileNav />
-        <TrialGate isExpired={isExpired} daysLeft={daysLeft}>
-          {children}
-        </TrialGate>
-      </div>
-    </div>
+    <TrialGate isExpired={isExpired} daysLeft={daysLeft}>
+      {children}
+    </TrialGate>
   );
 }

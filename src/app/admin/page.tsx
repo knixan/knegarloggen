@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
@@ -7,7 +8,17 @@ import AdminKlient from "./admin-klient";
 
 export const metadata = { title: "Admin – Knegarloggen" };
 
-export default async function AdminPage() {
+export default function AdminPage() {
+  return (
+    <main className="container mx-auto px-4 py-8">
+      <Suspense fallback={<div className="animate-pulse h-8 w-32 bg-muted rounded" />}>
+        <AdminInnehall />
+      </Suspense>
+    </main>
+  );
+}
+
+async function AdminInnehall() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) redirect("/logga-in");
 
@@ -17,7 +28,7 @@ export default async function AdminPage() {
   const users = await getAdminUsers();
 
   return (
-    <main className="container mx-auto px-4 py-8">
+    <>
       <div className="mb-8">
         <h1 className="text-2xl font-bold">Admin</h1>
         <p className="text-sm text-muted-foreground mt-1">
@@ -25,6 +36,6 @@ export default async function AdminPage() {
         </p>
       </div>
       <AdminKlient initialUsers={users} currentUserId={session.user.id} />
-    </main>
+    </>
   );
 }

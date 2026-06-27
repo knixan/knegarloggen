@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
@@ -17,7 +18,6 @@ type SubscriptionData = {
 };
 
 function getPeriodEnd(s: Stripe.Subscription): Date | null {
-  // cancel_at är satt när prenumerationen ska avslutas (cancel_at_period_end=true)
   const ts = s.cancel_at ?? s.items.data[0]?.current_period_end ?? null;
   return ts ? new Date(ts * 1000) : null;
 }
@@ -43,7 +43,6 @@ async function getSubscriptionData(
     return localSub;
   }
 
-  // Hämta live-data direkt från Stripe
   try {
     const stripeSubs = await stripe.subscriptions.list({
       customer: localSub.stripeCustomerId,
@@ -56,7 +55,6 @@ async function getSubscriptionData(
 
     const currentPeriodEnd = getPeriodEnd(s);
 
-    // Spara till DB i bakgrunden
     prisma.subscription
       .update({
         where: { userId },
@@ -82,7 +80,17 @@ async function getSubscriptionData(
   }
 }
 
-export default async function InstallningarPage() {
+export default function InstallningarPage() {
+  return (
+    <main className="container mx-auto px-4 py-8">
+      <Suspense fallback={<div className="animate-pulse h-8 w-48 bg-muted rounded" />}>
+        <InstallningarInnehall />
+      </Suspense>
+    </main>
+  );
+}
+
+async function InstallningarInnehall() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) redirect("/logga-in");
 
@@ -94,7 +102,7 @@ export default async function InstallningarPage() {
     !subscription.cancelAtPeriodEnd;
 
   return (
-    <main className="container mx-auto px-4 py-8">
+    <>
       <div className="mb-8">
         <h1 className="text-2xl font-bold">Inställningar</h1>
         <p className="text-muted-foreground text-sm mt-1">
@@ -105,6 +113,6 @@ export default async function InstallningarPage() {
         subscription={subscription}
         hasActiveStripeSub={hasActiveStripeSub}
       />
-    </main>
+    </>
   );
 }
