@@ -5,13 +5,23 @@ import { ArrowRight } from "lucide-react";
 export default function Hero() {
   return (
     <section className="relative bg-white dark:bg-gray-950 overflow-hidden min-h-screen flex flex-col justify-center">
-      {/* Background image */}
+      {/* Background image – desktop */}
       <Image
-        src="/hero-knegarloggen.png"
+        src="/knegarloggen-hero.png"
         alt=""
         fill
-        className="object-cover object-top scale-110 translate-y-16"
+        className="hidden lg:block object-cover object-top-right translate-y-0"
         priority
+        sizes="100vw"
+      />
+      {/* Background image – mobile */}
+      <Image
+        src="/hero-mobile.png"
+        alt=""
+        fill
+        className="block lg:hidden object-cover object-top"
+        priority
+        sizes="100vw"
       />
       <div className="absolute inset-0 bg-white/70 dark:bg-gray-950/75" />
 
@@ -94,19 +104,30 @@ export default function Hero() {
                 Ingen bindningstid
               </span>
             </div>
+
+            <div className="block lg:hidden w-full pt-4">
+              <Image
+                src="/knegarlogg-mobile.png"
+                alt="KnegarLoggen – app"
+                width={800}
+                height={600}
+                className="w-full h-auto"
+                priority
+              />
+            </div>
           </div>
 
           {/* Right – screenshot */}
           <div className="flex-1 w-full relative">
            
-              <Image
+              {/* <Image
                 src="/knegarlogg-heroscreen.png"
                 alt="KnegarLoggen – jobbvy"
                 width={1000}
                 height={600}
                 className="w-full h-auto object-cover"
                 priority
-              />
+              /> */}
             </div>
           </div>
 
