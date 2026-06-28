@@ -10,7 +10,7 @@ export default function Hero() {
         src="/knegarloggen-hero.png"
         alt=""
         fill
-        className="hidden lg:block object-cover object-top-right translate-y-0"
+        className="hidden min-[1080px]:block object-cover object-top-right translate-y-0"
         priority
         sizes="100vw"
       />
@@ -19,7 +19,7 @@ export default function Hero() {
         src="/hero-mobile.png"
         alt=""
         fill
-        className="block lg:hidden object-cover object-top"
+        className="block min-[1080px]:hidden object-cover object-top"
         priority
         sizes="100vw"
       />
@@ -47,7 +47,7 @@ export default function Hero() {
             </h1>
 
             {/* Steps */}
-            <div className="flex items-start justify-center lg:justify-start gap-0">
+            <div className="flex items-start justify-center lg:justify-start w-full gap-0">
               {[
                 { n: 1, label: "Skapa jobb", color: "bg-blue-600" },
                 { n: 2, label: "Logga tid", color: "bg-red-600" },
@@ -55,19 +55,19 @@ export default function Hero() {
                 { n: 4, label: "Skapa faktura", color: "bg-red-600" },
                 { n: 5, label: "Få betalt", color: "bg-blue-600" },
               ].map((step, i, arr) => (
-                <div key={step.n} className="flex items-start">
-                  <div className="flex flex-col items-center gap-2 w-20 sm:w-24">
+                <div key={step.n} className="flex flex-1 items-start">
+                  <div className="flex flex-1 flex-col items-center gap-1.5">
                     <div
-                      className={`${step.color} h-12 w-12 rounded-full flex items-center justify-center text-white font-black text-lg shrink-0`}
+                      className={`${step.color} h-9 w-9 sm:h-12 sm:w-12 rounded-full flex items-center justify-center text-white font-black text-sm sm:text-lg shrink-0`}
                     >
                       {step.n}
                     </div>
-                    <span className="text-xs font-bold text-center leading-tight">
+                    <span className="text-[10px] sm:text-xs font-bold text-center leading-tight">
                       {step.label}
                     </span>
                   </div>
                   {i < arr.length - 1 && (
-                    <div className="mt-6 flex-1 h-px bg-gray-300 dark:bg-gray-700 min-w-2" />
+                    <div className="mt-4 sm:mt-6 flex-none w-2 sm:w-4 h-px bg-gray-300 dark:bg-gray-700 self-start translate-y-4.5 sm:translate-y-6" />
                   )}
                 </div>
               ))}
@@ -105,7 +105,7 @@ export default function Hero() {
               </span>
             </div>
 
-            <div className="block lg:hidden w-full pt-4">
+            <div className="block min-[1080px]:hidden w-full pt-4">
               <Image
                 src="/knegarlogg-mobile.png"
                 alt="KnegarLoggen – app"
