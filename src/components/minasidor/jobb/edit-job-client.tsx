@@ -25,6 +25,7 @@ export default function EditJobClient({ job, customers }: Props) {
       if (result.ok) {
         toast.success("Jobb uppdaterat!");
         router.push("/mina-sidor");
+        router.refresh();
       } else {
         toast.error(result.error ?? "Kunde inte uppdatera jobb");
       }

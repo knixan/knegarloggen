@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Search } from "lucide-react";
@@ -111,6 +111,11 @@ export default function JobDashboard({
   const [allJobs, setAllJobs] = useState<Job[]>(initialJobs);
   const [cursor, setCursor] = useState<string | null>(initialCursor);
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    setAllJobs(initialJobs);
+    setCursor(initialCursor);
+  }, [initialJobs, initialCursor]);
   const [active, setActive] = useState<Filter>("alla");
   const [sok, setSok] = useState("");
   const [jobToDelete, setJobToDelete] = useState<Job | null>(null);
