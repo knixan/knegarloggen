@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
-import type { Prisma } from "@prisma/client";
+import type { Prisma } from "@/generated/prisma";
 import { UTApi } from "uploadthing/server";
 import { auth } from "./auth";
 import { prisma } from "./prisma";

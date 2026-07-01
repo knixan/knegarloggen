@@ -1,5 +1,4 @@
-// @ts-expect-error – available after `npx prisma generate`
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@/generated/prisma";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { env } from "./env";
 

@@ -24,19 +24,21 @@ export default function RootLayout({
 }) {
   return (
     <html lang="sv" suppressHydrationWarning className={roboto.className}>
-      <body className="min-h-screen" suppressHydrationWarning>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Navbar />
-          <Toaster position="top-right" />
-          <Suspense fallback={null}>{children}</Suspense>
-        </ThemeProvider>
-        <Footer />
-      </body>
+      <Suspense fallback={null}>
+        <body className="min-h-screen" suppressHydrationWarning>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <Navbar />
+            <Toaster position="top-right" />
+            {children}
+          </ThemeProvider>
+          <Footer />
+        </body>
+      </Suspense>
     </html>
   );
 }
