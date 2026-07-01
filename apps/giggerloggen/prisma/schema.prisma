@@ -1,0 +1,251 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Better Auth models ────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  role          String    @default("user")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  company      Company?
+  accounts     Account[]
+  sessions     Session[]
+  subscription Subscription?
+
+  @@map("user")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@unique([providerId, accountId])
+  @@map("account")
+}
+
+model Session {
+  id                   String   @id @default(cuid())
+  userId               String
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token                String   @unique
+  expiresAt            DateTime
+  ipAddress            String?
+  userAgent            String?
+  activeOrganizationId String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@map("session")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("verification")
+}
+
+// ─── Business models ───────────────────────────────────
+
+model Company {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Business info
+  namn       String @default("")
+  orgNummer  String @default("")
+  adress     String @default("")
+  postnummer String @default("")
+  stad       String @default("")
+  telefon    String @default("")
+  epost      String @default("")
+  hemsida    String @default("")
+
+  // Invoice settings
+  nextFakturaNummer Int    @default(1)
+  betalningsvillkor Int    @default(30)
+  drojsmalsranta    String @default("8%")
+  fakturaText       String @default("")
+
+  // VAT
+  momsregistrerad Boolean @default(false)
+  momsNummer      String  @default("")
+
+  // Payment methods
+  bankgiro String @default("")
+  plusgiro String @default("")
+  swish    String @default("")
+  iban     String @default("")
+  bic      String @default("")
+
+  // Logo (UploadThing)
+  logoUrl String?
+  logoKey String?
+
+  customers Customer[]
+  uppdrag   Uppdrag[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("company")
+}
+
+model Customer {
+  id        String  @id @default(cuid())
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  // privatperson | foretag
+  kundTyp String @default("privatperson")
+
+  // Shared fields
+  namn       String
+  adress     String @default("")
+  postnummer String @default("")
+  stad       String @default("")
+  telefon    String @default("")
+  epost      String @default("")
+
+  // Privatperson
+  personnummer String @default("")
+
+  // Företag
+  foretagsnamn  String @default("")
+  kontaktperson String @default("")
+  orgNummer     String @default("")
+
+  uppdrag Uppdrag[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
+  @@map("customer")
+}
+
+model Uppdrag {
+  id         String    @id @default(cuid())
+  companyId  String
+  company    Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  // Info
+  titel       String
+  beskrivning String @default("")
+  // konsulting | design | utbildning | handel | it | juridik | annat
+  uppdragsTyp String @default("konsulting")
+
+  // pagaende | utfort | fakturerat | betalt
+  status String @default("pagaende")
+
+  // timme | fast
+  prisTyp  String @default("timme")
+  timpris  Float  @default(0)
+  fastPris Float  @default(0)
+
+  // Mileage rate (kr/km)
+  milersattning Float @default(0)
+
+  // Invoice
+  fakturaNummer Int?
+
+  // Notes
+  anteckningar   String @default("")
+  utfortArbete   String @default("")
+  planeratArbete String @default("")
+
+  arbetspass      Arbetspass[]
+  resor           Resa[]
+  ovrigaKostnader OvrigKostnad[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([customerId])
+  @@map("uppdrag")
+}
+
+model Arbetspass {
+  id          String   @id @default(cuid())
+  uppdragId   String
+  uppdrag     Uppdrag  @relation(fields: [uppdragId], references: [id], onDelete: Cascade)
+  datum       DateTime @default(now()) @db.Date
+  timmar      Float
+  beskrivning String   @default("")
+  createdAt   DateTime @default(now())
+
+  @@index([uppdragId])
+  @@map("arbetspass")
+}
+
+model Resa {
+  id          String   @id @default(cuid())
+  uppdragId   String
+  uppdrag     Uppdrag  @relation(fields: [uppdragId], references: [id], onDelete: Cascade)
+  datum       DateTime @default(now()) @db.Date
+  stracka     Float
+  beskrivning String   @default("")
+  createdAt   DateTime @default(now())
+
+  @@index([uppdragId])
+  @@map("resa")
+}
+
+model OvrigKostnad {
+  id          String   @id @default(cuid())
+  uppdragId   String
+  uppdrag     Uppdrag  @relation(fields: [uppdragId], references: [id], onDelete: Cascade)
+  beskrivning String
+  pris        Float
+  createdAt   DateTime @default(now())
+
+  @@index([uppdragId])
+  @@map("ovrig_kostnad")
+}
+
+model Subscription {
+  id                   String    @id @default(cuid())
+  userId               String    @unique
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status               String    @default("trialing") // trialing | active | canceled | past_due
+  stripeCustomerId     String?   @unique
+  stripeSubscriptionId String?   @unique
+  trialEnd             DateTime?
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean   @default(false)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@map("subscription")
+}
