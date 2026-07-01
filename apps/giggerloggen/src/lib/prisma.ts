@@ -2,14 +2,13 @@ import { PrismaClient } from "@/generated/prisma";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { env } from "./env";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type PC = any;
-
-const globalForPrisma = globalThis as unknown as { prisma: PC };
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient;
+};
 
 const adapter = new PrismaPg({ connectionString: env.DATABASE_URL });
 
-export const prisma: PC =
+export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
     adapter,

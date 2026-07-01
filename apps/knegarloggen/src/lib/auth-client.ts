@@ -2,8 +2,13 @@ import { createAuthClient } from "better-auth/react";
 import { inferAdditionalFields } from "better-auth/client/plugins";
 import type { auth } from "./auth";
 
+const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+if (!appUrl) {
+  throw new Error("NEXT_PUBLIC_APP_URL saknas i miljövariablerna.");
+}
+
 export const authClient = createAuthClient({
-  baseURL: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
+  baseURL: appUrl,
   plugins: [inferAdditionalFields<typeof auth>()],
 });
 

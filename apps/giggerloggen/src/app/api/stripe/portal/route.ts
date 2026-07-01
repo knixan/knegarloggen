@@ -17,10 +17,15 @@ export async function POST() {
     return NextResponse.json({ error: "Ingen prenumeration hittad" }, { status: 404 });
   }
 
-  const portalSession = await stripe.billingPortal.sessions.create({
-    customer: subscription.stripeCustomerId,
-    return_url: `${env.NEXT_PUBLIC_APP_URL}/mina-sidor/installningar`,
-  });
-
-  return NextResponse.json({ url: portalSession.url });
+  try {
+    const portalSession = await stripe.billingPortal.sessions.create({
+      customer: subscription.stripeCustomerId,
+      return_url: `${env.NEXT_PUBLIC_APP_URL}/mina-sidor/installningar`,
+    });
+    return NextResponse.json({ url: portalSession.url });
+  } catch (err) {
+    console.error("Portal-fel:", err);
+    const message = err instanceof Error ? err.message : "Okänt fel";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
