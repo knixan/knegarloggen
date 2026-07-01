@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { beraknaTotal } from "@/lib/uppdrag-schema";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { SkrivUtKnapp } from "@/components/minasidor/uppdrag/skriv-ut-knapp";
 
 export default async function SkrivUtPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -168,12 +169,7 @@ export default async function SkrivUtPage({ params }: { params: Promise<{ id: st
       )}
 
       <div className="mt-8 print:hidden">
-        <button
-          onClick={() => window.print()}
-          className="rounded-md bg-primary px-4 py-2 text-primary-foreground text-sm font-medium"
-        >
-          Skriv ut / Spara som PDF
-        </button>
+        <SkrivUtKnapp />
       </div>
     </div>
   );

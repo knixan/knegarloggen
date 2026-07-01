@@ -4,6 +4,11 @@ import { prisma } from "@/lib/prisma";
 import { env } from "@/lib/env";
 import type Stripe from "stripe";
 
+function getPeriodEnd(sub: Stripe.Subscription): Date | null {
+  const ts = sub.cancel_at ?? sub.items.data[0]?.current_period_end ?? null;
+  return ts ? new Date(ts * 1000) : null;
+}
+
 export async function POST(req: NextRequest) {
   const body = await req.text();
   const sig = req.headers.get("stripe-signature");
@@ -26,8 +31,7 @@ export async function POST(req: NextRequest) {
           typeof s.subscription === "string" ? s.subscription : s.subscription.id;
 
         const sub = await stripe.subscriptions.retrieve(stripeSubscriptionId);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const periodEnd = new Date(((sub as any).current_period_end as number) * 1000);
+        const periodEnd = getPeriodEnd(sub);
         await prisma.subscription.upsert({
           where: { userId: s.metadata.userId },
           create: {
@@ -49,8 +53,7 @@ export async function POST(req: NextRequest) {
     }
     case "customer.subscription.updated": {
       const sub = event.data.object as Stripe.Subscription;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const periodEnd = new Date(((sub as any).current_period_end as number) * 1000);
+      const periodEnd = getPeriodEnd(sub);
       await prisma.subscription.updateMany({
         where: { stripeSubscriptionId: sub.id },
         data: {

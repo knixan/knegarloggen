@@ -104,7 +104,10 @@ export async function laggTillArbetspass(
 }
 
 export async function raderaArbetspass(arbetspassId: string, uppdragId: string) {
-  await prisma.arbetspass.delete({ where: { id: arbetspassId } });
+  const companyId = await getCompanyId();
+  await prisma.arbetspass.deleteMany({
+    where: { id: arbetspassId, uppdragId, uppdrag: { companyId } },
+  });
   revalidatePath(`/mina-sidor/uppdrag/${uppdragId}/redigera`);
   return { ok: true };
 }
@@ -127,7 +130,10 @@ export async function laggTillResa(
 }
 
 export async function raderaResa(resaId: string, uppdragId: string) {
-  await prisma.resa.delete({ where: { id: resaId } });
+  const companyId = await getCompanyId();
+  await prisma.resa.deleteMany({
+    where: { id: resaId, uppdragId, uppdrag: { companyId } },
+  });
   revalidatePath(`/mina-sidor/uppdrag/${uppdragId}/redigera`);
   return { ok: true };
 }
@@ -147,7 +153,10 @@ export async function laggTillOvrigKostnad(
 }
 
 export async function raderaOvrigKostnad(kostnadId: string, uppdragId: string) {
-  await prisma.ovrigKostnad.delete({ where: { id: kostnadId } });
+  const companyId = await getCompanyId();
+  await prisma.ovrigKostnad.deleteMany({
+    where: { id: kostnadId, uppdragId, uppdrag: { companyId } },
+  });
   revalidatePath(`/mina-sidor/uppdrag/${uppdragId}/redigera`);
   return { ok: true };
 }
