@@ -532,17 +532,9 @@ export async function updateJob(
     if (!customer) return { ok: false, error: "Kund hittades inte" };
   }
 
-  // Bilder att radera från UploadThing
   const existingImageKeys = existing.images.map((i) => i.key);
   const newImageKeys = bilder.map((b) => b.key);
   const toDelete = existingImageKeys.filter((k) => !newImageKeys.includes(k));
-  if (toDelete.length > 0) {
-    try {
-      await utapi.deleteFiles(toDelete);
-    } catch (err) {
-      console.error("Kunde inte radera bilder från UploadThing:", err);
-    }
-  }
 
   const existingArtiklarIds = ids(existing.artiklar);
   const keepArtiklarIds = ids(data.artiklar);
@@ -663,6 +655,14 @@ export async function updateJob(
     }),
   ]);
 
+  if (toDelete.length > 0) {
+    try {
+      await utapi.deleteFiles(toDelete);
+    } catch (err) {
+      console.error("Kunde inte radera bilder från UploadThing:", err);
+    }
+  }
+
   revalidatePath("/mina-sidor");
   revalidatePath(`/mina-sidor/jobb/${id}/redigera`);
   return { ok: true as const };
@@ -679,6 +679,8 @@ export async function deleteJob(id: string) {
   });
   if (!job) return { ok: false, error: "Jobb hittades inte" };
 
+  await prisma.job.delete({ where: { id } });
+
   if (job.images.length > 0) {
     try {
       await utapi.deleteFiles(job.images.map((i) => i.key));
@@ -686,8 +688,6 @@ export async function deleteJob(id: string) {
       console.error("Kunde inte radera jobbbilder:", err);
     }
   }
-
-  await prisma.job.delete({ where: { id } });
 
   revalidatePath("/mina-sidor");
   return { ok: true as const };
@@ -721,14 +721,6 @@ export async function deleteAccount(): Promise<{
     job.images.forEach((img) => keys.push(img.key)),
   );
 
-  if (keys.length > 0) {
-    try {
-      await utapi.deleteFiles(keys);
-    } catch (err) {
-      console.error("Kunde inte radera filer vid kontoborttagning:", err);
-    }
-  }
-
   if (subscription?.stripeSubscriptionId) {
     try {
       await stripe.subscriptions.cancel(subscription.stripeSubscriptionId);
@@ -738,6 +730,14 @@ export async function deleteAccount(): Promise<{
   }
 
   await prisma.user.delete({ where: { id: userId } });
+
+  if (keys.length > 0) {
+    try {
+      await utapi.deleteFiles(keys);
+    } catch (err) {
+      console.error("Kunde inte radera filer vid kontoborttagning:", err);
+    }
+  }
 
   return { ok: true as const };
 }
@@ -763,14 +763,20 @@ export async function reserverFakturanummer(
 
       if (job.fakturanummer) return job.fakturanummer;
 
-      const n = company.nastaFakturanummer;
+      // Atomärt: låser raden och returnerar gamla värdet i en enda SQL-sats,
+      // vilket förhindrar race conditions vid parallella anrop.
+      const result = await tx.$queryRaw<[{ nummer: number }]>`
+        UPDATE company
+        SET "nastaFakturanummer" = "nastaFakturanummer" + 1
+        WHERE id = ${company.id}
+        RETURNING "nastaFakturanummer" - 1 AS nummer
+      `;
+      const n = result[0]?.nummer;
+      if (n == null) throw new Error("Kunde inte reservera fakturanummer");
+
       await tx.job.update({
         where: { id: jobId },
         data: { fakturanummer: n },
-      });
-      await tx.company.update({
-        where: { id: company.id },
-        data: { nastaFakturanummer: { increment: 1 } },
       });
       return n;
     });
