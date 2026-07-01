@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { notFound, redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
@@ -5,7 +6,15 @@ import { prisma } from "@/lib/prisma";
 import { CustomerForm } from "@/components/minasidor/kunder/customer-form";
 import { CustomerDeleteButton } from "@/components/minasidor/kunder/customer-delete-button";
 
-export default async function RedigeraKundPage({ params }: { params: Promise<{ id: string }> }) {
+export default function RedigeraKundPage({ params }: { params: Promise<{ id: string }> }) {
+  return (
+    <Suspense fallback={<div className="animate-pulse h-8 w-48 bg-muted rounded" />}>
+      <RedigeraKundInnehall params={params} />
+    </Suspense>
+  );
+}
+
+async function RedigeraKundInnehall({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) redirect("/logga-in");

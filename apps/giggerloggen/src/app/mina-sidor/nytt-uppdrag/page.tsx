@@ -1,10 +1,19 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { UppdragForm } from "@/components/minasidor/uppdrag/uppdrag-form";
 
-export default async function NyttUppdragPage() {
+export default function NyttUppdragPage() {
+  return (
+    <Suspense fallback={<div className="animate-pulse h-8 w-48 bg-muted rounded" />}>
+      <NyttUppdragInnehall />
+    </Suspense>
+  );
+}
+
+async function NyttUppdragInnehall() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) redirect("/logga-in");
 

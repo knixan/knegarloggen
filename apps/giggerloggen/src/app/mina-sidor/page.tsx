@@ -1,10 +1,21 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { UppdragDashboard } from "@/components/minasidor/uppdrag/uppdrag-dashboard";
 
-export default async function MinaSidorPage() {
+export default function MinaSidorPage() {
+  return (
+    <Suspense
+      fallback={<div className="animate-pulse h-8 w-48 bg-muted rounded" />}
+    >
+      <MinaSidorInnehall />
+    </Suspense>
+  );
+}
+
+async function MinaSidorInnehall() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) redirect("/logga-in");
 

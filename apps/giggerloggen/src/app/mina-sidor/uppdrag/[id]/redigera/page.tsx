@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { notFound, redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
@@ -5,7 +6,19 @@ import { prisma } from "@/lib/prisma";
 import { UppdragForm } from "@/components/minasidor/uppdrag/uppdrag-form";
 import { UppdragDetaljer } from "@/components/minasidor/uppdrag/uppdrag-detaljer";
 
-export default async function RedigeraUppdragPage({
+export default function RedigeraUppdragPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  return (
+    <Suspense fallback={<div className="animate-pulse h-8 w-48 bg-muted rounded" />}>
+      <RedigeraUppdragInnehall params={params} />
+    </Suspense>
+  );
+}
+
+async function RedigeraUppdragInnehall({
   params,
 }: {
   params: Promise<{ id: string }>;

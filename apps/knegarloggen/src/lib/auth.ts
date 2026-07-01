@@ -15,6 +15,10 @@ export const auth = betterAuth({
   rateLimit: {
     window: 60,
     max: 10,
+    customRules: {
+      "/sign-in/email": { window: 10, max: 3 },
+      "/sign-up/email": { window: 10, max: 3 },
+    },
   },
 
   emailAndPassword: {

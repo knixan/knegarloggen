@@ -4,7 +4,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const from = process.env.RESEND_FROM ?? "noreply@giggerloggen.se";
 
 export async function sendVerificationEmail(email: string, url: string) {
-  await resend.emails.send({
+  const { error } = await resend.emails.send({
     from,
     to: email,
     subject: "Bekräfta din e-postadress – Giggerloggen",
@@ -21,10 +21,14 @@ export async function sendVerificationEmail(email: string, url: string) {
       </div>
     `,
   });
+  if (error) {
+    console.error("Kunde inte skicka verifieringsmejl:", error);
+    throw new Error("Kunde inte skicka verifieringsmejl");
+  }
 }
 
 export async function sendPasswordResetEmail(email: string, url: string) {
-  await resend.emails.send({
+  const { error } = await resend.emails.send({
     from,
     to: email,
     subject: "Återställ ditt lösenord – Giggerloggen",
@@ -41,4 +45,8 @@ export async function sendPasswordResetEmail(email: string, url: string) {
       </div>
     `,
   });
+  if (error) {
+    console.error("Kunde inte skicka återställningsmejl:", error);
+    throw new Error("Kunde inte skicka återställningsmejl");
+  }
 }

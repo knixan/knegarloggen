@@ -25,11 +25,14 @@ export async function POST() {
     if (existing?.stripeCustomerId) {
       stripeCustomerId = existing.stripeCustomerId;
     } else {
-      const customer = await stripe.customers.create({
-        email: user.email,
-        name: user.name,
-        metadata: { userId: user.id },
-      });
+      const customer = await stripe.customers.create(
+        {
+          email: user.email,
+          name: user.name,
+          metadata: { userId: user.id },
+        },
+        { idempotencyKey: `stripe-customer-${user.id}` },
+      );
       stripeCustomerId = customer.id;
 
       // Spara direkt så vi kan synka vid success-redirect (utan att vänta på webhook)
@@ -44,24 +47,27 @@ export async function POST() {
       });
     }
 
-    const checkoutSession = await stripe.checkout.sessions.create({
-      customer: stripeCustomerId,
-      mode: "subscription",
-      payment_method_types: ["card"],
-      line_items: [
-        {
-          price: env.STRIPE_PRICE_ID,
-          quantity: 1,
+    const checkoutSession = await stripe.checkout.sessions.create(
+      {
+        customer: stripeCustomerId,
+        mode: "subscription",
+        payment_method_types: ["card"],
+        line_items: [
+          {
+            price: env.STRIPE_PRICE_ID,
+            quantity: 1,
+          },
+        ],
+        subscription_data: {
+          metadata: { userId: user.id },
         },
-      ],
-      subscription_data: {
         metadata: { userId: user.id },
+        success_url: `${appUrl}/mina-sidor/installningar?checkout=success`,
+        cancel_url: `${appUrl}/mina-sidor/installningar`,
+        locale: "sv",
       },
-      metadata: { userId: user.id },
-      success_url: `${appUrl}/mina-sidor/installningar?checkout=success`,
-      cancel_url: `${appUrl}/mina-sidor/installningar`,
-      locale: "sv",
-    });
+      { idempotencyKey: `checkout-${user.id}-${Math.floor(Date.now() / 60000)}` },
+    );
 
     return NextResponse.json({ url: checkoutSession.url });
   } catch (err) {

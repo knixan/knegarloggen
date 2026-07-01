@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import Link from "next/link";
@@ -8,7 +9,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Plus, User, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export default async function KunderPage() {
+export default function KunderPage() {
+  return (
+    <Suspense fallback={<div className="animate-pulse h-8 w-48 bg-muted rounded" />}>
+      <KunderInnehall />
+    </Suspense>
+  );
+}
+
+async function KunderInnehall() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) redirect("/logga-in");
 

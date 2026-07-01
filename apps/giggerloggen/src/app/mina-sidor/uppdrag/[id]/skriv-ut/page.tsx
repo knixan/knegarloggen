@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { notFound, redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
@@ -6,7 +7,15 @@ import { beraknaTotal } from "@/lib/uppdrag-schema";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { SkrivUtKnapp } from "@/components/minasidor/uppdrag/skriv-ut-knapp";
 
-export default async function SkrivUtPage({ params }: { params: Promise<{ id: string }> }) {
+export default function SkrivUtPage({ params }: { params: Promise<{ id: string }> }) {
+  return (
+    <Suspense fallback={<div className="animate-pulse h-screen bg-muted" />}>
+      <SkrivUtInnehall params={params} />
+    </Suspense>
+  );
+}
+
+async function SkrivUtInnehall({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) redirect("/logga-in");

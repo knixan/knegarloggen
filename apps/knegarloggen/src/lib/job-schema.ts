@@ -18,10 +18,9 @@ export const customerSchema = z.object({
     .optional()
     .default(""),
   epost: z
-    .string()
+    .email({ error: "Ogiltig e-post" })
     .trim()
     .max(200)
-    .email("Ogiltig e-post")
     .optional()
     .or(z.literal("")),
   personnummer: z.string().trim().max(30).optional().default(""),

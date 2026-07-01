@@ -12,7 +12,7 @@ function getResend() {
 
 export async function sendVerificationEmail(email: string, url: string) {
   const resend = getResend();
-  await resend.emails.send({
+  const { error } = await resend.emails.send({
     from: FROM_NOREPLY,
     to: email,
     subject: "Verifiera din e-postadress – Knegarloggen",
@@ -31,6 +31,10 @@ export async function sendVerificationEmail(email: string, url: string) {
       </div>
     `,
   });
+  if (error) {
+    console.error("Kunde inte skicka verifieringsmejl:", error);
+    throw new Error("Kunde inte skicka verifieringsmejl");
+  }
 }
 
 export async function sendJobEmail(
@@ -193,11 +197,15 @@ export async function sendJobEmail(
     </div>
   `;
 
-  await resend.emails.send({
+  const { error } = await resend.emails.send({
     from: FROM_FAKTURA,
     to: recipientEmail,
     ...(company.epost ? { replyTo: company.epost } : {}),
     subject,
     html,
   });
+  if (error) {
+    console.error("Kunde inte skicka fakturamejl:", error);
+    throw new Error("Kunde inte skicka fakturamejl");
+  }
 }
