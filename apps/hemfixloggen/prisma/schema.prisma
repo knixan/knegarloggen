@@ -163,7 +163,7 @@ model Uppdrag {
   // Info
   titel       String
   beskrivning String @default("")
-  // stadning | tradgard | malning | snoskottning | flyttstadning | barnpassning | annat
+  // stadning | tradgard | snoskottning | flyttstadning | barnpassning | annat
   uppdragsTyp String @default("stadning")
 
   // pagaende | utfort | fakturerat | betalt

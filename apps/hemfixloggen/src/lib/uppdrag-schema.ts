@@ -24,7 +24,6 @@ export const uppdragSchema = z.object({
     .enum([
       "stadning",
       "tradgard",
-      "malning",
       "snoskottning",
       "flyttstadning",
       "barnpassning",

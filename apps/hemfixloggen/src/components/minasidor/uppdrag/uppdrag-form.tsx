@@ -32,7 +32,6 @@ type Props = {
 const uppdragsTyper = [
   { value: "stadning", label: "Städning" },
   { value: "tradgard", label: "Trädgårdsskötsel" },
-  { value: "malning", label: "Målning & tapetsering" },
   { value: "snoskottning", label: "Snöskottning" },
   { value: "flyttstadning", label: "Flyttstädning" },
   { value: "barnpassning", label: "Djur- & barnpassning" },
