@@ -1,0 +1,14 @@
+{
+  "name": "@knegarloggen/stripe",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "stripe": "^22.3.0"
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}

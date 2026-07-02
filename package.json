@@ -7,9 +7,11 @@
     "dev": "pnpm -r --parallel run dev",
     "dev:knegarloggen": "pnpm --filter knegarloggen run dev",
     "dev:giggerloggen": "pnpm --filter giggerloggen run dev",
+    "dev:hemfixloggen": "pnpm --filter hemfixloggen run dev",
     "build": "pnpm -r run build",
     "build:knegarloggen": "pnpm --filter knegarloggen run build",
     "build:giggerloggen": "pnpm --filter giggerloggen run build",
+    "build:hemfixloggen": "pnpm --filter hemfixloggen run build",
     "lint": "pnpm -r --if-present run lint",
     "type-check": "pnpm -r --if-present run type-check"
   }

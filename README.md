@@ -6,7 +6,7 @@
 [![pnpm](https://img.shields.io/badge/pnpm-workspaces-F69220?style=flat-square&logo=pnpm)](https://pnpm.io/)
 [![License](https://img.shields.io/badge/License-Privat-gray?style=flat-square)](LICENSE)
 
-Monorepo (pnpm workspaces) med jobblogg- och fakturaverktyg för svenska hantverkare, frilansare och konsulter. Håll koll på kunder, jobb/uppdrag, material, resor, arbetstid och fakturor – allt på ett ställe.
+Monorepo (pnpm workspaces) med jobblogg- och fakturaverktyg för svenska hantverkare, frilansare, konsulter och hushållsnära tjänster. Håll koll på kunder, jobb/uppdrag, material, resor, arbetstid och fakturor – allt på ett ställe.
 
 ---
 
@@ -15,9 +15,10 @@ Monorepo (pnpm workspaces) med jobblogg- och fakturaverktyg för svenska hantver
 | App | Målgrupp | Beskrivning |
 |-----|----------|-------------|
 | [`apps/knegarloggen`](apps/knegarloggen) | Hantverkare | Jobbhantering med artiklar/material, ROT-avdrag och milersättning |
-| [`apps/giggerloggen`](apps/giggerloggen) | Frilansare & konsulter | Uppdragshantering (konsulting, design, utbildning, IT, juridik m.fl.) |
+| [`apps/giggerloggen`](apps/giggerloggen) | Frilansare & konsulter | Uppdragshantering (konsulting, design, utbildning, IT, juridik m.fl.) — inget ROT/RUT |
+| [`apps/hemfixloggen`](apps/hemfixloggen) | Städ & trädgård | Uppdragshantering med RUT-avdrag (städning, trädgårdsskötsel, flyttstädning m.fl.) |
 
-Apparna delar samma tekniska grund (Next.js, Prisma, Better Auth, Stripe) men är **helt separata produkter**: egen databas, eget auth och egna miljövariabler per app. Stripe-priser/webhooks är separata per app även om de kan ligga på samma Stripe-konto.
+Apparna delar samma tekniska grund (Next.js, Prisma, Better Auth, Stripe) men är **helt separata produkter**: egen databas, eget auth och egna miljövariabler per app. Stripe-priser/webhooks är separata per app även om de kan ligga på samma Stripe-konto. Vilken avdragstyp (ROT/RUT/ingen) varje app stödjer är medvetet — se [Databasmodeller](#databasmodeller).
 
 ---
 
@@ -29,11 +30,12 @@ Apparna delar samma tekniska grund (Next.js, Prisma, Better Auth, Stripe) men ä
 - **Reslogg** – Körda sträckor per datum med automatisk milersättning
 - **Arbetstid** – Arbetspass per datum med automatisk timprisberäkning
 - **Övriga kostnader** – Fri rad för förbrukningsmaterial, hyrd utrustning m.m.
-- **Faktura som PDF** – Professionell PDF med logotyp, automatiskt fakturanummer, moms och ROT-avdrag
+- **Faktura som PDF/utskrift** – Med logotyp, automatiskt fakturanummer, moms och ROT-/RUT-avdrag
 - **Skicka faktura via e-post** – Skickas med Resend, med företagets avsändare och svarskopia
-- **ROT-avdrag** – Korrekt beräkning (30 % av arbetskostnad inkl. moms) enligt Skatteverkets regler
+- **ROT-avdrag** (Knegarloggen) – 30 % av arbetskostnad inkl. moms enligt Skatteverkets regler
+- **RUT-avdrag** (Hemfixloggen) – 50 % av arbetskostnad inkl. moms. Satsen har ändrats historiskt, så dubbelkolla mot aktuella Skatteverket-regler innan produktionsdrift (`RUT_AVDRAG_RATE` i `uppdrag-schema.ts`)
 - **Fast pris** – Fakturera ett fast pris istället för beräknad summa
-- **Bilder** – Ladda upp jobbfoton via UploadThing
+- **Bilder** – Ladda upp jobb-/uppdragsfoton via UploadThing (Knegarloggen, Hemfixloggen)
 - **Prenumeration** – Gratis provperiod, därefter via Stripe
 - **Självbetjäning** – Stripe Billing Portal för att hantera/avsluta abonnemang
 - **Admin** – Rollbaserad adminpanel för användarhantering
@@ -46,7 +48,7 @@ Apparna delar samma tekniska grund (Next.js, Prisma, Better Auth, Stripe) men ä
 
 | Lager       | Teknik                        |
 |-------------|-------------------------------|
-| Monorepo    | pnpm workspaces                |
+| Monorepo    | pnpm workspaces               |
 | Framework   | Next.js 16 (App Router)       |
 | Språk       | TypeScript                    |
 | Styling     | Tailwind CSS v4 + shadcn/ui   |
@@ -86,6 +88,7 @@ Varje app har sin **egen** `.env`-fil i sin egen mapp (inte en delad fil i roten
 ```bash
 cp apps/knegarloggen/.env.example apps/knegarloggen/.env
 cp apps/giggerloggen/.env.local.example apps/giggerloggen/.env.local
+cp apps/hemfixloggen/.env.local.example apps/hemfixloggen/.env.local
 ```
 
 ```env
@@ -118,7 +121,10 @@ Kör migrationer per app:
 ```bash
 pnpm --filter knegarloggen exec prisma migrate deploy
 pnpm --filter giggerloggen exec prisma migrate deploy
+pnpm --filter hemfixloggen exec prisma migrate deploy
 ```
+
+> Första gången en app kopplas till en helt tom databas finns ingen migrering att köra `deploy` mot. Kör då `pnpm --filter <app> exec prisma migrate dev --name init` istället för att skapa och applicera den första migreringen.
 
 ### Stripe webhook lokalt
 
@@ -128,6 +134,9 @@ stripe listen --forward-to localhost:3000/api/stripe/webhook
 
 # Giggerloggen (annan port, t.ex. 3001)
 stripe listen --forward-to localhost:3001/api/stripe/webhook
+
+# Hemfixloggen (annan port, t.ex. 3002)
+stripe listen --forward-to localhost:3002/api/stripe/webhook
 ```
 
 ### Starta
@@ -136,7 +145,10 @@ stripe listen --forward-to localhost:3001/api/stripe/webhook
 pnpm dev                    # Startar alla appar parallellt
 pnpm dev:knegarloggen       # Endast Knegarloggen
 pnpm dev:giggerloggen       # Endast Giggerloggen
+pnpm dev:hemfixloggen       # Endast Hemfixloggen
 ```
+
+Alla appars dev-server default:ar till port 3000 – kör bara en åt gången med `pnpm dev`, eller starta dem separat i egna terminaler med `--port` om du vill köra flera samtidigt.
 
 Öppna [http://localhost:3000](http://localhost:3000).
 
@@ -160,9 +172,13 @@ knegarloggen/
 │   │   │   ├── components/
 │   │   │   └── lib/                       # auth, prisma, stripe, email, schema
 │   │   └── prisma/schema.prisma
-│   └── giggerloggen/              # Uppdragslogg för frilansare & konsulter
-│       └── (samma struktur som ovan, med "uppdrag" istället för "jobb")
-├── packages/                      # Delade paket (om/när sådana tillkommer)
+│   ├── giggerloggen/               # Uppdragslogg för frilansare & konsulter
+│   │   └── (samma struktur som ovan, med "uppdrag" istället för "jobb")
+│   └── hemfixloggen/               # Uppdragslogg för städ & trädgård (RUT)
+│       └── (samma struktur som giggerloggen, med RUT istället för inget avdrag)
+├── packages/
+│   ├── ui/                        # Delade shadcn-komponenter (@knegarloggen/ui)
+│   └── stripe/                    # Delad Stripe-klient (@knegarloggen/stripe)
 ├── pnpm-workspace.yaml
 └── package.json
 ```
@@ -176,12 +192,12 @@ knegarloggen/
 | `User`        | Hanteras av Better Auth. Har `role`-fält (`user` / `admin`). |
 | `Company`     | Företagsuppgifter, fakturainställningar och logotyp per användare. |
 | `Customer`    | Privat- eller företagskund kopplad till ett företag. |
-| `Job` / `Uppdrag` | Jobb/uppdrag med status, prissättning och fakturanummer. |
+| `Job` / `Uppdrag` | Jobb/uppdrag med status, prissättning, fakturanummer och avdragsflagga (`rotAvdrag` i Knegarloggen, `rutAvdrag` i Hemfixloggen — inget avdrag i Giggerloggen). |
 | `Article`     | Materialrad per jobb (Knegarloggen). |
 | `Trip` / `Resa` | Resrad per datum. |
 | `WorkSession` / `Arbetspass` | Arbetspass per datum. |
 | `OvrigKostnad`| Övrig kostnad per jobb/uppdrag. |
-| `JobImage`    | Bild uppladdad via UploadThing (Knegarloggen). |
+| `JobImage` / `UppdragImage` | Bild uppladdad via UploadThing (Knegarloggen, Hemfixloggen). |
 | `Subscription`| Stripe-prenumeration med status och perioder. |
 
 ---
@@ -215,9 +231,11 @@ Körs från roten via pnpms inbyggda workspace-stöd (`--filter` kör mot en spe
 pnpm dev                        # Starta alla appar i dev-läge
 pnpm dev:knegarloggen           # Starta endast Knegarloggen
 pnpm dev:giggerloggen           # Starta endast Giggerloggen
+pnpm dev:hemfixloggen           # Starta endast Hemfixloggen
 pnpm build                      # Bygg alla appar (prisma generate + next build)
 pnpm build:knegarloggen         # Bygg endast Knegarloggen
 pnpm build:giggerloggen         # Bygg endast Giggerloggen
+pnpm build:hemfixloggen         # Bygg endast Hemfixloggen
 pnpm lint                       # ESLint för alla appar
 pnpm type-check                 # TypeScript-kontroll för alla appar
 ```

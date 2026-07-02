@@ -1,6 +1,4 @@
-import Stripe from "stripe";
+import { createStripeClient } from "@knegarloggen/stripe";
 import { env } from "./env";
 
-export const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
-  apiVersion: "2026-06-24.dahlia",
-});
+export const stripe = createStripeClient(env.STRIPE_SECRET_KEY);
