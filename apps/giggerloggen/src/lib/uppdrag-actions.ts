@@ -2,10 +2,14 @@
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { UTApi } from "uploadthing/server";
 import { auth } from "./auth";
 import { prisma } from "./prisma";
+import { stripe } from "./stripe";
 import { uppdragSchema } from "./uppdrag-schema";
 import type { UppdragFormValues } from "./uppdrag-schema";
+
+const utapi = new UTApi();
 
 async function getCompanyId(): Promise<string> {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -248,11 +252,24 @@ export async function sparaLogo(logoUrl: string, logoKey: string) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) return { ok: false };
 
+  const existing = await prisma.company.findUnique({
+    where: { userId: session.user.id },
+    select: { logoKey: true },
+  });
+
   await prisma.company.upsert({
     where: { userId: session.user.id },
     create: { userId: session.user.id, logoUrl, logoKey },
     update: { logoUrl, logoKey },
   });
+
+  if (existing?.logoKey && existing.logoKey !== logoKey) {
+    try {
+      await utapi.deleteFiles(existing.logoKey);
+    } catch (err) {
+      console.error("Kunde inte radera gammal logotyp:", err);
+    }
+  }
 
   revalidatePath("/mina-sidor/installningar");
   return { ok: true };
@@ -261,6 +278,35 @@ export async function sparaLogo(logoUrl: string, logoKey: string) {
 export async function raderaKonto() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) return { ok: false };
+
+  const [company, subscription] = await Promise.all([
+    prisma.company.findUnique({
+      where: { userId: session.user.id },
+      select: { logoKey: true },
+    }),
+    prisma.subscription.findUnique({
+      where: { userId: session.user.id },
+      select: { stripeSubscriptionId: true },
+    }),
+  ]);
+
+  if (subscription?.stripeSubscriptionId) {
+    try {
+      await stripe.subscriptions.cancel(subscription.stripeSubscriptionId);
+    } catch (err) {
+      console.error("Kunde inte avbryta Stripe-prenumeration:", err);
+    }
+  }
+
   await prisma.user.delete({ where: { id: session.user.id } });
+
+  if (company?.logoKey) {
+    try {
+      await utapi.deleteFiles(company.logoKey);
+    } catch (err) {
+      console.error("Kunde inte radera filer vid kontoborttagning:", err);
+    }
+  }
+
   return { ok: true };
 }

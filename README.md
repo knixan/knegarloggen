@@ -183,7 +183,8 @@ knegarloggen/
 │       └── (samma struktur som giggerloggen, med RUT istället för inget avdrag)
 ├── packages/
 │   ├── ui/                        # Delade shadcn-komponenter (@knegarloggen/ui)
-│   └── stripe/                    # Delad Stripe-klient (@knegarloggen/stripe)
+│   ├── stripe/                    # Delad Stripe-klient (@knegarloggen/stripe)
+│   └── auth/                      # Delad Better Auth-konfiguration (@knegarloggen/auth)
 ├── pnpm-workspace.yaml
 └── package.json
 ```

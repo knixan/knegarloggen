@@ -2,10 +2,14 @@
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { UTApi } from "uploadthing/server";
 import { auth } from "./auth";
 import { prisma } from "./prisma";
+import { stripe } from "./stripe";
 import { uppdragSchema } from "./uppdrag-schema";
 import type { UppdragFormValues } from "./uppdrag-schema";
+
+const utapi = new UTApi();
 
 async function getCompanyId(): Promise<string> {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -83,7 +87,22 @@ export async function uppdateraStatus(id: string, status: string) {
 
 export async function raderaUppdrag(id: string) {
   const companyId = await getCompanyId();
+
+  const uppdrag = await prisma.uppdrag.findFirst({
+    where: { id, companyId },
+    select: { images: { select: { key: true } } },
+  });
+
   await prisma.uppdrag.deleteMany({ where: { id, companyId } });
+
+  if (uppdrag && uppdrag.images.length > 0) {
+    try {
+      await utapi.deleteFiles(uppdrag.images.map((img) => img.key));
+    } catch (err) {
+      console.error("Kunde inte radera bilder vid borttagning av uppdrag:", err);
+    }
+  }
+
   revalidatePath("/mina-sidor");
   return { ok: true };
 }
@@ -222,9 +241,23 @@ export async function laggTillBild(uppdragId: string, url: string, key: string) 
 
 export async function raderaBild(bildId: string, uppdragId: string) {
   const companyId = await getCompanyId();
+
+  const bild = await prisma.uppdragImage.findFirst({
+    where: { id: bildId, uppdragId, uppdrag: { companyId } },
+    select: { key: true },
+  });
+  if (!bild) return { ok: false, error: "Bild hittades inte" };
+
   await prisma.uppdragImage.deleteMany({
     where: { id: bildId, uppdragId, uppdrag: { companyId } },
   });
+
+  try {
+    await utapi.deleteFiles(bild.key);
+  } catch (err) {
+    console.error("Kunde inte radera bild:", err);
+  }
+
   revalidatePath(`/mina-sidor/uppdrag/${uppdragId}/redigera`);
   return { ok: true };
 }
@@ -316,11 +349,24 @@ export async function sparaLogo(logoUrl: string, logoKey: string) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) return { ok: false };
 
+  const existing = await prisma.company.findUnique({
+    where: { userId: session.user.id },
+    select: { logoKey: true },
+  });
+
   await prisma.company.upsert({
     where: { userId: session.user.id },
     create: { userId: session.user.id, logoUrl, logoKey },
     update: { logoUrl, logoKey },
   });
+
+  if (existing?.logoKey && existing.logoKey !== logoKey) {
+    try {
+      await utapi.deleteFiles(existing.logoKey);
+    } catch (err) {
+      console.error("Kunde inte radera gammal logotyp:", err);
+    }
+  }
 
   revalidatePath("/mina-sidor/installningar");
   return { ok: true };
@@ -329,6 +375,42 @@ export async function sparaLogo(logoUrl: string, logoKey: string) {
 export async function raderaKonto() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) return { ok: false };
+
+  const [company, subscription] = await Promise.all([
+    prisma.company.findUnique({
+      where: { userId: session.user.id },
+      select: {
+        logoKey: true,
+        uppdrag: { select: { images: { select: { key: true } } } },
+      },
+    }),
+    prisma.subscription.findUnique({
+      where: { userId: session.user.id },
+      select: { stripeSubscriptionId: true },
+    }),
+  ]);
+
+  const keys: string[] = [];
+  if (company?.logoKey) keys.push(company.logoKey);
+  company?.uppdrag.forEach((u) => u.images.forEach((img) => keys.push(img.key)));
+
+  if (subscription?.stripeSubscriptionId) {
+    try {
+      await stripe.subscriptions.cancel(subscription.stripeSubscriptionId);
+    } catch (err) {
+      console.error("Kunde inte avbryta Stripe-prenumeration:", err);
+    }
+  }
+
   await prisma.user.delete({ where: { id: session.user.id } });
+
+  if (keys.length > 0) {
+    try {
+      await utapi.deleteFiles(keys);
+    } catch (err) {
+      console.error("Kunde inte radera filer vid kontoborttagning:", err);
+    }
+  }
+
   return { ok: true };
 }
