@@ -13,7 +13,9 @@ export default function MinaSidorLayout({
 }) {
   return (
     <div className="flex min-h-screen">
-      <MinaSidorNav />
+      <Suspense fallback={<div className="w-64 min-h-screen border-r bg-sidebar animate-pulse" />}>
+        <MinaSidorNav />
+      </Suspense>
       <main className="flex-1 overflow-y-auto p-6 lg:p-8">
         <Suspense fallback={null}>
           <MinaSidorGate>{children}</MinaSidorGate>
