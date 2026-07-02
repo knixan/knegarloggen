@@ -170,10 +170,15 @@ knegarloggen/
 │   │   │   │   ├── admin/                 # Adminpanel (kräver roll "admin")
 │   │   │   │   └── mina-sidor/            # Skyddade sidor (jobb, kunder, företag, inställningar)
 │   │   │   ├── components/
-│   │   │   └── lib/                       # auth, prisma, stripe, email, schema
-│   │   └── prisma/schema.prisma
+│   │   │   │   ├── button/                # Tema-toggle (re-export från @knegarloggen/ui)
+│   │   │   │   ├── minasidor/             # Affärslogik-UI: jobb, kunder, faktura, översikt
+│   │   │   │   ├── site/                  # Landningssida (hero, features, navbar, footer)
+│   │   │   │   └── ui/                    # Re-export-stubbar mot @knegarloggen/ui
+│   │   │   ├── lib/                       # auth, prisma, stripe, email, env, job-actions/-schema
+│   │   │   └── types/
+│   │   └── prisma/                        # schema.prisma, migrations/, seed.ts
 │   ├── giggerloggen/               # Uppdragslogg för frilansare & konsulter
-│   │   └── (samma struktur som ovan, med "uppdrag" istället för "jobb")
+│   │   └── (samma struktur som ovan, med "uppdrag" istället för "jobb", ingen seed.ts)
 │   └── hemfixloggen/               # Uppdragslogg för städ & trädgård (RUT)
 │       └── (samma struktur som giggerloggen, med RUT istället för inget avdrag)
 ├── packages/

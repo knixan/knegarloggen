@@ -37,6 +37,13 @@ yarn-error.log*
 # vercel
 .vercel
 
+# IDE
+.vs/
+
+# pnpm is the only package manager used in this repo
+package-lock.json
+yarn.lock
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
