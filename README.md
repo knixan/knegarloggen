@@ -3,10 +3,10 @@
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js)](https://nextjs.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
 [![Prisma](https://img.shields.io/badge/Prisma-v7-2D3748?style=flat-square&logo=prisma)](https://www.prisma.io/)
-[![Turborepo](https://img.shields.io/badge/Turborepo-monorepo-EF4444?style=flat-square&logo=turborepo)](https://turbo.build/)
+[![pnpm](https://img.shields.io/badge/pnpm-workspaces-F69220?style=flat-square&logo=pnpm)](https://pnpm.io/)
 [![License](https://img.shields.io/badge/License-Privat-gray?style=flat-square)](LICENSE)
 
-Monorepo (pnpm + Turborepo) med jobblogg- och fakturaverktyg för svenska hantverkare, frilansare och konsulter. Håll koll på kunder, jobb/uppdrag, material, resor, arbetstid och fakturor – allt på ett ställe.
+Monorepo (pnpm workspaces) med jobblogg- och fakturaverktyg för svenska hantverkare, frilansare och konsulter. Håll koll på kunder, jobb/uppdrag, material, resor, arbetstid och fakturor – allt på ett ställe.
 
 ---
 
@@ -46,7 +46,7 @@ Apparna delar samma tekniska grund (Next.js, Prisma, Better Auth, Stripe) men ä
 
 | Lager       | Teknik                        |
 |-------------|-------------------------------|
-| Monorepo    | pnpm workspaces + Turborepo   |
+| Monorepo    | pnpm workspaces                |
 | Framework   | Next.js 16 (App Router)       |
 | Språk       | TypeScript                    |
 | Styling     | Tailwind CSS v4 + shadcn/ui   |
@@ -133,7 +133,7 @@ stripe listen --forward-to localhost:3001/api/stripe/webhook
 ### Starta
 
 ```bash
-pnpm dev                    # Startar alla appar via Turborepo
+pnpm dev                    # Startar alla appar parallellt
 pnpm dev:knegarloggen       # Endast Knegarloggen
 pnpm dev:giggerloggen       # Endast Giggerloggen
 ```
@@ -163,7 +163,6 @@ knegarloggen/
 │   └── giggerloggen/              # Uppdragslogg för frilansare & konsulter
 │       └── (samma struktur som ovan, med "uppdrag" istället för "jobb")
 ├── packages/                      # Delade paket (om/när sådana tillkommer)
-├── turbo.json
 ├── pnpm-workspace.yaml
 └── package.json
 ```
@@ -210,7 +209,7 @@ UPDATE "user" SET role = 'admin' WHERE email = 'din@epost.se';
 
 ## Scripts
 
-Körs från roten och styrs via Turborepo (`--filter` kör mot en specifik app):
+Körs från roten via pnpms inbyggda workspace-stöd (`--filter` kör mot en specifik app):
 
 ```bash
 pnpm dev                        # Starta alla appar i dev-läge
@@ -234,5 +233,3 @@ npm run db:seed                 # Seed-data (Knegarloggen, kräver prisma/seed.t
 ## Licens
 
 Privat projekt – alla rättigheter förbehållna.
-#   m o n o - l o g g e n  
- 

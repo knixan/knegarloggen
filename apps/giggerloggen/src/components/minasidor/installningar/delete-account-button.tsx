@@ -32,8 +32,10 @@ export function DeleteAccountButton() {
 
   return (
     <AlertDialog>
-      <AlertDialogTrigger render={<Button variant="destructive" size="sm" />}>
-        Radera mitt konto
+      <AlertDialogTrigger asChild>
+        <Button variant="destructive" size="sm">
+          Radera mitt konto
+        </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
