@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Search } from "lucide-react";
@@ -112,10 +112,15 @@ export default function JobDashboard({
   const [cursor, setCursor] = useState<string | null>(initialCursor);
   const [isPending, startTransition] = useTransition();
 
-  useEffect(() => {
+  // Synkar om servern skickar nya initialJobs/initialCursor (t.ex. efter
+  // router.refresh()), utan en extra render-omgång via useEffect.
+  const [prevInitialJobs, setPrevInitialJobs] = useState(initialJobs);
+  if (initialJobs !== prevInitialJobs) {
+    setPrevInitialJobs(initialJobs);
     setAllJobs(initialJobs);
     setCursor(initialCursor);
-  }, [initialJobs, initialCursor]);
+  }
+
   const [active, setActive] = useState<Filter>("alla");
   const [sok, setSok] = useState("");
   const [jobToDelete, setJobToDelete] = useState<Job | null>(null);

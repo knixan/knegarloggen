@@ -23,7 +23,10 @@ export default function Hero() {
         priority
         sizes="100vw"
       />
-      <div className="absolute inset-0 bg-white/70 dark:bg-gray-950/75" />
+      {/* Gradient overlay: opaque left (text) → transparent right (image) */}
+      <div className="absolute inset-0 bg-linear-to-r from-white/85 via-white/30 to-white/10 dark:from-gray-950/50 dark:via-gray-950/10 dark:to-gray-950/0" />
+      {/* Fallback full overlay for small screens where text sits on top of the image */}
+      <div className="absolute inset-0 bg-white/40 dark:bg-gray-950/40 min-[1080px]:bg-transparent" />
 
       <div className="relative container mx-auto px-4 py-16 lg:py-24">
         <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">

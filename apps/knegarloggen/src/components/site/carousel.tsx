@@ -45,7 +45,7 @@ function Lightbox({
       </button>
 
       <div
-        className="rounded-2xl overflow-hidden shadow-2xl"
+        className="rounded-2xl  overflow-hidden shadow-2xl"
         style={{ height: "85vh", width: "calc(85vh * 879 / 1178)" }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -104,7 +104,7 @@ export default function AppCarousel() {
 
   return (
     <>
-      <div className="relative w-full select-none">
+      <div className="relative w-full bg-secondary rounded-2xl p-6 select-none">
         {/* Viewport */}
         <div ref={viewportRef} className="overflow-hidden">
           <div className="flex gap-6 px-4">
