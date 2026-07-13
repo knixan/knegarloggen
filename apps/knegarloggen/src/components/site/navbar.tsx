@@ -4,7 +4,7 @@ import React, { useState, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, X, User, LogOut, ShieldCheck } from "lucide-react";
+import { Menu, X, User, LogIn, LogOut, ShieldCheck } from "lucide-react";
 import authClient, { useSession } from "@/lib/auth-client";
 import { ModeToggle } from "../button/theme-button";
 
@@ -145,9 +145,10 @@ const AuthButtons: React.FC<AuthButtonsProps> = ({
       <>
         <button
           onClick={onLogin}
-          className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors dark:text-gray-300"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors dark:text-gray-300"
         >
-          Logga in
+          <LogIn className="h-4 w-4" aria-hidden="true" />
+          <span>Logga in</span>
         </button>
         <button
           onClick={onRegister}
@@ -216,9 +217,10 @@ const MobileAuthSection: React.FC<MobileAuthSectionProps> = ({
             onLogin();
             onNavigate();
           }}
-          className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md transition-colors dark:text-gray-300 dark:hover:bg-gray-800"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md transition-colors dark:text-gray-300 dark:hover:bg-gray-800"
         >
-          Logga in
+          <LogIn className="h-4 w-4" aria-hidden="true" />
+          <span>Logga in</span>
         </button>
         <button
           onClick={() => {

@@ -104,7 +104,7 @@ export default function Features() {
                 {/* Text */}
                 <div className="space-y-2">
                   <h3 className="text-lg font-bold">{f.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
+                  <p className="text-md text-muted-foreground leading-relaxed">
                     {f.description}
                   </p>
                 </div>
