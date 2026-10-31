@@ -11,6 +11,7 @@ import {
   LogOut,
   ShieldCheck,
   MoreHorizontal,
+  UserPlus,
   type LucideIcon,
 } from "lucide-react";
 import authClient, { useSession } from "@/lib/auth-client";
@@ -246,16 +247,17 @@ const AuthButtons: React.FC<AuthButtonsProps> = ({
       <>
         <button
           onClick={onLogin}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors dark:text-gray-300"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-md hover:bg-primary/85 transition-colors"
         >
           <LogIn className="h-4 w-4" aria-hidden="true" />
-          <span>Logga in</span>
+          <span>Logga in!</span>
         </button>
         <button
           onClick={onRegister}
-          className="px-4 py-2 text-sm font-medium text-white bg-black rounded-md hover:bg-gray-800 transition-colors dark:bg-white dark:text-black dark:hover:bg-gray-200"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-accent-foreground bg-accent rounded-md hover:bg-accent/85 transition-colors"
         >
-          Registrera
+          <UserPlus className="h-4 w-4" aria-hidden="true" />
+          <span>Registrera</span>
         </button>
       </>
     );
@@ -311,19 +313,20 @@ const MobileAuthSection: React.FC<MobileAuthSectionProps> = ({
             onLogin();
             onNavigate();
           }}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md transition-colors dark:text-gray-300 dark:hover:bg-gray-800"
+          className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-md hover:bg-primary/85 transition-colors"
         >
           <LogIn className="h-4 w-4" aria-hidden="true" />
-          <span>Logga in</span>
+          <span>Logga in!</span>
         </button>
         <button
           onClick={() => {
             onRegister();
             onNavigate();
           }}
-          className="px-4 py-2 text-sm font-medium text-white bg-black rounded-md hover:bg-gray-800 transition-colors dark:bg-white dark:text-black"
+          className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-accent-foreground bg-accent rounded-md hover:bg-accent/85 transition-colors"
         >
-          Registrera
+          <UserPlus className="h-4 w-4" aria-hidden="true" />
+          <span>Registrera</span>
         </button>
       </>
     );
@@ -363,9 +366,10 @@ const MobileAuthSection: React.FC<MobileAuthSectionProps> = ({
 
 const Navbar: React.FC<NavbarProps> = ({
   links = [
-    { href: "/", label: "Hem" },
+    { href: "/#funktioner", label: "Hur funkar det?" },
     { href: "/integritet", label: "Integritet" },
     { href: "/villkor", label: "Villkor" },
+    { href: "#kontakt", label: "Kontakt" },
   ],
   showThemeToggle = true,
 }) => {

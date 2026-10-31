@@ -1,46 +1,45 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 
 export default function Cta() {
   return (
-    <section className="px-4  py-16 lg:py-24">
-      <div className="relative mx-auto max-w-7xl overflow-hidden rounded-3xl bg-secondary">
-  
+    <section className="px-4 py-16 lg:py-20 bg-surface">
+      <p className="text-center text-base font-bold tracking-[0.1em] uppercase text-accent mb-8">
+        Kom igång idag!
+      </p>
 
-        <div className="relative  flex flex-col items-center gap-8 p-4 lg:flex-row lg:gap-12 lg:p-12">
-          {/* Image */}
-          <div className="relative h-48 w-full max-w-sm shrink-0 overflow-hidden rounded-2xl lg:h-80 lg:w-102">
+      <div className="relative mx-auto max-w-4xl overflow-hidden rounded-md bg-secondary text-secondary-foreground shadow-lg">
+        {/* Flik uppe till höger */}
+        <Link
+          href="/registrera"
+          className="absolute right-0 top-0 rounded-bl-md bg-accent px-6 py-2 text-lg font-semibold text-accent-foreground hover:bg-accent/85 transition-colors"
+        >
+          Gratis 30 dagar
+        </Link>
+
+        <div className="flex flex-col items-center gap-8 p-6 pt-16 lg:flex-row lg:gap-12 lg:p-6">
+          <div className="relative h-56 w-full shrink-0 overflow-hidden rounded-md lg:h-72 lg:w-[26rem]">
             <Image
               src="/knegare.png"
               alt=""
               fill
               className="object-cover"
-              sizes="(min-width: 1024px) 320px, 100vw"
+              sizes="(min-width: 1024px) 416px, 100vw"
             />
           </div>
 
-          {/* Text */}
           <div className="text-center lg:text-left">
-            <p className="text-xs font-bold tracking-[0.25em] uppercase text-primary mb-8">
-              Kom igång idag
-            </p>
-            <h2 className="text-4xl md:text-6xl font-black text-primary-foreground leading-[1.05] tracking-tight mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold leading-tight tracking-tight">
               Redo att sluta
               <br />
               gissa på timmar?
             </h2>
-            <p className="text-primary-foreground text-lg leading-relaxed mb-12 max-w-xl mx-auto lg:mx-0">
-              30 dagars gratis provperiod. Ingen bindningstid. Avsluta när du vill.
-              99 kr/mån efteråt.
-            </p>
-            <Link
-              href="/registrera"
-              className="inline-flex items-center gap-2 h-14 px-10 bg-primary text-primary-foreground font-bold text-base rounded-lg hover:bg-accent transition-colors"
-            >
-              Prova gratis i 30 dagar
-              <ArrowRight className="h-4 w-4" />
-            </Link>
+            <ul className="mt-6 space-y-2 lg:pl-4">
+              <li>30 dagars gratis provperiod.</li>
+              <li>Ingen bindningstid. Avsluta när du vill.</li>
+              <li>Därefter 99 kr/mån exkl. moms.</li>
+              <li className="text-sm opacity-80">+ 49 kr per extra medlem.</li>
+            </ul>
           </div>
         </div>
       </div>

@@ -1,141 +1,116 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import {
+  ArrowRight,
+  Clock,
+  FileText,
+  Package,
+  Wrench,
+  type LucideIcon,
+} from "lucide-react";
+
+const steps: { label: string; icon: LucideIcon }[] = [
+  { label: "Skapa jobb", icon: Wrench },
+  { label: "Logga tid", icon: Clock },
+  { label: "Material", icon: Package },
+  { label: "Skapa faktura", icon: FileText },
+];
 
 export default function Hero() {
   return (
-    <section className="relative bg-white dark:bg-gray-950 overflow-hidden min-h-screen flex flex-col justify-center">
-      {/* Background image – desktop */}
-      <Image
-        src="/knegarloggen-hero.png"
-        alt=""
-        fill
-        className="hidden min-[1080px]:block object-cover object-top-right translate-y-0"
-        priority
-        sizes="100vw"
-      />
-      {/* Background image – mobile */}
-      <Image
-        src="/hero-mobile.png"
-        alt=""
-        fill
-        className="block min-[1080px]:hidden object-cover object-top"
-        priority
-        sizes="100vw"
-      />
-      {/* Gradient overlay: opaque left (text) → transparent right (image) */}
-      <div className="absolute inset-0 bg-linear-to-r from-white/85 via-white/30 to-white/10 dark:from-gray-950/50 dark:via-gray-950/10 dark:to-gray-950/0" />
-      {/* Fallback full overlay for small screens where text sits on top of the image */}
-      <div className="absolute inset-0 bg-white/40 dark:bg-gray-950/40 min-[1080px]:bg-transparent" />
+    <section className="relative overflow-hidden bg-surface-tertiary lg:min-h-[calc(100vh-4rem)] flex flex-col justify-center">
+      {/* Bild – desktop: högra delen, tonas in från ytfärgen till vänster */}
+      <div className="absolute inset-y-0 right-0 hidden w-[62%] lg:block">
+        <Image
+          src="/hero-mobile.png"
+          alt=""
+          fill
+          className="object-cover object-[65%_center]"
+          priority
+          sizes="62vw"
+        />
+        <div className="absolute inset-y-0 left-0 w-1/2 bg-linear-to-r from-surface-tertiary to-transparent" />
+      </div>
 
       <div className="relative container mx-auto px-4 py-16 lg:py-24">
-        <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
+        <div className="max-w-xl space-y-8 text-center lg:text-left mx-auto lg:mx-0">
+          <p className="text-sm font-bold tracking-[0.2em] uppercase text-primary">
+            Jobblogg för hantverkare
+          </p>
 
-          {/* Left – content */}
-          <div className="flex-1 max-w-2xl space-y-8 text-center lg:text-left">
-            <p className="text-xs font-bold tracking-[0.25em] uppercase text-muted-foreground">
-              Jobblogg för hantverkare
-            </p>
+          <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-[1.05] text-foreground">
+            Från jobb
+            <br />
+            till{" "}
+            <span className="relative inline-block text-accent">
+              faktura
+              {/* Penseldrag under ordet */}
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 300 24"
+                preserveAspectRatio="none"
+                className="absolute -bottom-5 left-0 h-4 w-full md:h-5 text-accent"
+              >
+                <path
+                  d="M4 18 C 70 6, 180 2, 296 8 L 294 14 C 190 9, 90 12, 8 22 Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </span>
+            <span className="text-accent">!</span>
+          </h1>
 
-            <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-[1.05]">
-              Från{" "}
-              <span className="bg-linear-to-br from-red-600 to-red-400 bg-clip-text text-transparent">
-                jobb
-              </span>
-              <br />
-              till{" "}
-              <span className="bg-linear-to-br from-blue-600 to-blue-400 bg-clip-text text-transparent">
-                faktura.
-              </span>
-            </h1>
-
-            {/* Steps */}
-            <div className="flex items-start justify-center lg:justify-start w-full gap-0">
-              {[
-                { n: 1, label: "Skapa jobb", color: "bg-blue-600" },
-                { n: 2, label: "Logga tid", color: "bg-red-600" },
-                { n: 3, label: "Material", color: "bg-blue-600" },
-                { n: 4, label: "Skapa faktura", color: "bg-red-600" },
-                { n: 5, label: "Få betalt", color: "bg-blue-600" },
-              ].map((step, i, arr) => (
-                <div key={step.n} className="flex flex-1 items-start">
-                  <div className="flex flex-1 flex-col items-center gap-1.5">
-                    <div
-                      className={`${step.color} h-9 w-9 sm:h-12 sm:w-12 rounded-full flex items-center justify-center text-white font-black text-sm sm:text-lg shrink-0`}
-                    >
-                      {step.n}
+          {/* Steps */}
+          <ol className="flex items-start justify-center lg:justify-start gap-1 sm:gap-2 pt-4">
+            {steps.map((step, i) => {
+              const Icon = step.icon;
+              return (
+                <li key={step.label} className="flex items-start gap-1 sm:gap-2">
+                  <div className="flex w-16 sm:w-20 flex-col items-center gap-2">
+                    <div className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-secondary text-secondary-foreground shadow-md">
+                      <Icon className="h-6 w-6 sm:h-8 sm:w-8" strokeWidth={1.5} />
                     </div>
-                    <span className="text-[10px] sm:text-xs font-bold text-center leading-tight">
+                    <span className="text-[11px] sm:text-xs font-bold text-center leading-tight">
                       {step.label}
                     </span>
                   </div>
-                  {i < arr.length - 1 && (
-                    <div className="mt-4 sm:mt-6 flex-none w-2 sm:w-4 h-px bg-gray-300 dark:bg-gray-700 self-start translate-y-4.5 sm:translate-y-6" />
+                  {i < steps.length - 1 && (
+                    <ArrowRight
+                      aria-hidden="true"
+                      className="mt-4 sm:mt-6 h-4 w-4 shrink-0 text-accent"
+                    />
                   )}
-                </div>
-              ))}
-            </div>
+                </li>
+              );
+            })}
+          </ol>
 
-            <p className="text-lg text-muted-foreground leading-relaxed max-w-lg mx-auto lg:mx-0">
-              Logga tid, material och resor direkt på plats. Skicka
-              professionella fakturor med ROT-avdrag – utan papperskrångel.
-            </p>
+          <p className="text-base font-medium leading-relaxed max-w-md mx-auto lg:mx-0">
+            Logga tid, material och resor på plats! Skicka professionella
+            fakturor med ROT-avdrag, utan papperskrångel!
+          </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 pt-2">
-              <Link
-                href="/registrera"
-                className="inline-flex items-center gap-2 h-12 px-7 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-semibold rounded-lg hover:bg-gray-700 dark:hover:bg-gray-100 transition-colors text-sm"
-              >
-                Prova gratis i 30 dagar
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                href="/logga-in"
-                className="inline-flex items-center h-12 px-5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Logga in →
-              </Link>
-            </div>
-
-            <div className="flex items-center justify-center lg:justify-start gap-6 text-xs text-muted-foreground pt-2">
-              <span className="flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-                99 kr/mån efter provperioden
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-                Ingen bindningstid
-              </span>
-            </div>
-
-            <div className="block min-[1080px]:hidden w-full pt-4">
-              <Image
-                src="/knegarlogg-mobile.png"
-                alt="KnegarLoggen – app"
-                width={800}
-                height={600}
-                className="w-full h-auto"
-                priority
-              />
-            </div>
-          </div>
-
-          {/* Right – screenshot */}
-          <div className="flex-1 w-full relative">
-           
-              {/* <Image
-                src="/knegarlogg-heroscreen.png"
-                alt="KnegarLoggen – jobbvy"
-                width={1000}
-                height={600}
-                className="w-full h-auto object-cover"
-                priority
-              /> */}
-            </div>
-          </div>
+          <Link
+            href="/registrera"
+            className="inline-flex items-center h-11 px-6 rounded-md bg-accent text-accent-foreground font-semibold text-sm shadow-md hover:bg-accent/85 transition-colors"
+          >
+            Prova gratis 30 dagar
+          </Link>
 
         </div>
-      
+      </div>
+
+      {/* Bild – mobil: under texten */}
+      <div className="relative h-72 w-full sm:h-96 lg:hidden">
+        <Image
+          src="/hero-mobile.png"
+          alt=""
+          fill
+          className="object-cover object-[65%_center]"
+          sizes="100vw"
+        />
+        <div className="absolute inset-x-0 top-0 h-1/3 bg-linear-to-b from-surface-tertiary to-transparent" />
+      </div>
     </section>
   );
 }
