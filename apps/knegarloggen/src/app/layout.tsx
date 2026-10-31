@@ -27,7 +27,7 @@ export default function RootLayout({
       <Suspense fallback={null}>
         {/* Plats under mobilens flikrad (navbar.tsx) när den visas. */}
         <body
-          className="min-h-screen has-[#mobil-flikrad]:pb-[calc(4rem+env(safe-area-inset-bottom))] lg:has-[#mobil-flikrad]:pb-0"
+          className="min-h-screen has-[#mobil-flikrad]:pb-[calc(4rem+env(safe-area-inset-bottom))] xl:has-[#mobil-flikrad]:pb-0"
           suppressHydrationWarning
         >
           <ThemeProvider

@@ -8,17 +8,19 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import JobDashboard from "@/components/minasidor/jobb/job-dashboard";
 
-export default function MinaSidorPage() {
+export default function MinaJobbPage() {
   return (
     <main className="container mx-auto px-4 py-8">
-      <Suspense fallback={<div className="animate-pulse h-8 w-48 bg-muted rounded" />}>
-        <MinaSidorInnehall />
+      <Suspense
+        fallback={<div className="animate-pulse h-8 w-48 bg-muted rounded" />}
+      >
+        <MinaJobbInnehall />
       </Suspense>
     </main>
   );
 }
 
-async function MinaSidorInnehall() {
+async function MinaJobbInnehall() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) redirect("/logga-in");
 
@@ -27,12 +29,7 @@ async function MinaSidorInnehall() {
   return (
     <>
       <div className="flex flex-col gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Mina jobb</h1>
-          <p className="text-muted-foreground text-sm">
-            Välkommen, {session.user.name}
-          </p>
-        </div>
+        <h1 className="text-2xl font-bold">Mina jobb</h1>
         <Link href="/mina-sidor/nytt-jobb">
           <Button>
             <Plus className="h-4 w-4 mr-2" />

@@ -24,7 +24,7 @@ export default function EditJobClient({ job, customers }: Props) {
       const result = await updateJob(job.id, data, bilder);
       if (result.ok) {
         toast.success("Jobb uppdaterat!");
-        router.push("/mina-sidor");
+        router.push("/mina-sidor/jobb");
         router.refresh();
       } else {
         toast.error(result.error ?? "Kunde inte uppdatera jobb");

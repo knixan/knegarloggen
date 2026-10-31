@@ -10,6 +10,7 @@ import {
   LogIn,
   LogOut,
   ShieldCheck,
+  MoreHorizontal,
   type LucideIcon,
 } from "lucide-react";
 import authClient, { useSession } from "@/lib/auth-client";
@@ -29,6 +30,7 @@ type LinkItem = {
   label: string;
   icon?: LucideIcon;
   isActive?: (pathname: string) => boolean;
+  mobileTab?: boolean;
 };
 
 const isLinkActive = (link: LinkItem, pathname: string) =>
@@ -150,18 +152,49 @@ const MobileNavLinks: React.FC<MobileNavLinksProps> = ({
 interface MobileTabBarProps {
   links: LinkItem[];
   currentPath: string;
+  moreActive: boolean;
+  moreOpen: boolean;
+  onMore: () => void;
 }
 
-const MobileTabBar: React.FC<MobileTabBarProps> = ({ links, currentPath }) => (
+const tabClass = (isActive: boolean) =>
+  `flex flex-1 items-center justify-center transition-colors ${
+    isActive
+      ? "text-gray-900 dark:text-white"
+      : "text-gray-400 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300"
+  }`;
+
+const TabIcon = ({
+  icon: Icon,
+  isActive,
+}: {
+  icon: LucideIcon;
+  isActive: boolean;
+}) => (
+  <span
+    className={`flex h-10 w-14 items-center justify-center rounded-full ${
+      isActive ? "bg-gray-100 dark:bg-gray-800" : ""
+    }`}
+  >
+    <Icon className="h-6 w-6" aria-hidden="true" />
+  </span>
+);
+
+const MobileTabBar: React.FC<MobileTabBarProps> = ({
+  links,
+  currentPath,
+  moreActive,
+  moreOpen,
+  onMore,
+}) => (
   <nav
     id="mobil-flikrad"
     aria-label="Mina sidor"
-    className="fixed inset-x-0 bottom-0 z-50 border-t bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur supports-backdrop-filter:bg-white/80 lg:hidden dark:bg-gray-950/95"
+    className="fixed inset-x-0 bottom-0 z-50 border-t bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur supports-backdrop-filter:bg-white/80 xl:hidden dark:bg-gray-950/95"
   >
     <ul className="flex h-16 items-stretch justify-around">
       {links.map((link) => {
         const isActive = isLinkActive(link, currentPath);
-        const Icon = link.icon;
         return (
           <li key={link.href} className="flex flex-1">
             <Link
@@ -169,25 +202,25 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({ links, currentPath }) => (
               aria-label={link.label}
               title={link.label}
               aria-current={isActive ? "page" : undefined}
-              className={`flex flex-1 items-center justify-center transition-colors ${
-                isActive
-                  ? "text-gray-900 dark:text-white"
-                  : "text-gray-400 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300"
-              }`}
+              className={tabClass(isActive)}
             >
-              {Icon && (
-                <span
-                  className={`flex h-10 w-14 items-center justify-center rounded-full ${
-                    isActive ? "bg-gray-100 dark:bg-gray-800" : ""
-                  }`}
-                >
-                  <Icon className="h-6 w-6" aria-hidden="true" />
-                </span>
-              )}
+              {link.icon && <TabIcon icon={link.icon} isActive={isActive} />}
             </Link>
           </li>
         );
       })}
+      <li className="flex flex-1">
+        <button
+          type="button"
+          onClick={onMore}
+          aria-label="Mer"
+          title="Mer"
+          aria-expanded={moreOpen}
+          className={tabClass(moreActive || moreOpen)}
+        >
+          <TabIcon icon={MoreHorizontal} isActive={moreActive || moreOpen} />
+        </button>
+      </li>
     </ul>
   </nav>
 );
@@ -387,15 +420,21 @@ const Navbar: React.FC<NavbarProps> = ({
   }, [userId]);
 
   const navLinks = isAuthenticated ? minaSidorLinks : links;
+  // Mobil inloggad: flikraden har huvudlänkarna, resten ligger under "Mer".
+  const tabLinks = navLinks.filter((l) => l.mobileTab);
+  const moreLinks = isAuthenticated
+    ? navLinks.filter((l) => !l.mobileTab)
+    : navLinks;
   // Inloggad: bara loggan om företaget har en, annars bara företagsnamnet.
   const companyLogo = isAuthenticated && company?.logoUrl ? company : null;
   const companyName = isAuthenticated ? company?.name : undefined;
 
-  // Inloggad har fler länkar – visa hela menyn först från lg-bredd.
+  // Inloggad har fler länkar – visa hela menyn först från xl-bredd.
+  // Samma brytpunkt som flikraden (MobileTabBar) och body-paddingen i layout.tsx.
   const desktopClass = isAuthenticated
-    ? "hidden lg:flex lg:items-center lg:gap-5"
+    ? "hidden xl:flex xl:items-center xl:gap-5"
     : "hidden md:flex md:items-center md:gap-6";
-  const mobileClass = isAuthenticated ? "lg:hidden" : "md:hidden";
+  const mobileClass = isAuthenticated ? "xl:hidden" : "md:hidden";
 
   return (
     <>
@@ -475,22 +514,17 @@ const Navbar: React.FC<NavbarProps> = ({
             </button>
           </div>
 
-          {/* Mobile Menu */}
+          {/* Mobile Menu – inloggad är det "Mer" till flikraden längst ner. */}
           {isMobileMenuOpen && (
             <div className={`${mobileClass} py-4 border-t`} role="menu">
               <div className="flex flex-col gap-4">
-                {/* Inloggad ligger länkarna i flikraden längst ner. */}
-                {!isAuthenticated && (
-                  <MobileNavLinks
-                    links={navLinks}
-                    currentPath={pathname}
-                    onNavigate={closeMobileMenu}
-                  />
-                )}
+                <MobileNavLinks
+                  links={moreLinks}
+                  currentPath={pathname}
+                  onNavigate={closeMobileMenu}
+                />
 
-                <div
-                  className={`flex flex-col gap-2 ${isAuthenticated ? "" : "pt-4 border-t"}`}
-                >
+                <div className="flex flex-col gap-2 pt-4 border-t">
                   {showThemeToggle && (
                     <div className="flex items-center justify-between px-2 mb-2">
                       <span className="text-sm font-medium">Tema</span>
@@ -515,7 +549,13 @@ const Navbar: React.FC<NavbarProps> = ({
       </nav>
       {/* Utanför <nav>: backdrop-blur där skulle låsa fixed-positionen till navbaren. */}
       {isAuthenticated && (
-        <MobileTabBar links={navLinks} currentPath={pathname} />
+        <MobileTabBar
+          links={tabLinks}
+          currentPath={pathname}
+          moreActive={moreLinks.some((l) => isLinkActive(l, pathname))}
+          moreOpen={isMobileMenuOpen}
+          onMore={toggleMobileMenu}
+        />
       )}
     </>
   );

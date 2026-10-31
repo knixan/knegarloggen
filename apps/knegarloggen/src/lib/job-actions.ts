@@ -287,7 +287,7 @@ export async function updateCompanySettings(data: CompanyInput) {
     },
   });
 
-  revalidatePath("/mina-sidor");
+  revalidatePath("/mina-sidor", "layout");
   revalidatePath("/mina-sidor/foretag");
   return { ok: true as const };
 }
@@ -320,7 +320,7 @@ export async function updateCompanyLogo(
     },
   });
 
-  revalidatePath("/mina-sidor");
+  revalidatePath("/mina-sidor", "layout");
   revalidatePath("/mina-sidor/foretag");
   return { ok: true as const };
 }
@@ -454,7 +454,7 @@ export async function deleteCustomer(id: string) {
   await prisma.customer.delete({ where: { id } });
 
   revalidatePath("/mina-sidor/kunder");
-  revalidatePath("/mina-sidor");
+  revalidatePath("/mina-sidor", "layout");
   return { ok: true as const };
 }
 
@@ -593,7 +593,7 @@ export async function createJob(
     },
   });
 
-  revalidatePath("/mina-sidor");
+  revalidatePath("/mina-sidor", "layout");
   return { ok: true as const };
 }
 
@@ -774,7 +774,7 @@ export async function updateJob(
     }
   }
 
-  revalidatePath("/mina-sidor");
+  revalidatePath("/mina-sidor", "layout");
   revalidatePath(`/mina-sidor/jobb/${id}/redigera`);
   return { ok: true as const };
 }
@@ -800,7 +800,7 @@ export async function deleteJob(id: string) {
     }
   }
 
-  revalidatePath("/mina-sidor");
+  revalidatePath("/mina-sidor", "layout");
   return { ok: true as const };
 }
 

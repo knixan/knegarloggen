@@ -23,7 +23,7 @@ export default function NyttJobbClient({ customers }: Props) {
       const result = await createJob(data, bilder);
       if (result.ok) {
         toast.success("Jobb sparat!");
-        router.push("/mina-sidor");
+        router.push("/mina-sidor/jobb");
       } else {
         toast.error(result.error ?? "Kunde inte spara jobb");
       }

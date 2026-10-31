@@ -143,7 +143,18 @@ export const MOMS_SATS = 0.25;
  * Enda stället där jobbets summor räknas ut – formulär, lista, faktura,
  * utskrift och e-post ska alla använda denna så att de visar samma belopp.
  */
-export function beräknaSummering(job: JobInput) {
+export function beräknaSummering(
+  job: Pick<
+    JobInput,
+    | "artiklar"
+    | "ovrigaKostnader"
+    | "arbetstider"
+    | "resor"
+    | "timpris"
+    | "milersattning"
+    | "fastPris"
+  >,
+) {
   const artiklarSum = job.artiklar.reduce(
     (sum, a) => sum + a.pris * a.antal,
     0,
