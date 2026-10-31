@@ -45,6 +45,9 @@ export function createAuth(config: {
           type: "string",
           defaultValue: "user",
           required: false,
+          // Får aldrig sättas från klienten (sign-up/update-user) – annars
+          // kan vem som helst göra sig till admin. Ändras bara via admin-actions.
+          input: false,
         },
       },
     },

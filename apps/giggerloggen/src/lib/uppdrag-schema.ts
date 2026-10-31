@@ -21,7 +21,15 @@ export const uppdragSchema = z.object({
   titel: z.string().min(1, "Titel krävs"),
   beskrivning: z.string().optional().default(""),
   uppdragsTyp: z
-    .enum(["konsulting", "design", "utbildning", "handel", "it", "juridik", "annat"])
+    .enum([
+      "konsulting",
+      "design",
+      "utbildning",
+      "handel",
+      "it",
+      "juridik",
+      "annat",
+    ])
     .default("konsulting"),
   customerId: z.string().optional().nullable(),
   prisTyp: z.enum(["timme", "fast"]).default("timme"),
@@ -62,7 +70,12 @@ export type UppdragMedRelationer = {
     epost: string;
     telefon: string;
   } | null;
-  arbetspass: { id: string; datum: Date; timmar: number; beskrivning: string }[];
+  arbetspass: {
+    id: string;
+    datum: Date;
+    timmar: number;
+    beskrivning: string;
+  }[];
   resor: { id: string; datum: Date; stracka: number; beskrivning: string }[];
   ovrigaKostnader: { id: string; beskrivning: string; pris: number }[];
 };
@@ -86,8 +99,7 @@ export function beraknaTotal(uppdrag: UppdragMedRelationer): {
 
   const ovrigaSum = uppdrag.ovrigaKostnader.reduce((s, k) => s + k.pris, 0);
 
-  const basePris =
-    uppdrag.prisTyp === "fast" ? uppdrag.fastPris : arbetstidSum;
+  const basePris = uppdrag.prisTyp === "fast" ? uppdrag.fastPris : arbetstidSum;
   const totalExklMoms = basePris + resorSum + ovrigaSum;
   const moms = totalExklMoms * 0.25;
   const totalInklMoms = totalExklMoms + moms;
@@ -103,3 +115,54 @@ export function beraknaTotal(uppdrag: UppdragMedRelationer): {
     totalInklMoms,
   };
 }
+
+// ============================================================
+// Kund och företag – valideras på servern. z.object tar bort okända
+// fält, så klienten kan inte smyga med t.ex. companyId eller userId.
+// ============================================================
+
+// Tomma fält i FormData kan komma som null – gör om till "".
+const text = (max: number) =>
+  z
+    .string()
+    .max(max)
+    .nullish()
+    .transform((v) => v?.trim() ?? "");
+
+export const kundSchema = z.object({
+  kundTyp: z.enum(["privatperson", "foretag"]).default("privatperson"),
+  namn: z.string().trim().min(1, "Namn krävs").max(120),
+  adress: text(200),
+  postnummer: text(20),
+  stad: text(100),
+  telefon: text(50),
+  epost: text(200),
+  personnummer: text(20),
+  foretagsnamn: text(200),
+  kontaktperson: text(120),
+  orgNummer: text(20),
+});
+
+export const foretagSchema = z.object({
+  namn: text(200),
+  orgNummer: text(20),
+  adress: text(200),
+  postnummer: text(20),
+  stad: text(100),
+  telefon: text(50),
+  epost: text(200),
+  hemsida: text(200),
+  betalningsvillkor: z.coerce.number().int().min(0).max(365).default(30),
+  drojsmalsranta: text(20),
+  fakturaText: text(2000),
+  momsregistrerad: z.boolean().default(false),
+  momsNummer: text(30),
+  bankgiro: text(20),
+  plusgiro: text(20),
+  swish: text(20),
+  iban: text(40),
+  bic: text(20),
+});
+
+export type KundInput = z.input<typeof kundSchema>;
+export type ForetagInput = z.input<typeof foretagSchema>;

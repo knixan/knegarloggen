@@ -45,9 +45,13 @@ export function InstallningarKlient({ user, company, subscription }: Props) {
   const { startUpload } = useUploadThing("companyLogo", {
     onClientUploadComplete: async (res) => {
       if (res?.[0]) {
-        await sparaLogo(res[0].ufsUrl, res[0].key);
-        setLogoUrl(res[0].ufsUrl);
-        toast.success("Logga uppladdad!");
+        const result = await sparaLogo(res[0].ufsUrl, res[0].key);
+        if (result.ok) {
+          setLogoUrl(res[0].ufsUrl);
+          toast.success("Logga uppladdad!");
+        } else {
+          toast.error("Kunde inte spara loggan");
+        }
       }
       setUploading(false);
     },

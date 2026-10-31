@@ -99,10 +99,14 @@ export function UppdragDetaljer({ uppdrag }: Props) {
     try {
       const res = await startUpload(filer);
       if (res) {
-        for (const bild of res) {
-          await laggTillBild(uppdrag.id, bild.ufsUrl, bild.key);
+        const resultat = await Promise.all(
+          res.map((bild) => laggTillBild(uppdrag.id, bild.ufsUrl, bild.key)),
+        );
+        if (resultat.every((r) => r.ok)) {
+          toast.success("Bild(er) uppladdade");
+        } else {
+          toast.error("Någon bild kunde inte sparas");
         }
-        toast.success("Bild(er) uppladdade");
       }
     } catch {
       toast.error("Bilduppladdning misslyckades. Försök igen.");

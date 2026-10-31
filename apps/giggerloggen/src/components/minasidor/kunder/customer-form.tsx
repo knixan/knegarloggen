@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { skapaKund, uppdateraKund } from "@/lib/uppdrag-actions";
+import type { KundInput } from "@/lib/uppdrag-schema";
 
 type CustomerData = {
   id?: string;
@@ -38,8 +39,8 @@ export function CustomerForm({ defaultValues }: Props) {
     e.preventDefault();
     setLoading(true);
     const fd = new FormData(e.currentTarget);
-    const data = {
-      kundTyp,
+    const data: KundInput = {
+      kundTyp: kundTyp === "foretag" ? "foretag" : "privatperson",
       namn: fd.get("namn") as string,
       adress: fd.get("adress") as string,
       postnummer: fd.get("postnummer") as string,

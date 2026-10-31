@@ -6,8 +6,12 @@ import { UTApi } from "uploadthing/server";
 import { auth } from "./auth";
 import { prisma } from "./prisma";
 import { stripe } from "./stripe";
-import { uppdragSchema } from "./uppdrag-schema";
-import type { UppdragFormValues } from "./uppdrag-schema";
+import { uppdragSchema, kundSchema, foretagSchema } from "./uppdrag-schema";
+import type {
+  UppdragFormValues,
+  KundInput,
+  ForetagInput,
+} from "./uppdrag-schema";
 
 const utapi = new UTApi();
 
@@ -23,10 +27,49 @@ async function getCompanyId(): Promise<string> {
   return company.id;
 }
 
+/** Kunden måste tillhöra det egna företaget – annars kan man koppla in
+ *  (och sedan läsa) en annan användares kund via uppdraget/fakturan. */
+async function kundTillhorForetag(
+  customerId: string | null | undefined,
+  companyId: string,
+) {
+  if (!customerId) return true;
+  const kund = await prisma.customer.findFirst({
+    where: { id: customerId, companyId },
+    select: { id: true },
+  });
+  return Boolean(kund);
+}
+
+/** Bara filer från vår UploadThing-app, med url som matchar nyckeln. */
+function isUploadThingUrl(url: string, key: string) {
+  if (!key || key.length > 200) return false;
+  try {
+    const u = new URL(url);
+    const hostOk = u.hostname === "utfs.io" || u.hostname.endsWith(".ufs.sh");
+    return u.protocol === "https:" && hostOk && u.pathname === `/f/${key}`;
+  } catch {
+    return false;
+  }
+}
+
+/** Nycklar som redan används får inte återanvändas – annars kan man
+ *  "låna" en annan användares fil och sedan radera den. */
+async function nyckelAnvands(key: string) {
+  const logo = await prisma.company.findFirst({
+    where: { logoKey: key },
+    select: { id: true },
+  });
+  return Boolean(logo);
+}
+
 export async function skapaUppdrag(data: UppdragFormValues) {
   const companyId = await getCompanyId();
   const parsed = uppdragSchema.safeParse(data);
   if (!parsed.success) return { ok: false, error: "Ogiltiga uppgifter" };
+  if (!(await kundTillhorForetag(parsed.data.customerId, companyId))) {
+    return { ok: false, error: "Kunden hittades inte" };
+  }
 
   const uppdrag = await prisma.uppdrag.create({
     data: {
@@ -53,6 +96,9 @@ export async function uppdateraUppdrag(id: string, data: UppdragFormValues) {
   const companyId = await getCompanyId();
   const parsed = uppdragSchema.safeParse(data);
   if (!parsed.success) return { ok: false, error: "Ogiltiga uppgifter" };
+  if (!(await kundTillhorForetag(parsed.data.customerId, companyId))) {
+    return { ok: false, error: "Kunden hittades inte" };
+  }
 
   await prisma.uppdrag.updateMany({
     where: { id, companyId },
@@ -78,7 +124,10 @@ export async function uppdateraUppdrag(id: string, data: UppdragFormValues) {
 
 export async function uppdateraStatus(id: string, status: string) {
   const companyId = await getCompanyId();
-  await prisma.uppdrag.updateMany({ where: { id, companyId }, data: { status } });
+  await prisma.uppdrag.updateMany({
+    where: { id, companyId },
+    data: { status },
+  });
   revalidatePath("/mina-sidor");
   return { ok: true };
 }
@@ -97,7 +146,9 @@ export async function laggTillArbetspass(
   beskrivning: string,
 ) {
   const companyId = await getCompanyId();
-  const uppdrag = await prisma.uppdrag.findFirst({ where: { id: uppdragId, companyId } });
+  const uppdrag = await prisma.uppdrag.findFirst({
+    where: { id: uppdragId, companyId },
+  });
   if (!uppdrag) return { ok: false, error: "Uppdrag hittades inte" };
 
   await prisma.arbetspass.create({
@@ -107,7 +158,10 @@ export async function laggTillArbetspass(
   return { ok: true };
 }
 
-export async function raderaArbetspass(arbetspassId: string, uppdragId: string) {
+export async function raderaArbetspass(
+  arbetspassId: string,
+  uppdragId: string,
+) {
   const companyId = await getCompanyId();
   await prisma.arbetspass.deleteMany({
     where: { id: arbetspassId, uppdragId, uppdrag: { companyId } },
@@ -123,7 +177,9 @@ export async function laggTillResa(
   beskrivning: string,
 ) {
   const companyId = await getCompanyId();
-  const uppdrag = await prisma.uppdrag.findFirst({ where: { id: uppdragId, companyId } });
+  const uppdrag = await prisma.uppdrag.findFirst({
+    where: { id: uppdragId, companyId },
+  });
   if (!uppdrag) return { ok: false, error: "Uppdrag hittades inte" };
 
   await prisma.resa.create({
@@ -148,7 +204,9 @@ export async function laggTillOvrigKostnad(
   pris: number,
 ) {
   const companyId = await getCompanyId();
-  const uppdrag = await prisma.uppdrag.findFirst({ where: { id: uppdragId, companyId } });
+  const uppdrag = await prisma.uppdrag.findFirst({
+    where: { id: uppdragId, companyId },
+  });
   if (!uppdrag) return { ok: false, error: "Uppdrag hittades inte" };
 
   await prisma.ovrigKostnad.create({ data: { uppdragId, beskrivning, pris } });
@@ -165,45 +223,27 @@ export async function raderaOvrigKostnad(kostnadId: string, uppdragId: string) {
   return { ok: true };
 }
 
-export async function skapaKund(data: {
-  kundTyp: string;
-  namn: string;
-  adress: string;
-  postnummer: string;
-  stad: string;
-  telefon: string;
-  epost: string;
-  personnummer: string;
-  foretagsnamn: string;
-  kontaktperson: string;
-  orgNummer: string;
-}) {
+export async function skapaKund(data: KundInput) {
   const companyId = await getCompanyId();
+  const parsed = kundSchema.safeParse(data);
+  if (!parsed.success) return { ok: false, error: "Ogiltiga uppgifter" };
+
   const kund = await prisma.customer.create({
-    data: { companyId, ...data },
+    data: { ...parsed.data, companyId },
   });
   revalidatePath("/mina-sidor/kunder");
   return { ok: true, id: kund.id };
 }
 
-export async function uppdateraKund(
-  id: string,
-  data: {
-    kundTyp: string;
-    namn: string;
-    adress: string;
-    postnummer: string;
-    stad: string;
-    telefon: string;
-    epost: string;
-    personnummer: string;
-    foretagsnamn: string;
-    kontaktperson: string;
-    orgNummer: string;
-  },
-) {
+export async function uppdateraKund(id: string, data: KundInput) {
   const companyId = await getCompanyId();
-  await prisma.customer.updateMany({ where: { id, companyId }, data });
+  const parsed = kundSchema.safeParse(data);
+  if (!parsed.success) return { ok: false, error: "Ogiltiga uppgifter" };
+
+  await prisma.customer.updateMany({
+    where: { id, companyId },
+    data: parsed.data,
+  });
   revalidatePath("/mina-sidor/kunder");
   return { ok: true };
 }
@@ -215,33 +255,17 @@ export async function raderaKund(id: string) {
   return { ok: true };
 }
 
-export async function sparaForetagsinformation(data: {
-  namn: string;
-  orgNummer: string;
-  adress: string;
-  postnummer: string;
-  stad: string;
-  telefon: string;
-  epost: string;
-  hemsida: string;
-  betalningsvillkor: number;
-  drojsmalsranta: string;
-  fakturaText: string;
-  momsregistrerad: boolean;
-  momsNummer: string;
-  bankgiro: string;
-  plusgiro: string;
-  swish: string;
-  iban: string;
-  bic: string;
-}) {
+export async function sparaForetagsinformation(data: ForetagInput) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) return { ok: false, error: "Inte inloggad" };
 
+  const parsed = foretagSchema.safeParse(data);
+  if (!parsed.success) return { ok: false, error: "Ogiltiga uppgifter" };
+
   await prisma.company.upsert({
     where: { userId: session.user.id },
-    create: { userId: session.user.id, ...data },
-    update: data,
+    create: { ...parsed.data, userId: session.user.id },
+    update: parsed.data,
   });
 
   revalidatePath("/mina-sidor/foretag");
@@ -256,6 +280,12 @@ export async function sparaLogo(logoUrl: string, logoKey: string) {
     where: { userId: session.user.id },
     select: { logoKey: true },
   });
+
+  if (logoKey !== existing?.logoKey) {
+    if (!isUploadThingUrl(logoUrl, logoKey) || (await nyckelAnvands(logoKey))) {
+      return { ok: false };
+    }
+  }
 
   await prisma.company.upsert({
     where: { userId: session.user.id },
