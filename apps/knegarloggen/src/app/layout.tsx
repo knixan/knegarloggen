@@ -25,7 +25,11 @@ export default function RootLayout({
   return (
     <html lang="sv" suppressHydrationWarning className={roboto.className}>
       <Suspense fallback={null}>
-        <body className="min-h-screen" suppressHydrationWarning>
+        {/* Plats under mobilens flikrad (navbar.tsx) när den visas. */}
+        <body
+          className="min-h-screen has-[#mobil-flikrad]:pb-[calc(4rem+env(safe-area-inset-bottom))] lg:has-[#mobil-flikrad]:pb-0"
+          suppressHydrationWarning
+        >
           <ThemeProvider
             attribute="class"
             defaultTheme="system"

@@ -145,6 +145,53 @@ const MobileNavLinks: React.FC<MobileNavLinksProps> = ({
   </>
 );
 
+// Mobil flikrad längst ner (inloggad) – bara ikoner, som i en vanlig app.
+// Id:t används i root-layouten för att ge sidan utrymme under raden.
+interface MobileTabBarProps {
+  links: LinkItem[];
+  currentPath: string;
+}
+
+const MobileTabBar: React.FC<MobileTabBarProps> = ({ links, currentPath }) => (
+  <nav
+    id="mobil-flikrad"
+    aria-label="Mina sidor"
+    className="fixed inset-x-0 bottom-0 z-50 border-t bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur supports-backdrop-filter:bg-white/80 lg:hidden dark:bg-gray-950/95"
+  >
+    <ul className="flex h-16 items-stretch justify-around">
+      {links.map((link) => {
+        const isActive = isLinkActive(link, currentPath);
+        const Icon = link.icon;
+        return (
+          <li key={link.href} className="flex flex-1">
+            <Link
+              href={link.href}
+              aria-label={link.label}
+              title={link.label}
+              aria-current={isActive ? "page" : undefined}
+              className={`flex flex-1 items-center justify-center transition-colors ${
+                isActive
+                  ? "text-gray-900 dark:text-white"
+                  : "text-gray-400 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300"
+              }`}
+            >
+              {Icon && (
+                <span
+                  className={`flex h-10 w-14 items-center justify-center rounded-full ${
+                    isActive ? "bg-gray-100 dark:bg-gray-800" : ""
+                  }`}
+                >
+                  <Icon className="h-6 w-6" aria-hidden="true" />
+                </span>
+              )}
+            </Link>
+          </li>
+        );
+      })}
+    </ul>
+  </nav>
+);
+
 // Auth Buttons (Desktop)
 interface AuthButtonsProps {
   isAuthenticated: boolean;
@@ -340,7 +387,9 @@ const Navbar: React.FC<NavbarProps> = ({
   }, [userId]);
 
   const navLinks = isAuthenticated ? minaSidorLinks : links;
+  // Inloggad: bara loggan om företaget har en, annars bara företagsnamnet.
   const companyLogo = isAuthenticated && company?.logoUrl ? company : null;
+  const companyName = isAuthenticated ? company?.name : undefined;
 
   // Inloggad har fler länkar – visa hela menyn först från lg-bredd.
   const desktopClass = isAuthenticated
@@ -349,21 +398,21 @@ const Navbar: React.FC<NavbarProps> = ({
   const mobileClass = isAuthenticated ? "lg:hidden" : "md:hidden";
 
   return (
-    <nav
-      className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-backdrop-filter:bg-white/60 dark:bg-gray-950/95"
-      aria-label="Huvudnavigation"
-    >
-      <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
-          <div className="flex min-w-0 items-center">
-            <Link
-              href={isAuthenticated ? "/mina-sidor" : "/"}
-              onClick={closeMobileMenu}
-              className="flex min-w-0 items-center gap-2 text-xl font-black hover:text-gray-600 transition-colors"
-            >
-              {companyLogo ? (
-                <>
+    <>
+      <nav
+        className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-backdrop-filter:bg-white/60 dark:bg-gray-950/95"
+        aria-label="Huvudnavigation"
+      >
+        <div className="container mx-auto px-4">
+          <div className="flex h-16 items-center justify-between">
+            {/* Logo */}
+            <div className="flex min-w-0 items-center">
+              <Link
+                href={isAuthenticated ? "/mina-sidor" : "/"}
+                onClick={closeMobileMenu}
+                className="flex min-w-0 items-center gap-2 text-xl font-black hover:text-gray-600 transition-colors"
+              >
+                {companyLogo ? (
                   <Image
                     src={companyLogo.logoUrl}
                     alt={companyLogo.name}
@@ -372,93 +421,103 @@ const Navbar: React.FC<NavbarProps> = ({
                     className="h-12 w-auto max-w-35 object-contain"
                     priority
                   />
-                  <span className="truncate text-base font-semibold">
-                    {companyLogo.name}
+                ) : companyName ? (
+                  <span className="truncate text-lg font-semibold">
+                    {companyName}
                   </span>
-                </>
-              ) : (
-                <>
-                  <Image
-                    src="/knegaloggen-logga.png"
-                    alt="KnegarLoggen"
-                    width={100}
-                    height={100}
-                    className="h-16 w-16 object-contain"
-                    priority
-                  />
-                  <span>
-                    <span className="text-red-600">Knegar</span>
-                    <span className="text-blue-600">Loggen</span>
-                  </span>
-                </>
-              )}
-            </Link>
-          </div>
-
-          {/* Desktop Navigation */}
-          <div className={desktopClass}>
-            <NavLinks links={navLinks} currentPath={pathname} />
-
-            <div className="flex items-center gap-3">
-              {showThemeToggle && <ModeToggle />}
-              <AuthButtons
-                isAuthenticated={isAuthenticated}
-                isAdmin={isAdmin}
-                onLogin={handleLogin}
-                onRegister={handleRegister}
-                onLogout={handleLogout}
-              />
-            </div>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <button
-            onClick={toggleMobileMenu}
-            className={`${mobileClass} p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800`}
-            aria-label={isMobileMenuOpen ? "Stäng meny" : "Öppna meny"}
-            aria-expanded={isMobileMenuOpen}
-          >
-            {isMobileMenuOpen ? (
-              <X className="h-6 w-6" aria-hidden="true" />
-            ) : (
-              <Menu className="h-6 w-6" aria-hidden="true" />
-            )}
-          </button>
-        </div>
-
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div className={`${mobileClass} py-4 border-t`} role="menu">
-            <div className="flex flex-col gap-4">
-              <MobileNavLinks
-                links={navLinks}
-                currentPath={pathname}
-                onNavigate={closeMobileMenu}
-              />
-
-              <div className="flex flex-col gap-2 pt-4 border-t">
-                {showThemeToggle && (
-                  <div className="flex items-center justify-between px-2 mb-2">
-                    <span className="text-sm font-medium">Tema</span>
-                    <ModeToggle />
-                  </div>
+                ) : (
+                  <>
+                    <Image
+                      src="/knegaloggen-logga.png"
+                      alt="KnegarLoggen"
+                      width={100}
+                      height={100}
+                      className="h-16 w-16 object-contain"
+                      priority
+                    />
+                    <span>
+                      <span className="text-red-600">Knegar</span>
+                      <span className="text-blue-600">Loggen</span>
+                    </span>
+                  </>
                 )}
+              </Link>
+            </div>
 
-                <MobileAuthSection
+            {/* Desktop Navigation */}
+            <div className={desktopClass}>
+              <NavLinks links={navLinks} currentPath={pathname} />
+
+              <div className="flex items-center gap-3">
+                {showThemeToggle && <ModeToggle />}
+                <AuthButtons
                   isAuthenticated={isAuthenticated}
                   isAdmin={isAdmin}
-                  user={user}
                   onLogin={handleLogin}
                   onRegister={handleRegister}
                   onLogout={handleLogout}
-                  onNavigate={closeMobileMenu}
                 />
               </div>
             </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={toggleMobileMenu}
+              className={`${mobileClass} p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800`}
+              aria-label={isMobileMenuOpen ? "Stäng meny" : "Öppna meny"}
+              aria-expanded={isMobileMenuOpen}
+            >
+              {isMobileMenuOpen ? (
+                <X className="h-6 w-6" aria-hidden="true" />
+              ) : (
+                <Menu className="h-6 w-6" aria-hidden="true" />
+              )}
+            </button>
           </div>
-        )}
-      </div>
-    </nav>
+
+          {/* Mobile Menu */}
+          {isMobileMenuOpen && (
+            <div className={`${mobileClass} py-4 border-t`} role="menu">
+              <div className="flex flex-col gap-4">
+                {/* Inloggad ligger länkarna i flikraden längst ner. */}
+                {!isAuthenticated && (
+                  <MobileNavLinks
+                    links={navLinks}
+                    currentPath={pathname}
+                    onNavigate={closeMobileMenu}
+                  />
+                )}
+
+                <div
+                  className={`flex flex-col gap-2 ${isAuthenticated ? "" : "pt-4 border-t"}`}
+                >
+                  {showThemeToggle && (
+                    <div className="flex items-center justify-between px-2 mb-2">
+                      <span className="text-sm font-medium">Tema</span>
+                      <ModeToggle />
+                    </div>
+                  )}
+
+                  <MobileAuthSection
+                    isAuthenticated={isAuthenticated}
+                    isAdmin={isAdmin}
+                    user={user}
+                    onLogin={handleLogin}
+                    onRegister={handleRegister}
+                    onLogout={handleLogout}
+                    onNavigate={closeMobileMenu}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </nav>
+      {/* Utanför <nav>: backdrop-blur där skulle låsa fixed-positionen till navbaren. */}
+      {isAuthenticated && (
+        <MobileTabBar links={navLinks} currentPath={pathname} />
+      )}
+    </>
   );
 };
 
