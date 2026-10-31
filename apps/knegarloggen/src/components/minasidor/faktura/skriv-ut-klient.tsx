@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import type { Job } from "@/lib/job-schema";
+import type { Job, beräknaSummering } from "@/lib/job-schema";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
 
@@ -34,18 +34,7 @@ type Company = {
   fakturatext: string;
 };
 
-type Summary = {
-  artiklarSum: number;
-  ovrigaSum: number;
-  arbetstidSum: number;
-  resorSum: number;
-  totalExklMoms: number;
-  totalTimmar: number;
-  totalStracka: number;
-  antalResor: number;
-  timpris: number;
-  milersattning: number;
-};
+type Summary = ReturnType<typeof beräknaSummering>;
 
 interface Props {
   job: Job;
@@ -65,12 +54,7 @@ export default function SkrivUtKlient({
   forfalloDate.setDate(forfalloDate.getDate() + (company.forfallodagar || 30));
   const forfalloStr = forfalloDate.toLocaleDateString("sv-SE");
 
-  const exklMoms =
-    job.fastPris !== undefined && job.fastPris !== null
-      ? job.fastPris
-      : summary.totalExklMoms;
-  const moms = exklMoms * 0.25;
-  const totalInklMoms = exklMoms + moms;
+  const { totalExklMoms: exklMoms, moms, totalInklMoms } = summary;
 
   const kund = job.customer;
   const kundNamn = kund

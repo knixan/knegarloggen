@@ -14,6 +14,7 @@ import {
   Trash2,
   Package,
   Tag,
+  Hash,
   Store,
   Layers2,
   Receipt,
@@ -317,9 +318,13 @@ export default function JobForm({
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="hidden sm:grid sm:grid-cols-12 gap-2 text-xs font-medium text-muted-foreground px-1">
-            <div className="col-span-3 flex items-center gap-1.5">
+            <div className="col-span-2 flex items-center gap-1.5">
               <Tag className="h-3.5 w-3.5" />
               Artikelnamn
+            </div>
+            <div className="col-span-2 flex items-center gap-1.5">
+              <Hash className="h-3.5 w-3.5" />
+              Artikelnr
             </div>
             <div className="col-span-2 flex items-center gap-1.5">
               <Store className="h-3.5 w-3.5" />
@@ -341,7 +346,7 @@ export default function JobForm({
           </div>
           {artiklar.fields.map((field, i) => (
             <div key={field.id} className="grid grid-cols-12 gap-2 items-start">
-              <div className="col-span-12 sm:col-span-3">
+              <div className="col-span-12 sm:col-span-2">
                 <Input
                   {...register(`artiklar.${i}.namn`)}
                   placeholder="Artikelnamn"
@@ -352,7 +357,14 @@ export default function JobForm({
                   </p>
                 )}
               </div>
-              <div className="col-span-12 sm:col-span-2">
+              <div className="col-span-6 sm:col-span-2">
+                <Input
+                  {...register(`artiklar.${i}.artikelnr`)}
+                  placeholder="Artikelnr"
+                  autoComplete="off"
+                />
+              </div>
+              <div className="col-span-6 sm:col-span-2">
                 <Input
                   {...register(`artiklar.${i}.aterforsaljare`)}
                   placeholder="Återförsäljare"
@@ -905,8 +917,23 @@ export default function JobForm({
             })}
           />
           <Separator />
+          {summering.harFastPris && (
+            <p className="text-xs text-muted-foreground">
+              Beräknat på tid och material:{" "}
+              {summering.beraknatExklMoms.toLocaleString("sv-SE", {
+                style: "currency",
+                currency: "SEK",
+                maximumFractionDigits: 0,
+              })}{" "}
+              – ersätts av det fasta priset.
+            </p>
+          )}
           <SumRow
-            label="Totalt exkl. moms"
+            label={
+              summering.harFastPris
+                ? "Fast pris exkl. moms"
+                : "Totalt exkl. moms"
+            }
             icon={<Receipt className="h-3.5 w-3.5" />}
             value={summering.totalExklMoms.toLocaleString("sv-SE", {
               style: "currency",

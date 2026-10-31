@@ -1,11 +1,23 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, X, User, LogIn, LogOut, ShieldCheck } from "lucide-react";
+import {
+  Menu,
+  X,
+  LogIn,
+  LogOut,
+  ShieldCheck,
+  type LucideIcon,
+} from "lucide-react";
 import authClient, { useSession } from "@/lib/auth-client";
+import { getNavbarCompany } from "@/lib/navbar-actions";
+import {
+  minaSidorLinks,
+  COMPANY_UPDATED_EVENT,
+} from "@/components/minasidor/mina-sidor-nav";
 import { ModeToggle } from "../button/theme-button";
 
 // ============================================================================
@@ -15,7 +27,12 @@ import { ModeToggle } from "../button/theme-button";
 type LinkItem = {
   href: string;
   label: string;
+  icon?: LucideIcon;
+  isActive?: (pathname: string) => boolean;
 };
+
+const isLinkActive = (link: LinkItem, pathname: string) =>
+  link.isActive ? link.isActive(pathname) : pathname === link.href;
 
 interface NavbarProps {
   links?: LinkItem[];
@@ -69,20 +86,22 @@ interface NavLinksProps {
 }
 
 const NavLinks: React.FC<NavLinksProps> = ({ links, currentPath }) => (
-  <div className="flex items-center gap-6">
+  <div className="flex items-center gap-5">
     {links.map((link) => {
-      const isActive = currentPath === link.href;
+      const isActive = isLinkActive(link, currentPath);
+      const Icon = link.icon;
       return (
         <Link
           key={link.href}
           href={link.href}
-          className={`text-sm font-medium transition-colors ${
+          className={`flex items-center gap-1.5 whitespace-nowrap text-sm font-medium transition-colors ${
             isActive
               ? "text-gray-900 dark:text-white"
               : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
           }`}
           aria-current={isActive ? "page" : undefined}
         >
+          {Icon && <Icon className="h-4 w-4" aria-hidden="true" />}
           {link.label}
         </Link>
       );
@@ -104,12 +123,13 @@ const MobileNavLinks: React.FC<MobileNavLinksProps> = ({
 }) => (
   <>
     {links.map((link) => {
-      const isActive = currentPath === link.href;
+      const isActive = isLinkActive(link, currentPath);
+      const Icon = link.icon;
       return (
         <Link
           key={link.href}
           href={link.href}
-          className={`px-2 py-2 text-sm font-medium rounded-md transition-colors ${
+          className={`flex items-center gap-2 px-2 py-2 text-sm font-medium rounded-md transition-colors ${
             isActive
               ? "bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white"
               : "text-gray-700 hover:text-gray-900 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
@@ -117,6 +137,7 @@ const MobileNavLinks: React.FC<MobileNavLinksProps> = ({
           onClick={onNavigate}
           aria-current={isActive ? "page" : undefined}
         >
+          {Icon && <Icon className="h-4 w-4" aria-hidden="true" />}
           {link.label}
         </Link>
       );
@@ -171,13 +192,6 @@ const AuthButtons: React.FC<AuthButtonsProps> = ({
           <span>Admin</span>
         </Link>
       )}
-      <Link
-        href="/mina-sidor"
-        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors dark:text-gray-300"
-      >
-        <User className="h-4 w-4" aria-hidden="true" />
-        <span>Mina sidor</span>
-      </Link>
       <button
         onClick={onLogout}
         className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors"
@@ -253,14 +267,6 @@ const MobileAuthSection: React.FC<MobileAuthSectionProps> = ({
           <span>Admin</span>
         </Link>
       )}
-      <Link
-        href="/mina-sidor"
-        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md transition-colors dark:text-gray-300 dark:hover:bg-gray-800"
-        onClick={onNavigate}
-      >
-        <User className="h-4 w-4" aria-hidden="true" />
-        <span>Mina sidor</span>
-      </Link>
       <button
         onClick={async () => {
           await onLogout();
@@ -308,6 +314,40 @@ const Navbar: React.FC<NavbarProps> = ({
     setIsMobileMenuOpen((prev) => !prev);
   }, []);
 
+  // Företagets namn och logga visas när man är inloggad. Hämtas om när
+  // företagsuppgifterna sparas (COMPANY_UPDATED_EVENT).
+  const [company, setCompany] = useState<{
+    name: string;
+    logoUrl: string;
+  } | null>(null);
+  const userId = user?.id;
+
+  useEffect(() => {
+    if (!userId) return;
+    let cancelled = false;
+    const load = () =>
+      getNavbarCompany()
+        .then((c) => {
+          if (!cancelled) setCompany(c);
+        })
+        .catch(() => {});
+    load();
+    window.addEventListener(COMPANY_UPDATED_EVENT, load);
+    return () => {
+      cancelled = true;
+      window.removeEventListener(COMPANY_UPDATED_EVENT, load);
+    };
+  }, [userId]);
+
+  const navLinks = isAuthenticated ? minaSidorLinks : links;
+  const companyLogo = isAuthenticated && company?.logoUrl ? company : null;
+
+  // Inloggad har fler länkar – visa hela menyn först från lg-bredd.
+  const desktopClass = isAuthenticated
+    ? "hidden lg:flex lg:items-center lg:gap-5"
+    : "hidden md:flex md:items-center md:gap-6";
+  const mobileClass = isAuthenticated ? "lg:hidden" : "md:hidden";
+
   return (
     <nav
       className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-backdrop-filter:bg-white/60 dark:bg-gray-950/95"
@@ -316,30 +356,48 @@ const Navbar: React.FC<NavbarProps> = ({
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center">
+          <div className="flex min-w-0 items-center">
             <Link
-              href="/"
+              href={isAuthenticated ? "/mina-sidor" : "/"}
               onClick={closeMobileMenu}
-              className="flex items-center gap-2 text-xl font-black hover:text-gray-600 transition-colors"
+              className="flex min-w-0 items-center gap-2 text-xl font-black hover:text-gray-600 transition-colors"
             >
-              <Image
-                src="/knegaloggen-logga.png"
-                alt="KnegarLoggen"
-                width={100}
-                height={100}
-                className="h-16 w-16 object-contain"
-                priority
-              />
-              <span>
-                <span className="text-red-600">Knegar</span>
-                <span className="text-blue-600">Loggen</span>
-              </span>
+              {companyLogo ? (
+                <>
+                  <Image
+                    src={companyLogo.logoUrl}
+                    alt={companyLogo.name}
+                    width={160}
+                    height={64}
+                    className="h-12 w-auto max-w-35 object-contain"
+                    priority
+                  />
+                  <span className="truncate text-base font-semibold">
+                    {companyLogo.name}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <Image
+                    src="/knegaloggen-logga.png"
+                    alt="KnegarLoggen"
+                    width={100}
+                    height={100}
+                    className="h-16 w-16 object-contain"
+                    priority
+                  />
+                  <span>
+                    <span className="text-red-600">Knegar</span>
+                    <span className="text-blue-600">Loggen</span>
+                  </span>
+                </>
+              )}
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex md:items-center md:gap-6">
-            <NavLinks links={links} currentPath={pathname} />
+          <div className={desktopClass}>
+            <NavLinks links={navLinks} currentPath={pathname} />
 
             <div className="flex items-center gap-3">
               {showThemeToggle && <ModeToggle />}
@@ -356,7 +414,7 @@ const Navbar: React.FC<NavbarProps> = ({
           {/* Mobile Menu Button */}
           <button
             onClick={toggleMobileMenu}
-            className="md:hidden p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+            className={`${mobileClass} p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800`}
             aria-label={isMobileMenuOpen ? "Stäng meny" : "Öppna meny"}
             aria-expanded={isMobileMenuOpen}
           >
@@ -370,10 +428,10 @@ const Navbar: React.FC<NavbarProps> = ({
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden py-4 border-t" role="menu">
+          <div className={`${mobileClass} py-4 border-t`} role="menu">
             <div className="flex flex-col gap-4">
               <MobileNavLinks
-                links={links}
+                links={navLinks}
                 currentPath={pathname}
                 onNavigate={closeMobileMenu}
               />

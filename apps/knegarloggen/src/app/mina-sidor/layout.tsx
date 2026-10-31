@@ -4,10 +4,6 @@ import { cacheLife } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { evaluateSubscription } from "@/lib/subscription";
-import {
-  MinaSidorSidebar,
-  MinaSidorMobileNav,
-} from "../../components/minasidor/mina-sidor-nav";
 import TrialGate from "@/components/minasidor/trial-gate";
 
 async function getSubscriptionStatus(userId: string) {
@@ -24,15 +20,12 @@ export default function MinaSidorLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // Navigeringen för mina sidor ligger i navbaren (components/site/navbar.tsx).
   return (
-    <div className="flex min-h-[calc(100vh-4rem)]">
-      <MinaSidorSidebar />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <MinaSidorMobileNav />
-        <Suspense fallback={<div className="flex-1" />}>
-          <MinaSidorGate>{children}</MinaSidorGate>
-        </Suspense>
-      </div>
+    <div className="flex min-h-[calc(100vh-4rem)] min-w-0 flex-col">
+      <Suspense fallback={<div className="flex-1" />}>
+        <MinaSidorGate>{children}</MinaSidorGate>
+      </Suspense>
     </div>
   );
 }

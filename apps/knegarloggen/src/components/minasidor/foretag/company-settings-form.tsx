@@ -26,6 +26,7 @@ import {
 import { useUploadThing } from "@/lib/uploadthing-client";
 import { updateCompanySettings, updateCompanyLogo } from "@/lib/job-actions";
 import { type CompanyInput } from "@/lib/job-schema";
+import { COMPANY_UPDATED_EVENT } from "@/components/minasidor/mina-sidor-nav";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -96,6 +97,7 @@ export default function CompanySettingsForm({ company }: Props) {
       setLogo(ny);
       const result = await updateCompanyLogo(ny);
       if (result.ok) {
+        window.dispatchEvent(new Event(COMPANY_UPDATED_EVENT));
         toast.success("Logotyp uppdaterad");
       } else {
         toast.error(result.error ?? "Kunde inte spara logotyp");
@@ -108,6 +110,7 @@ export default function CompanySettingsForm({ company }: Props) {
     setLogo(null);
     const result = await updateCompanyLogo(null);
     if (result.ok) {
+      window.dispatchEvent(new Event(COMPANY_UPDATED_EVENT));
       toast.success("Logotyp borttagen");
     } else {
       toast.error(result.error ?? "Kunde inte ta bort logotyp");
@@ -118,6 +121,7 @@ export default function CompanySettingsForm({ company }: Props) {
     startTransition(async () => {
       const result = await updateCompanySettings(data);
       if (result.ok) {
+        window.dispatchEvent(new Event(COMPANY_UPDATED_EVENT));
         toast.success("Företagsuppgifter sparade");
       } else {
         toast.error(result.error ?? "Kunde inte spara företagsuppgifter");

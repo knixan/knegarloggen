@@ -137,6 +137,12 @@ export const companySchema = z.object({
 
 export type CompanyInput = z.infer<typeof companySchema>;
 
+export const MOMS_SATS = 0.25;
+
+/**
+ * Enda stället där jobbets summor räknas ut – formulär, lista, faktura,
+ * utskrift och e-post ska alla använda denna så att de visar samma belopp.
+ */
 export function beräknaSummering(job: JobInput) {
   const artiklarSum = job.artiklar.reduce(
     (sum, a) => sum + a.pris * a.antal,
@@ -154,7 +160,20 @@ export function beräknaSummering(job: JobInput) {
   const milersattning = job.milersattning ?? 0;
   const arbetstidSum = totalTimmar * timpris;
   const resorSum = totalStracka * milersattning;
-  const totalExklMoms = artiklarSum + ovrigaSum + arbetstidSum + resorSum;
+  const beraknatExklMoms = artiklarSum + ovrigaSum + arbetstidSum + resorSum;
+
+  // Fast pris ersätter det beräknade beloppet. Ett tomt fält i formuläret
+  // ger NaN (valueAsNumber) – räkna det som 0 så länge fast pris är påslaget.
+  const harFastPris = job.fastPris !== undefined && job.fastPris !== null;
+  const fastPris = harFastPris
+    ? Number.isFinite(job.fastPris)
+      ? (job.fastPris as number)
+      : 0
+    : null;
+
+  const totalExklMoms = fastPris ?? beraknatExklMoms;
+  const moms = totalExklMoms * MOMS_SATS;
+  const totalInklMoms = totalExklMoms + moms;
 
   return {
     artiklarSum,
@@ -166,6 +185,11 @@ export function beräknaSummering(job: JobInput) {
     milersattning,
     arbetstidSum,
     resorSum,
+    beraknatExklMoms,
+    harFastPris,
+    fastPris,
     totalExklMoms,
+    moms,
+    totalInklMoms,
   };
 }

@@ -139,9 +139,7 @@ export function FakturaPdf({
   forfalloDate.setDate(forfalloDate.getDate() + (company.forfallodagar ?? 30));
   const forfalloStr = forfalloDate.toLocaleDateString("sv-SE");
 
-  const exklMoms = job.fastPris != null ? job.fastPris : summary.totalExklMoms;
-  const moms = exklMoms * 0.25;
-  const totalInklMoms = exklMoms + moms;
+  const { totalExklMoms: exklMoms, moms, totalInklMoms } = summary;
   const rotAvdrag =
     job.rotAvdrag && summary.arbetstidSum > 0
       ? summary.arbetstidSum * 1.25 * 0.3

@@ -36,6 +36,7 @@ export default function EditJobClient({ job, customers }: Props) {
     customerId: job.customerId,
     timpris: job.timpris ?? 0,
     milersattning: job.milersattning ?? 0,
+    fastPris: job.fastPris,
     rotAvdrag: job.rotAvdrag,
     pagaende: job.pagaende,
     utfort: job.utfort,
