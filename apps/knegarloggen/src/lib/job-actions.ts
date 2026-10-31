@@ -181,8 +181,7 @@ function isUploadThingUrl({ url, key }: UploadedFile) {
   if (!key || key.length > 200) return false;
   try {
     const u = new URL(url);
-    const hostOk =
-      u.hostname === "utfs.io" || u.hostname.endsWith(".ufs.sh");
+    const hostOk = u.hostname === "utfs.io" || u.hostname.endsWith(".ufs.sh");
     return u.protocol === "https:" && hostOk && u.pathname === `/f/${key}`;
   } catch {
     return false;
@@ -522,10 +521,7 @@ export async function getJob(id: string) {
   return mapJob(j);
 }
 
-export async function createJob(
-  input: JobInput,
-  bilder: UploadedFile[] = [],
-) {
+export async function createJob(input: JobInput, bilder: UploadedFile[] = []) {
   const ctx = await requireCompany();
   if ("error" in ctx) return ctx;
   const { company } = ctx;
@@ -808,6 +804,8 @@ export async function deleteAccount(): Promise<{
   ok: boolean;
   error?: string;
 }> {
+  // Bara inloggning krävs – man ska kunna radera sitt konto även när
+  // provperioden har gått ut (GDPR).
   const ctx = await requireSession();
   if ("error" in ctx) return ctx;
   const { userId } = ctx;
@@ -832,11 +830,18 @@ export async function deleteAccount(): Promise<{
     job.images.forEach((img) => keys.push(img.key)),
   );
 
+  // Avbryt prenumerationen först. Misslyckas det får kontot inte raderas –
+  // då skulle Stripe fortsätta dra pengar utan att kunden kan logga in.
   if (subscription?.stripeSubscriptionId) {
     try {
       await stripe.subscriptions.cancel(subscription.stripeSubscriptionId);
     } catch (err) {
       console.error("Kunde inte avbryta Stripe-prenumeration:", err);
+      return {
+        ok: false,
+        error:
+          "Kunde inte avsluta prenumerationen. Försök igen eller kontakta support.",
+      };
     }
   }
 

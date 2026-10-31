@@ -62,6 +62,11 @@ export default function DeleteAccountButton() {
               företagsuppgifter, alla jobb, kunder, bilder och ditt konto.
               Åtgärden kan inte ångras.
             </span>
+            <span className="block">
+              Enligt bokföringslagen ska fakturor och underlag sparas i 7 år.
+              Ladda ner PDF:er för dina fakturerade jobb innan du raderar
+              kontot.
+            </span>
             <span className="block pt-1">
               Skriv <strong>{BEKRAFTELSE_ORD}</strong> för att bekräfta.
             </span>

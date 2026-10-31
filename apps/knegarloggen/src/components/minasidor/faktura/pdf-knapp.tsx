@@ -3,22 +3,18 @@
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FakturaPdf, type PdfCompany } from "./faktura-pdf";
-import type { Job } from "@/lib/job-schema";
+import { FakturaPdf } from "./faktura-pdf";
+import type { FakturaData } from "./faktura-data";
 
 interface Props {
-  job: Job;
-  company: PdfCompany;
-  fakturanummer: number;
+  data: FakturaData;
 }
 
-export function PdfKnapp({ job, company, fakturanummer }: Props) {
+export function PdfKnapp({ data }: Props) {
   return (
     <PDFDownloadLink
-      document={
-        <FakturaPdf job={job} company={company} fakturanummer={fakturanummer} />
-      }
-      fileName={`faktura-${fakturanummer}.pdf`}
+      document={<FakturaPdf data={data} />}
+      fileName={`faktura-${data.ocr}.pdf`}
     >
       {({ loading }) => (
         <Button variant="outline" size="sm" disabled={loading} asChild={false}>

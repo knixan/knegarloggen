@@ -40,6 +40,7 @@ catalog:
   dotenv: ^17.4.2
   # Verktyg och typer
   typescript: ^5
+  vitest: ^4.1.0
   eslint: ^9
   "@types/node": ^20
   "@types/pg": ^8.20.0
@@ -61,3 +62,8 @@ onlyBuiltDependencies:
   - "sharp"
   - "msgpackr-extract"
   - "unrs-resolver"
+
+# vite 8.2+ kräver lightningcss ^1.33.0, som inte finns publicerad (senaste
+# är 1.32.0). Ta bort när vitest/vite går att installera utan den här låsningen.
+overrides:
+  vite: ~8.1.0

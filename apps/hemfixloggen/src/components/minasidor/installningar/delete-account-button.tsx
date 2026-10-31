@@ -25,7 +25,9 @@ export function DeleteAccountButton() {
     if (result.ok) {
       window.location.href = "/";
     } else {
-      toast.error("Kunde inte radera kontot");
+      toast.error(
+        ("error" in result && result.error) || "Kunde inte radera kontot",
+      );
       setLoading(false);
     }
   }
@@ -40,9 +42,16 @@ export function DeleteAccountButton() {
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Radera konto permanent?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Alla dina uppdrag, kunder och företagsuppgifter raderas permanent.
-            Detta går inte att ångra.
+          <AlertDialogDescription className="space-y-2">
+            <span className="block">
+              Alla dina uppdrag, kunder och företagsuppgifter raderas permanent.
+              Detta går inte att ångra.
+            </span>
+            <span className="block">
+              Enligt bokföringslagen ska fakturor och underlag sparas i 7 år.
+              Ladda ner PDF:er för dina fakturerade uppdrag innan du raderar
+              kontot.
+            </span>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

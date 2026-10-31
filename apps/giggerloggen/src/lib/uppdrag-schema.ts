@@ -1,21 +1,37 @@
 import { z } from "zod";
 
+// ÅÅÅÅ-MM-DD som är ett riktigt datum (inte t.ex. 2026-02-31).
+const datumSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Ogiltigt datum")
+  .refine((d) => {
+    const dt = new Date(`${d}T00:00:00Z`);
+    return !Number.isNaN(dt.getTime()) && dt.toISOString().startsWith(d);
+  }, "Ogiltigt datum");
+
 export const arbetspassSchema = z.object({
-  datum: z.string().min(1, "Datum krävs"),
+  datum: datumSchema,
   timmar: z.number().min(0.25, "Minst 15 minuter").max(24),
-  beskrivning: z.string().optional().default(""),
+  beskrivning: z.string().trim().max(500).optional().default(""),
 });
 
 export const resaSchema = z.object({
-  datum: z.string().min(1, "Datum krävs"),
-  stracka: z.number().min(1, "Ange sträcka i km"),
-  beskrivning: z.string().optional().default(""),
+  datum: datumSchema,
+  stracka: z.number().min(1, "Ange sträcka i km").max(10000),
+  beskrivning: z.string().trim().max(500).optional().default(""),
 });
 
 export const ovrigKostnadSchema = z.object({
-  beskrivning: z.string().min(1, "Beskriv kostnaden"),
-  pris: z.number().min(0),
+  beskrivning: z.string().trim().min(1, "Beskriv kostnaden").max(200),
+  pris: z.number().min(0).max(10_000_000),
 });
+
+export const UPPDRAG_STATUSAR = [
+  "pagaende",
+  "utfort",
+  "fakturerat",
+  "betalt",
+] as const;
 
 export const uppdragSchema = z.object({
   titel: z.string().min(1, "Titel krävs"),

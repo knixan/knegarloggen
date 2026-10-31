@@ -1,19 +1,22 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertTriangle } from "lucide-react";
 
 type Props = {
-  status: string;
-  trialEnd: Date | null;
+  /** Från evaluateSubscription (lib/subscription.ts) – samma regel som actions. */
+  isExpired: boolean;
 };
 
-export function TrialGate({ status, trialEnd }: Props) {
-  const isExpired =
-    status === "canceled" ||
-    (status === "trialing" && trialEnd && trialEnd < new Date());
-
-  if (!isExpired) return null;
+export function TrialGate({ isExpired }: Props) {
+  const pathname = usePathname();
+  // Inställningar måste gå att nå – det är där prenumerationen aktiveras.
+  if (!isExpired || pathname.startsWith("/mina-sidor/installningar")) {
+    return null;
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/90 backdrop-blur-sm p-4">

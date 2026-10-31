@@ -40,8 +40,9 @@ export function UppdragDetaljer({ uppdrag }: Props) {
   async function handleStatusChange(newStatus: string | null) {
     if (!newStatus) return;
     setStatus(newStatus);
-    await uppdateraStatus(uppdrag.id, newStatus);
-    toast.success("Status uppdaterad");
+    const result = await uppdateraStatus(uppdrag.id, newStatus);
+    if (result.ok) toast.success("Status uppdaterad");
+    else toast.error(result.error ?? "Kunde inte uppdatera status");
   }
 
   async function handleAddArbetspass(e: React.FormEvent<HTMLFormElement>) {
@@ -56,6 +57,8 @@ export function UppdragDetaljer({ uppdrag }: Props) {
     if (result.ok) {
       toast.success("Arbetspass tillagt");
       (e.target as HTMLFormElement).reset();
+    } else {
+      toast.error(result.error ?? "Kunde inte lägga till arbetspass");
     }
   }
 
@@ -71,6 +74,8 @@ export function UppdragDetaljer({ uppdrag }: Props) {
     if (result.ok) {
       toast.success("Resa tillagd");
       (e.target as HTMLFormElement).reset();
+    } else {
+      toast.error(result.error ?? "Kunde inte lägga till resa");
     }
   }
 
@@ -85,6 +90,8 @@ export function UppdragDetaljer({ uppdrag }: Props) {
     if (result.ok) {
       toast.success("Kostnad tillagd");
       (e.target as HTMLFormElement).reset();
+    } else {
+      toast.error(result.error ?? "Kunde inte lägga till kostnad");
     }
   }
 

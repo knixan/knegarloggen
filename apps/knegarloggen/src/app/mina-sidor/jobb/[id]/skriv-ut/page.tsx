@@ -7,7 +7,6 @@ import {
   getCompanySettings,
   reserverFakturanummer,
 } from "@/lib/job-actions";
-import { beräknaSummering } from "@/lib/job-schema";
 import SkrivUtKlient from "@/components/minasidor/faktura/skriv-ut-klient";
 
 export default function SkrivUtPage({
@@ -39,14 +38,8 @@ async function SkrivUtInnehall({
   const fakturaResult = await reserverFakturanummer(id);
   if (!fakturaResult.ok) notFound();
   const fakturanummer = fakturaResult.nummer;
-  const summary = beräknaSummering(job);
 
   return (
-    <SkrivUtKlient
-      job={job}
-      company={company}
-      summary={summary}
-      fakturanummer={fakturanummer}
-    />
+    <SkrivUtKlient job={job} company={company} fakturanummer={fakturanummer} />
   );
 }

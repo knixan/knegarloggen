@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { MinaSidorNav } from "@/components/minasidor/mina-sidor-nav";
 import { TrialGate } from "@/components/minasidor/trial-gate";
+import { evaluateSubscription } from "@/lib/subscription";
 
 export default function MinaSidorLayout({
   children,
@@ -36,12 +37,7 @@ async function MinaSidorGate({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      {subscription && (
-        <TrialGate
-          status={subscription.status}
-          trialEnd={subscription.trialEnd}
-        />
-      )}
+      <TrialGate isExpired={evaluateSubscription(subscription).isExpired} />
       {children}
     </>
   );

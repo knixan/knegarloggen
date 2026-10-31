@@ -6,7 +6,16 @@ import { UTApi } from "uploadthing/server";
 import { auth } from "./auth";
 import { prisma } from "./prisma";
 import { stripe } from "./stripe";
-import { uppdragSchema, kundSchema, foretagSchema } from "./uppdrag-schema";
+import {
+  uppdragSchema,
+  kundSchema,
+  foretagSchema,
+  arbetspassSchema,
+  resaSchema,
+  ovrigKostnadSchema,
+  UPPDRAG_STATUSAR,
+} from "./uppdrag-schema";
+import { hasActiveSubscription } from "./subscription";
 import type {
   UppdragFormValues,
   KundInput,
@@ -15,9 +24,19 @@ import type {
 
 const utapi = new UTApi();
 
+const SUBSCRIPTION_EXPIRED =
+  "Provperioden har gått ut – aktivera en prenumeration för att fortsätta";
+
+// Alla skrivande actions kräver aktiv prenumeration/provperiod. TrialGate
+// döljer bara gränssnittet – det är den här kontrollen som skyddar.
+// Undantag: raderaKonto (man ska alltid kunna ta bort sitt konto).
+
 async function getCompanyId(): Promise<string> {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) redirect("/logga-in");
+  if (!(await hasActiveSubscription(session.user.id))) {
+    redirect("/mina-sidor/installningar");
+  }
 
   const company = await prisma.company.findUnique({
     where: { userId: session.user.id },
@@ -124,6 +143,9 @@ export async function uppdateraUppdrag(id: string, data: UppdragFormValues) {
 
 export async function uppdateraStatus(id: string, status: string) {
   const companyId = await getCompanyId();
+  if (!(UPPDRAG_STATUSAR as readonly string[]).includes(status)) {
+    return { ok: false, error: "Ogiltig status" };
+  }
   await prisma.uppdrag.updateMany({
     where: { id, companyId },
     data: { status },
@@ -151,8 +173,20 @@ export async function laggTillArbetspass(
   });
   if (!uppdrag) return { ok: false, error: "Uppdrag hittades inte" };
 
+  const parsed = arbetspassSchema.safeParse({ datum, timmar, beskrivning });
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: parsed.error.issues[0]?.message ?? "Ogiltiga uppgifter",
+    };
+  }
+
   await prisma.arbetspass.create({
-    data: { uppdragId, datum: new Date(datum), timmar, beskrivning },
+    data: {
+      uppdragId,
+      ...parsed.data,
+      datum: new Date(`${parsed.data.datum}T00:00:00Z`),
+    },
   });
   revalidatePath(`/mina-sidor/uppdrag/${uppdragId}/redigera`);
   return { ok: true };
@@ -182,8 +216,20 @@ export async function laggTillResa(
   });
   if (!uppdrag) return { ok: false, error: "Uppdrag hittades inte" };
 
+  const parsed = resaSchema.safeParse({ datum, stracka, beskrivning });
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: parsed.error.issues[0]?.message ?? "Ogiltiga uppgifter",
+    };
+  }
+
   await prisma.resa.create({
-    data: { uppdragId, datum: new Date(datum), stracka, beskrivning },
+    data: {
+      uppdragId,
+      ...parsed.data,
+      datum: new Date(`${parsed.data.datum}T00:00:00Z`),
+    },
   });
   revalidatePath(`/mina-sidor/uppdrag/${uppdragId}/redigera`);
   return { ok: true };
@@ -209,7 +255,15 @@ export async function laggTillOvrigKostnad(
   });
   if (!uppdrag) return { ok: false, error: "Uppdrag hittades inte" };
 
-  await prisma.ovrigKostnad.create({ data: { uppdragId, beskrivning, pris } });
+  const parsed = ovrigKostnadSchema.safeParse({ beskrivning, pris });
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: parsed.error.issues[0]?.message ?? "Ogiltiga uppgifter",
+    };
+  }
+
+  await prisma.ovrigKostnad.create({ data: { uppdragId, ...parsed.data } });
   revalidatePath(`/mina-sidor/uppdrag/${uppdragId}/redigera`);
   return { ok: true };
 }
@@ -258,6 +312,9 @@ export async function raderaKund(id: string) {
 export async function sparaForetagsinformation(data: ForetagInput) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) return { ok: false, error: "Inte inloggad" };
+  if (!(await hasActiveSubscription(session.user.id))) {
+    return { ok: false, error: SUBSCRIPTION_EXPIRED };
+  }
 
   const parsed = foretagSchema.safeParse(data);
   if (!parsed.success) return { ok: false, error: "Ogiltiga uppgifter" };
@@ -275,6 +332,9 @@ export async function sparaForetagsinformation(data: ForetagInput) {
 export async function sparaLogo(logoUrl: string, logoKey: string) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) return { ok: false };
+  if (!(await hasActiveSubscription(session.user.id))) {
+    return { ok: false, error: SUBSCRIPTION_EXPIRED };
+  }
 
   const existing = await prisma.company.findUnique({
     where: { userId: session.user.id },
@@ -320,11 +380,18 @@ export async function raderaKonto() {
     }),
   ]);
 
+  // Avbryt prenumerationen först. Misslyckas det får kontot inte raderas –
+  // då skulle Stripe fortsätta dra pengar utan att kunden kan logga in.
   if (subscription?.stripeSubscriptionId) {
     try {
       await stripe.subscriptions.cancel(subscription.stripeSubscriptionId);
     } catch (err) {
       console.error("Kunde inte avbryta Stripe-prenumeration:", err);
+      return {
+        ok: false,
+        error:
+          "Kunde inte avsluta prenumerationen. Försök igen eller kontakta support.",
+      };
     }
   }
 
