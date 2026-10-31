@@ -43,9 +43,10 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      # Prisma-klienten (src/generated) ligger inte i git.
-      - name: Generera Prisma-klienter
-        run: pnpm --filter "./apps/*" exec prisma generate
+      # Prisma-klienten (packages/app/src/generated) ligger inte i git.
+      # postinstall genererar den redan – det här steget gör det tydligt.
+      - name: Generera Prisma-klienten
+        run: pnpm --filter @knegarloggen/app generate
 
       - run: pnpm type-check
       - run: pnpm lint

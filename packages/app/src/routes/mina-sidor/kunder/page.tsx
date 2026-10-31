@@ -2,12 +2,12 @@ import { Suspense } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { auth } from "@/lib/auth";
-import { getCustomers } from "@/lib/job-actions";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { auth } from "../../../lib/auth";
+import { getCustomers } from "../../../lib/job-actions";
+import { Button } from "@knegarloggen/ui/button";
+import { Card, CardContent } from "@knegarloggen/ui/card";
 import { Plus, Pencil, User, Building2, Phone, Mail } from "lucide-react";
-import CustomerDeleteButton from "@/components/minasidor/kunder/customer-delete-button";
+import CustomerDeleteButton from "../../../components/minasidor/kunder/customer-delete-button";
 
 export default function KundregisterPage() {
   return (

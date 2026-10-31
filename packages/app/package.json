@@ -1,0 +1,64 @@
+{
+  "name": "@knegarloggen/app",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Allt som är gemensamt för Knegarloggen, Giggerloggen och Hemfixloggen: mina sidor, faktura, auth, betalning, uppladdning, e-post och databasschema. Apparna väljer märke med NEXT_PUBLIC_APP (se src/brand.ts).",
+  "exports": {
+    "./brand": "./src/brand.ts",
+    "./proxy": "./src/proxy.ts",
+    "./theme.css": "./src/theme.css",
+    "./routes/*": "./src/routes/*.tsx",
+    "./api/*": "./src/routes/api/*.ts",
+    "./components/*": "./src/components/*.tsx",
+    "./lib/*": "./src/lib/*.ts"
+  },
+  "scripts": {
+    "postinstall": "prisma generate",
+    "generate": "prisma generate",
+    "lint": "eslint",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "catalog:",
+    "@knegarloggen/auth": "workspace:*",
+    "@knegarloggen/stripe": "workspace:*",
+    "@knegarloggen/ui": "workspace:*",
+    "@prisma/adapter-pg": "catalog:",
+    "@prisma/client": "catalog:",
+    "@prisma/client-runtime-utils": "catalog:",
+    "@react-pdf/renderer": "catalog:",
+    "@uploadthing/react": "catalog:",
+    "better-auth": "catalog:",
+    "date-fns": "catalog:",
+    "dotenv": "catalog:",
+    "lucide-react": "catalog:",
+    "pg": "catalog:",
+    "prisma": "catalog:",
+    "react-hook-form": "catalog:",
+    "resend": "catalog:",
+    "sonner": "catalog:",
+    "stripe": "catalog:",
+    "uploadthing": "catalog:",
+    "zod": "catalog:"
+  },
+  "peerDependencies": {
+    "next": "16",
+    "react": "^19",
+    "react-dom": "^19"
+  },
+  "devDependencies": {
+    "@knegarloggen/config": "workspace:*",
+    "@types/node": "catalog:",
+    "@types/pg": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "eslint": "catalog:",
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "tsx": "^4.22.3",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

@@ -3,7 +3,7 @@
 
 import type { ReactNode } from "react";
 import { Wrench } from "lucide-react";
-import type { Job } from "@/lib/job-schema";
+import type { Job } from "../../../lib/job-schema";
 
 /**
  * Hjälpfunktion för att formatera telefonnummer för tel:-länkar

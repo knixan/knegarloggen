@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
-import type { Prisma } from "@/generated/prisma";
+import type { Prisma } from "../generated/prisma";
 import { UTApi } from "uploadthing/server";
 import { auth } from "./auth";
 import { prisma } from "./prisma";
@@ -115,7 +115,7 @@ function mapJob(j: JobWithRelations) {
     id: j.id,
     customerId: j.customerId ?? undefined,
     customer: j.customer ? mapCustomer(j.customer) : null,
-    rotAvdrag: j.rotAvdrag,
+    skatteavdrag: j.skatteavdrag,
     fakturanummer: j.fakturanummer ?? undefined,
     timpris: j.timpris,
     milersattning: j.milersattning,
@@ -544,7 +544,7 @@ export async function createJob(input: JobInput, bilder: UploadedFile[] = []) {
     data: {
       companyId: company.id,
       customerId: data.customerId ?? null,
-      rotAvdrag: data.rotAvdrag,
+      skatteavdrag: data.skatteavdrag,
       timpris: data.timpris ?? 0,
       milersattning: data.milersattning ?? 0,
       fastPris: data.fastPris ?? null,
@@ -747,7 +747,7 @@ export async function updateJob(
       where: { id },
       data: {
         customerId: data.customerId ?? null,
-        rotAvdrag: data.rotAvdrag,
+        skatteavdrag: data.skatteavdrag,
         timpris: data.timpris ?? 0,
         milersattning: data.milersattning ?? 0,
         fastPris: data.fastPris ?? null,

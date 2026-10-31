@@ -1,12 +1,8 @@
 // Fakturans innehåll – EN källa för både förhandsvisningen (skriv-ut-klient.tsx)
 // och PDF:en (faktura-pdf.tsx). Layouterna ska bara rita det som står här,
 // så att de inte kan visa olika texter eller belopp (#80).
-import {
-  beräknaSummering,
-  MOMS_SATS,
-  ROT_SATS,
-  type Job,
-} from "@/lib/job-schema";
+import { brand } from "../../../brand";
+import { beräknaSummering, MOMS_SATS, type Job } from "../../../lib/job-schema";
 
 export type FakturaCompany = {
   name: string;
@@ -39,7 +35,7 @@ export type FakturaRad = {
 export type SummeringsRad = {
   label: string;
   value: string;
-  ton?: "dämpad" | "rot";
+  ton?: "dämpad" | "avdrag";
 };
 
 export function kr(n: number) {
@@ -61,6 +57,7 @@ export function fakturaData(
   idag: Date = new Date(),
 ) {
   const summary = beräknaSummering(job);
+  const avdrag = brand.skatteavdrag;
   const forfallodagar = company.forfallodagar || 30;
   const forfallo = new Date(idag);
   forfallo.setDate(forfallo.getDate() + forfallodagar);
@@ -98,9 +95,10 @@ export function fakturaData(
   ].filter((x): x is string => Boolean(x));
   const kundExtra = [
     kund?.personnummer && `Personnummer: ${kund.personnummer}`,
-    job.rotAvdrag &&
+    avdrag?.kraverFastighet &&
+      job.skatteavdrag &&
       kund?.fastighetsbeteckning &&
-      `ROT-avdrag · Fastighet: ${kund.fastighetsbeteckning}${
+      `${avdrag.typ}-avdrag · Fastighet: ${kund.fastighetsbeteckning}${
         kund.lagenhetsnummer ? ` · Lgh: ${kund.lagenhetsnummer}` : ""
       }`,
   ].filter((x): x is string => Boolean(x));
@@ -153,14 +151,14 @@ export function fakturaData(
       value: kr(summary.moms),
       ton: "dämpad",
     },
-    ...(summary.rotAvdrag > 0
+    ...(avdrag && summary.avdrag > 0
       ? [
           {
-            label: `ROT-avdrag ${procent(ROT_SATS)} (av ${kr(
-              summary.rotUnderlagInklMoms,
+            label: `${avdrag.typ}-avdrag ${procent(avdrag.sats)} (av ${kr(
+              summary.avdragUnderlagInklMoms,
             )} arbete inkl. moms)*`,
-            value: `−${kr(summary.rotAvdrag)}`,
-            ton: "rot" as const,
+            value: `−${kr(summary.avdrag)}`,
+            ton: "avdrag" as const,
           },
         ]
       : []),
@@ -178,10 +176,11 @@ export function fakturaData(
         company.momsNummer ||
         `SE${(company.orgNummer ?? "").replace("-", "")}01`
       }`,
-    summary.rotAvdrag > 0 &&
-      `* ROT-avdrag: Avser ${procent(
-        ROT_SATS,
-      )} av arbetskostnad inkl. moms. Hantverkaren ansöker om utbetalning hos Skatteverket.`,
+    avdrag &&
+      summary.avdrag > 0 &&
+      `* ${avdrag.typ}-avdrag: Avser ${procent(
+        avdrag.sats,
+      )} av arbetskostnad inkl. moms. ${avdrag.utforare} ansöker om utbetalning hos Skatteverket.`,
   ].filter((x): x is string => Boolean(x));
 
   return {

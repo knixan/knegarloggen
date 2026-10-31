@@ -3,12 +3,12 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import { auth } from "@/lib/auth";
-import { getOversikt, halsning } from "@/lib/oversikt-data";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import OversiktVy from "@/components/minasidor/startsida/oversikt-vy";
-import OversiktSkelett from "@/components/minasidor/startsida/oversikt-skelett";
+import { auth } from "../../lib/auth";
+import { getOversikt, halsning } from "../../lib/oversikt-data";
+import { Button } from "@knegarloggen/ui/button";
+import { Card, CardContent } from "@knegarloggen/ui/card";
+import OversiktVy from "../../components/minasidor/startsida/oversikt-vy";
+import OversiktSkelett from "../../components/minasidor/startsida/oversikt-skelett";
 
 export default function OversiktPage() {
   return (

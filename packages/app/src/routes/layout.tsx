@@ -1,10 +1,10 @@
-import "./globals.css";
 import { Suspense } from "react";
+import { brand } from "../brand";
 import { Roboto } from "next/font/google";
-import Navbar from "@/components/site/navbar";
+import Navbar from "../components/site/navbar";
 import { Toaster } from "sonner";
-import { ThemeProvider } from "@/components/site/theme-provider";
-import Footer from "@/components/site/footer";
+import { ThemeProvider } from "../components/site/theme-provider";
+import Footer from "../components/site/footer";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -13,8 +13,8 @@ const roboto = Roboto({
 });
 
 export const metadata = {
-  title: "Knegarloggen",
-  description: "Joblogg för hantverkare",
+  title: brand.namn,
+  description: brand.beskrivning,
 };
 
 export default function RootLayout({

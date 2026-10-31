@@ -2,7 +2,7 @@
 
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { Download } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@knegarloggen/ui/button";
 import { FakturaPdf } from "./faktura-pdf";
 import type { FakturaData } from "./faktura-data";
 

@@ -1,3 +1,4 @@
+import { brand } from "../brand";
 import { Resend } from "resend";
 import { type Job, type CompanyInput, beräknaSummering } from "./job-schema";
 import { escapeHtml as e } from "./utils";
@@ -15,7 +16,7 @@ export async function sendVerificationEmail(email: string, url: string) {
   const { error } = await resend.emails.send({
     from: FROM_NOREPLY,
     to: email,
-    subject: "Verifiera din e-postadress – Knegarloggen",
+    subject: `Verifiera din e-postadress – ${brand.namn}`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;color:#1a1a1a">
         <h2 style="font-size:20px;margin-bottom:16px">Verifiera din e-postadress</h2>
@@ -27,7 +28,7 @@ export async function sendVerificationEmail(email: string, url: string) {
           Om knappen inte fungerar, kopiera och klistra in den här länken i din webbläsare:<br>
           <a href="${url}" style="color:#555">${url}</a>
         </p>
-        <p style="margin-top:32px;font-size:12px;color:#aaa">Knegarloggen</p>
+        <p style="margin-top:32px;font-size:12px;color:#aaa">${brand.namn}</p>
       </div>
     `,
   });
@@ -149,7 +150,7 @@ export async function sendJobEmail(
   const totalHtml = `
     <div style="background:#f8f8f8;border-radius:6px;padding:14px 16px;margin-top:20px">
       <p style="margin:0;font-size:15px">Totalt exkl. moms: <strong>${summary.totalExklMoms.toLocaleString("sv-SE")} kr</strong></p>
-      ${job.rotAvdrag ? `<p style="margin:6px 0 0;font-size:12px;color:#666">ROT-avdrag kan vara tillämpligt.</p>` : ""}
+      ${job.skatteavdrag && brand.skatteavdrag ? `<p style="margin:6px 0 0;font-size:12px;color:#666">${brand.skatteavdrag.typ}-avdrag kan vara tillämpligt.</p>` : ""}
     </div>
   `;
 

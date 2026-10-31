@@ -1,8 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { buttonVariants } from "@knegarloggen/ui/button";
+import { cn } from "@knegarloggen/ui/lib/utils";
 
 const highlights = [
   "30 dagars gratis provperiod",

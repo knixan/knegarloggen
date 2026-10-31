@@ -1,7 +1,8 @@
 // Data till översikten på /mina-sidor. Används bara från serverkomponenter
 // (ingen "use server" – ska inte kunna anropas från klienten).
-import { prisma } from "@/lib/prisma";
-import { beräknaSummering } from "@/lib/job-schema";
+import { brand } from "../brand";
+import { prisma } from "./prisma";
+import { beräknaSummering } from "./job-schema";
 
 const PAGAENDE_ANTAL = 5;
 
@@ -98,7 +99,7 @@ export async function getOversikt(ownerId: string) {
     attFakturera,
     obetalda,
     pagaende,
-    rotJobb,
+    avdragJobb,
   ] = await Promise.all([
     prisma.job.count({
       where: { companyId, pagaende: true, utfort: false },
@@ -139,9 +140,10 @@ export async function getOversikt(ownerId: string) {
       orderBy: { updatedAt: "desc" },
       take: PAGAENDE_ANTAL,
     }),
-    // ROT-uppgifter behövs först vid fakturering – betalda jobb är klara.
-    prisma.job.findMany({
-      where: { companyId, rotAvdrag: true, betalt: false },
+    // ROT/RUT-uppgifter behövs först vid fakturering – betalda jobb är klara.
+    brand.skatteavdrag
+      ? prisma.job.findMany({
+      where: { companyId, skatteavdrag: true, betalt: false },
       select: {
         id: true,
         customerId: true,
@@ -155,16 +157,19 @@ export async function getOversikt(ownerId: string) {
           },
         },
       },
-    }),
+    })
+      : Promise.resolve([]),
   ]);
 
-  const rotSaknas = rotJobb
+  // ROT kräver personnummer + fastighet/BRF, RUT bara personnummer.
+  const kraverFastighet = brand.skatteavdrag?.kraverFastighet ?? false;
+  const avdragSaknas = avdragJobb
     .filter(({ customer: c }) => {
       if (!c) return true;
       const harBostad =
         c.fastighetsbeteckning.trim() ||
         (c.lagenhetsnummer.trim() && c.bostadsrattsforening.trim());
-      return !c.personnummer.trim() || !harBostad;
+      return !c.personnummer.trim() || (kraverFastighet && !harBostad);
     })
     .map((j) => ({
       id: j.id,
@@ -216,7 +221,7 @@ export async function getOversikt(ownerId: string) {
       pagaende: j.pagaende,
       timmar: j.arbetspass.reduce((s, w) => s + w.timmar, 0),
     })),
-    rotSaknas,
+    avdragSaknas,
     foretagSaknas,
   };
 }

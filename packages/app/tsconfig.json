@@ -1,0 +1,5 @@
+{
+  "extends": "@knegarloggen/config/tsconfig/nextjs.json",
+  "include": ["src", "prisma", "*.ts", "*.mts"],
+  "exclude": ["node_modules"]
+}

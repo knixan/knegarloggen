@@ -30,6 +30,4 @@ export function proxy(request: NextRequest) {
   return NextResponse.next();
 }
 
-export const config = {
-  matcher: ["/", "/mina-sidor/:path*", "/admin/:path*", "/admin"],
-};
+// Matcher-configen ligger i varje apps src/proxy.ts – Next läser den statiskt.

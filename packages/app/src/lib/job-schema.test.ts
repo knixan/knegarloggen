@@ -47,14 +47,14 @@ describe("beräknaSummering", () => {
 
   it("ger inget ROT-avdrag när ROT inte är markerat", () => {
     const s = beräknaSummering(jobb());
-    expect(s.rotAvdrag).toBe(0);
+    expect(s.avdrag).toBe(0);
     expect(s.attBetala).toBe(s.totalInklMoms);
   });
 
   it("ROT: 30 % av arbetskostnaden inkl. moms – inte av material", () => {
-    const s = beräknaSummering({ ...jobb(), rotAvdrag: true });
-    expect(s.rotUnderlagInklMoms).toBe(7500); // 6 000 × 1,25
-    expect(s.rotAvdrag).toBe(2250); // 7 500 × 0,3
+    const s = beräknaSummering({ ...jobb(), skatteavdrag: true });
+    expect(s.avdragUnderlagInklMoms).toBe(7500); // 6 000 × 1,25
+    expect(s.avdrag).toBe(2250); // 7 500 × 0,3
     expect(s.attBetala).toBe(6906.25); // 9 156,25 − 2 250
   });
 
@@ -67,9 +67,9 @@ describe("beräknaSummering", () => {
   });
 
   it("ROT med fast pris: underlaget blir aldrig större än det fasta priset", () => {
-    const s = beräknaSummering({ ...jobb({ fastPris: 5000 }), rotAvdrag: true });
-    expect(s.rotUnderlagInklMoms).toBe(6250); // min(6 000, 5 000) × 1,25
-    expect(s.rotAvdrag).toBe(1875);
+    const s = beräknaSummering({ ...jobb({ fastPris: 5000 }), skatteavdrag: true });
+    expect(s.avdragUnderlagInklMoms).toBe(6250); // min(6 000, 5 000) × 1,25
+    expect(s.avdrag).toBe(1875);
     expect(s.attBetala).toBe(4375);
   });
 

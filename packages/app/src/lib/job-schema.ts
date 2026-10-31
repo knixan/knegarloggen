@@ -1,3 +1,4 @@
+import { brand } from "../brand";
 import { z } from "zod";
 
 // ============================================================
@@ -79,7 +80,7 @@ export const jobSchema = z
     timpris: z.coerce.number().min(0).default(0),
     milersattning: z.coerce.number().min(0).default(0),
 
-    rotAvdrag: z.boolean().default(false),
+    skatteavdrag: z.boolean().default(false),
     pagaende: z.boolean().default(false),
     utfort: z.boolean().default(false),
     fakturerat: z.boolean().default(false),
@@ -140,13 +141,6 @@ export type CompanyInput = z.infer<typeof companySchema>;
 export const MOMS_SATS = 0.25;
 
 /**
- * ROT-avdrag: andel av arbetskostnaden inkl. moms. 30 % från 2026
- * (tillfälligt 50 % 12 maj–31 dec 2025). Verifiera mot Skatteverket
- * vid årsskifte. Taket (50 000 kr/person och år) hanteras inte här.
- */
-export const ROT_SATS = 0.3;
-
-/**
  * Enda stället där jobbets summor räknas ut – formulär, lista, faktura,
  * utskrift och e-post ska alla använda denna så att de visar samma belopp.
  */
@@ -160,7 +154,9 @@ export function beräknaSummering(
     | "timpris"
     | "milersattning"
     | "fastPris"
-  > & { rotAvdrag?: boolean },
+  > & { skatteavdrag?: boolean },
+  /** ROT/RUT-sats från appens brand (0 = appen har inget skatteavdrag). */
+  avdragSats: number = brand.skatteavdrag?.sats ?? 0,
 ) {
   const artiklarSum = job.artiklar.reduce(
     (sum, a) => sum + a.pris * a.antal,
@@ -193,15 +189,16 @@ export function beräknaSummering(
   const moms = totalExklMoms * MOMS_SATS;
   const totalInklMoms = totalExklMoms + moms;
 
-  // ROT gäller bara arbetskostnaden. Med fast pris vet vi inte exakt hur
-  // stor del som är arbete – använd loggad arbetstid, men aldrig mer än
-  // det fasta priset.
-  const rotUnderlagExklMoms = job.rotAvdrag
-    ? Math.min(arbetstidSum, totalExklMoms)
-    : 0;
-  const rotUnderlagInklMoms = rotUnderlagExklMoms * (1 + MOMS_SATS);
-  const rotAvdrag = rotUnderlagInklMoms * ROT_SATS;
-  const attBetala = totalInklMoms - rotAvdrag;
+  // ROT/RUT gäller bara arbetskostnaden. Med fast pris vet vi inte exakt
+  // hur stor del som är arbete – använd loggad arbetstid, men aldrig mer
+  // än det fasta priset (#81). Taket per person och år hanteras inte här.
+  const avdragUnderlagExklMoms =
+    job.skatteavdrag && avdragSats > 0
+      ? Math.min(arbetstidSum, totalExklMoms)
+      : 0;
+  const avdragUnderlagInklMoms = avdragUnderlagExklMoms * (1 + MOMS_SATS);
+  const avdrag = avdragUnderlagInklMoms * avdragSats;
+  const attBetala = totalInklMoms - avdrag;
 
   return {
     artiklarSum,
@@ -219,8 +216,8 @@ export function beräknaSummering(
     totalExklMoms,
     moms,
     totalInklMoms,
-    rotUnderlagInklMoms,
-    rotAvdrag,
+    avdragUnderlagInklMoms,
+    avdrag,
     attBetala,
   };
 }

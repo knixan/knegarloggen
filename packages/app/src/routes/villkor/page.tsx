@@ -1,8 +1,10 @@
+import { brand } from "../../brand";
+
 export default function AnvandarvillkorPage() {
   return (
     <main className="container mx-auto px-4 py-12 max-w-4xl">
       <h1 className="text-3xl font-bold mb-2 text-foreground">
-        Användarvillkor för KnegarLoggen
+        Användarvillkor för {brand.namn}
       </h1>
       <p className="text-muted-foreground mb-8 italic">
         Senast uppdaterad: 2024-05-20
@@ -12,7 +14,7 @@ export default function AnvandarvillkorPage() {
         <section>
           <h2 className="text-xl font-bold mb-3 border-b pb-1">1. Allmänt</h2>
           <p>
-            KnegarLoggen är ett webbaserat system för hantverkare och företag
+            {brand.namn} är ett webbaserat system för {brand.malgrupp}
             som vill hantera kunder, arbetstid, material, resor, dokumentation
             och fakturaunderlag. Genom att registrera ett konto och använda
             tjänsten accepterar du dessa villkor.
@@ -34,7 +36,7 @@ export default function AnvandarvillkorPage() {
             3. Gratis provperiod
           </h2>
           <p>
-            Nya användare får prova KnegarLoggen kostnadsfritt i 30 dagar. Efter
+            Nya användare får prova {brand.namn} kostnadsfritt i 30 dagar. Efter
             provperiodens slut krävs en aktiv prenumeration för fortsatt
             användning.
           </p>
@@ -54,7 +56,7 @@ export default function AnvandarvillkorPage() {
             5. Ingen bindningstid
           </h2>
           <p>
-            KnegarLoggen har ingen bindningstid. Du kan avsluta din
+            {brand.namn} har ingen bindningstid. Du kan avsluta din
             prenumeration när som helst. Redan genomförda betalningar
             återbetalas normalt inte.
           </p>
@@ -65,7 +67,7 @@ export default function AnvandarvillkorPage() {
             6. Utebliven betalning
           </h2>
           <p>
-            Vid utebliven betalning förbehåller sig KnegarLoggen rätten att
+            Vid utebliven betalning förbehåller sig {brand.namn} rätten att
             begränsa åtkomsten till tjänsten, stänga av kontot eller avsluta
             kontot vid långvarig utebliven betalning.
           </p>
@@ -119,7 +121,7 @@ export default function AnvandarvillkorPage() {
             11. Ansvarsbegränsning
           </h2>
           <p>
-            KnegarLoggen ansvarar inte för förlorad data, förlorade
+            {brand.namn} ansvarar inte för förlorad data, förlorade
             affärsmöjligheter eller felaktiga uppgifter som registrerats av
             användaren.
           </p>
@@ -130,7 +132,7 @@ export default function AnvandarvillkorPage() {
             12. Ändringar
           </h2>
           <p>
-            KnegarLoggen kan uppdatera dessa villkor vid behov. Väsentliga
+            {brand.namn} kan uppdatera dessa villkor vid behov. Väsentliga
             förändringar meddelas användarna i rimlig tid.
           </p>
         </section>

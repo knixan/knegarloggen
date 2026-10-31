@@ -3,9 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
-import JobForm from "@/components/minasidor/jobb/job-form";
-import { createJob } from "@/lib/job-actions";
-import type { JobInput, Customer } from "@/lib/job-schema";
+import JobForm from "./job-form";
+import { createJob } from "../../../lib/job-actions";
+import type { JobInput, Customer } from "../../../lib/job-schema";
 
 interface Props {
   customers: Customer[];

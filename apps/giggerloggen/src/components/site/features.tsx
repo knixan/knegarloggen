@@ -1,5 +1,5 @@
 import { Clock, FileText, Users, TrendingUp, Shield, Zap } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@knegarloggen/ui/card";
 
 const features = [
   {

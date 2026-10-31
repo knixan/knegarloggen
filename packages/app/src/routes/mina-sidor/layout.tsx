@@ -1,10 +1,10 @@
 import { Suspense } from "react";
 import { headers } from "next/headers";
 import { cacheLife } from "next/cache";
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { evaluateSubscription } from "@/lib/subscription";
-import TrialGate from "@/components/minasidor/trial-gate";
+import { auth } from "../../lib/auth";
+import { prisma } from "../../lib/prisma";
+import { evaluateSubscription } from "../../lib/subscription";
+import TrialGate from "../../components/minasidor/trial-gate";
 
 async function getSubscriptionStatus(userId: string) {
   "use cache";

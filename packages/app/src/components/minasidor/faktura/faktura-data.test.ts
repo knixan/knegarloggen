@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Job } from "@/lib/job-schema";
+import type { Job } from "../../../lib/job-schema";
 import { fakturaData, kr, type FakturaCompany } from "./faktura-data";
 
 const company: FakturaCompany = {
@@ -43,7 +43,7 @@ function jobb(extra: Partial<Job> = {}): Job {
     },
     timpris: 600,
     milersattning: 0,
-    rotAvdrag: false,
+    skatteavdrag: false,
     pagaende: false,
     utfort: true,
     fakturerat: false,
@@ -99,14 +99,14 @@ describe("fakturaData", () => {
 
   it("utan ROT: ingen ROT-rad och att betala = inkl. moms", () => {
     const d = fakturaData(jobb(), company, 1, idag);
-    expect(d.summering.some((r) => r.ton === "rot")).toBe(false);
+    expect(d.summering.some((r) => r.ton === "avdrag")).toBe(false);
     expect(d.attBetala).toBe(kr(8750)); // (1 000 + 6 000) × 1,25
     expect(d.fotnoter.some((f) => f.includes("ROT"))).toBe(false);
   });
 
   it("med ROT: avdrag, fastighet och fotnot", () => {
-    const d = fakturaData(jobb({ rotAvdrag: true }), company, 1, idag);
-    const rot = d.summering.find((r) => r.ton === "rot");
+    const d = fakturaData(jobb({ skatteavdrag: true }), company, 1, idag);
+    const rot = d.summering.find((r) => r.ton === "avdrag");
     expect(rot?.value).toBe(`−${kr(2250)}`); // 6 000 × 1,25 × 0,3
     expect(d.attBetala).toBe(kr(6500));
     expect(d.kund.extra).toContain("ROT-avdrag · Fastighet: Skeninge 1:2");

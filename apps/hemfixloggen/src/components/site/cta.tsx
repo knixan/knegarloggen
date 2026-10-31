@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@knegarloggen/ui/button";
 import { ArrowRight } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@knegarloggen/ui/lib/utils";
 
 export function CTA() {
   return (

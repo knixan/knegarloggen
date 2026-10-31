@@ -6,11 +6,12 @@ import { ClipboardList, FileText, Pencil, Trash2, X } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { beräknaSummering, type Job } from "@/lib/job-schema";
+import { Button } from "@knegarloggen/ui/button";
+import { Card, CardContent } from "@knegarloggen/ui/card";
+import { beräknaSummering, type Job } from "../../../lib/job-schema";
 import JobOverviewDialog from "../oversikt/job-overview-dialog";
 import { StatusBadge, Badge } from "../oversikt/job-overview-badges";
+import { brand } from "../../../brand";
 
 interface Props {
   jobs: Job[];
@@ -72,7 +73,9 @@ export default function JobList({ jobs, onEdit, onDelete }: Props) {
                     <Badge label="Fakturerat" color="orange" />
                   )}
                   {job.betalt && <Badge label="Betalt" color="green" />}
-                  {job.rotAvdrag && <Badge label="ROT" />}
+                  {job.skatteavdrag && brand.skatteavdrag && (
+                    <Badge label={brand.skatteavdrag.typ} />
+                  )}
                 </div>
               </div>
 

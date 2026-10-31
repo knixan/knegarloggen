@@ -3,10 +3,11 @@
 const CURRENT_YEAR = new Date().getFullYear();
 
 import Link from "next/link";
-import Image from "next/image";
+import { brand } from "../../brand";
+import { BrandLogo } from "./brand-logo";
 import { Mail, MapPin, ExternalLink, LogOut } from "lucide-react";
-import { useSession } from "@/lib/auth-client";
-import authClient from "@/lib/auth-client";
+import { useSession } from "../../lib/auth-client";
+import authClient from "../../lib/auth-client";
 import { useRouter } from "next/navigation";
 
 export default function Footer() {
@@ -30,17 +31,7 @@ export default function Footer() {
               href="/"
               className="flex items-center gap-2 text-xl font-black hover:opacity-80 transition-opacity"
             >
-              <Image
-                src="/knegaloggen-logga.png"
-                alt="KnegarLoggen"
-                width={100}
-                height={100}
-                className="h-16 w-16 object-contain"
-              />
-              <span>
-                <span className="text-red-600">Knegar</span>
-                <span className="text-blue-600">Loggen</span>
-              </span>
+              <BrandLogo />
             </Link>
             <div className="text-muted-foreground flex items-center gap-2">
               <MapPin className="h-4 w-4" aria-hidden="true" />
@@ -133,7 +124,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="border-t mt-12 pt-8 text-center text-xs text-muted-foreground">
-          © {CURRENT_YEAR} KnegarLoggen. Alla rättigheter
+          © {CURRENT_YEAR} {brand.namn}. Alla rättigheter
           förbehållna.
         </div>
       </div>

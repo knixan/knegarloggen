@@ -1,4 +1,4 @@
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@knegarloggen/ui/card";
 
 const Block = ({ className }: { className: string }) => (
   <div className={`animate-pulse rounded-md bg-muted ${className}`} />

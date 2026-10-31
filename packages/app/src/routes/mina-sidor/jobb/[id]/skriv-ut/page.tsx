@@ -1,13 +1,13 @@
 import { Suspense } from "react";
 import { headers } from "next/headers";
 import { redirect, notFound } from "next/navigation";
-import { auth } from "@/lib/auth";
+import { auth } from "../../../../../lib/auth";
 import {
   getJob,
   getCompanySettings,
   reserverFakturanummer,
-} from "@/lib/job-actions";
-import SkrivUtKlient from "@/components/minasidor/faktura/skriv-ut-klient";
+} from "../../../../../lib/job-actions";
+import SkrivUtKlient from "../../../../../components/minasidor/faktura/skriv-ut-klient";
 
 export default function SkrivUtPage({
   params,

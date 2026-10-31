@@ -13,9 +13,10 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { Oversikt } from "@/lib/oversikt-data";
+import { Button } from "@knegarloggen/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@knegarloggen/ui/card";
+import { brand } from "../../../brand";
+import type { Oversikt } from "../../../lib/oversikt-data";
 
 const VISA_MAX = 5;
 
@@ -296,7 +297,7 @@ function AttGoraLista({
 }
 
 function Varningar({ data }: { data: Oversikt }) {
-  if (!data.foretagSaknas.length && !data.rotSaknas.length) return null;
+  if (!data.foretagSaknas.length && !data.avdragSaknas.length) return null;
   return (
     <div className="space-y-3">
       {data.foretagSaknas.length > 0 && (
@@ -307,13 +308,17 @@ function Varningar({ data }: { data: Oversikt }) {
           </Link>
         </Varning>
       )}
-      {data.rotSaknas.length > 0 && (
+      {data.avdragSaknas.length > 0 && (
         <Varning>
-          {data.rotSaknas.length === 1
-            ? "Ett ROT-jobb"
-            : `${data.rotSaknas.length} ROT-jobb`}{" "}
-          saknar personnummer eller fastighetsbeteckning/BRF hos kunden:{" "}
-          {data.rotSaknas.slice(0, VISA_MAX).map((j, i) => (
+          {data.avdragSaknas.length === 1
+            ? `Ett ${brand.skatteavdrag?.typ}-jobb`
+            : `${data.avdragSaknas.length} ${brand.skatteavdrag?.typ}-jobb`}{" "}
+          saknar{" "}
+          {brand.skatteavdrag?.kraverFastighet
+            ? "personnummer eller fastighetsbeteckning/BRF"
+            : "personnummer"}{" "}
+          hos kunden:{" "}
+          {data.avdragSaknas.slice(0, VISA_MAX).map((j, i) => (
             <span key={j.id}>
               {i > 0 && ", "}
               <Link
@@ -328,7 +333,7 @@ function Varningar({ data }: { data: Oversikt }) {
               </Link>
             </span>
           ))}
-          {data.rotSaknas.length > VISA_MAX && " …"}
+          {data.avdragSaknas.length > VISA_MAX && " …"}
         </Varning>
       )}
     </div>

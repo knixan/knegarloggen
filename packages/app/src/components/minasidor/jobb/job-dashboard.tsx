@@ -4,12 +4,12 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Search } from "lucide-react";
-import JobList from "@/components/minasidor/jobb/job-list";
-import { deleteJob, getJobs } from "@/lib/job-actions";
-import type { Job } from "@/lib/job-schema";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import JobList from "./job-list";
+import { deleteJob, getJobs } from "../../../lib/job-actions";
+import type { Job } from "../../../lib/job-schema";
+import { Input } from "@knegarloggen/ui/input";
+import { Button } from "@knegarloggen/ui/button";
+import { Card, CardContent } from "@knegarloggen/ui/card";
 
 import {
   AlertDialog,
@@ -20,7 +20,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from "@knegarloggen/ui/alert-dialog";
 
 type Filter =
   | "alla"

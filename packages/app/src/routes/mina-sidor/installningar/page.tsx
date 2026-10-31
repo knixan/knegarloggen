@@ -1,13 +1,14 @@
+import { brand } from "../../../brand";
 import { Suspense } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { stripe } from "@/lib/stripe";
-import InstallningarKlient from "@/components/minasidor/installningar/installningar-klient";
+import { auth } from "../../../lib/auth";
+import { prisma } from "../../../lib/prisma";
+import { stripe } from "../../../lib/stripe";
+import InstallningarKlient from "../../../components/minasidor/installningar/installningar-klient";
 import type Stripe from "stripe";
 
-export const metadata = { title: "Inställningar – Knegarloggen" };
+export const metadata = { title: `Inställningar – ${brand.namn}` };
 
 type SubscriptionData = {
   status: string;

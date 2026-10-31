@@ -14,7 +14,7 @@ import {
   Van,
   Wrench,
 } from "lucide-react";
-import { beräknaSummering, type Job } from "@/lib/job-schema";
+import { beräknaSummering, type Job } from "../../../lib/job-schema";
 import { InfoItem, toTelHref } from "./job-overview-badges";
 
 export function ContactSection({ job }: { job: Job }) {

@@ -67,3 +67,10 @@ onlyBuiltDependencies:
 # är 1.32.0). Ta bort när vitest/vite går att installera utan den här låsningen.
 overrides:
   vite: ~8.1.0
+
+# @hookform/resolvers importerar zod-typer utan att deklarera zod. Utan det
+# här hittar den zod 3 via hoistningen och zodResolver får fel typer.
+packageExtensions:
+  "@hookform/resolvers":
+    peerDependencies:
+      zod: "*"

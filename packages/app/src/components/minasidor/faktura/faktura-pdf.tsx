@@ -213,7 +213,7 @@ export function FakturaPdf({ data }: { data: FakturaData }) {
                   style={[
                     S.summValue,
                     rad.ton === "dämpad" ? S.summMuted : {},
-                    rad.ton === "rot" ? S.summRot : {},
+                    rad.ton === "avdrag" ? S.summRot : {},
                   ]}
                 >
                   {rad.value}

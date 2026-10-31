@@ -1,9 +1,9 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import type { Job } from "@/lib/job-schema";
+import type { Job } from "../../../lib/job-schema";
 import { fakturaData, type FakturaCompany } from "./faktura-data";
-import { Button } from "@/components/ui/button";
+import { Button } from "@knegarloggen/ui/button";
 import { Printer } from "lucide-react";
 
 const PdfKnapp = dynamic(() => import("./pdf-knapp").then((m) => m.PdfKnapp), {
@@ -197,7 +197,7 @@ export default function SkrivUtKlient({ job, company, fakturanummer }: Props) {
                 <tr
                   key={rad.label}
                   className={
-                    rad.ton === "rot" ? "rot" : rad.ton ? "dampad" : undefined
+                    rad.ton === "avdrag" ? "rot" : rad.ton ? "dampad" : undefined
                   }
                 >
                   <td>{rad.label}</td>

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Mail } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@knegarloggen/ui/card";
+import { Button } from "@knegarloggen/ui/button";
 
 export default function BekraftaEpostPage() {
   return (

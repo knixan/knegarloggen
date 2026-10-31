@@ -13,9 +13,9 @@ import {
   CreditCard,
   Clock,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@knegarloggen/ui/button";
+import { Input } from "@knegarloggen/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@knegarloggen/ui/card";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,12 +25,12 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from "@knegarloggen/ui/alert-dialog";
 import {
   setUserRole,
   adminDeleteUser,
   type AdminUser,
-} from "@/lib/admin-actions";
+} from "../../lib/admin-actions";
 
 interface Props {
   initialUsers: AdminUser[];

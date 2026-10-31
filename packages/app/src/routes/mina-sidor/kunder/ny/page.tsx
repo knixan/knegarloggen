@@ -1,8 +1,8 @@
 import { Suspense } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
-import CustomerForm from "@/components/minasidor/kunder/customer-form";
+import { auth } from "../../../../lib/auth";
+import CustomerForm from "../../../../components/minasidor/kunder/customer-form";
 
 export default function NyKundPage() {
   return (

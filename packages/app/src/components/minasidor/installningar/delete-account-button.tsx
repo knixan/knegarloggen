@@ -4,8 +4,8 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@knegarloggen/ui/button";
+import { Input } from "@knegarloggen/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -14,9 +14,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { deleteAccount } from "@/lib/job-actions";
-import authClient from "@/lib/auth-client";
+} from "@knegarloggen/ui/dialog";
+import { deleteAccount } from "../../../lib/job-actions";
+import authClient from "../../../lib/auth-client";
 
 const BEKRAFTELSE_ORD = "RADERA";
 

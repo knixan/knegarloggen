@@ -3,9 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
-import JobForm from "@/components/minasidor/jobb/job-form";
-import { updateJob } from "@/lib/job-actions";
-import type { Job, JobInput, Customer } from "@/lib/job-schema";
+import JobForm from "./job-form";
+import { updateJob } from "../../../lib/job-actions";
+import type { Job, JobInput, Customer } from "../../../lib/job-schema";
 
 interface Props {
   job: Job;
@@ -37,7 +37,7 @@ export default function EditJobClient({ job, customers }: Props) {
     timpris: job.timpris ?? 0,
     milersattning: job.milersattning ?? 0,
     fastPris: job.fastPris,
-    rotAvdrag: job.rotAvdrag,
+    skatteavdrag: job.skatteavdrag,
     pagaende: job.pagaende,
     utfort: job.utfort,
     fakturerat: job.fakturerat,

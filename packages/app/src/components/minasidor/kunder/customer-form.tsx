@@ -19,14 +19,15 @@ import {
   Key,
 } from "lucide-react";
 
-import { createCustomer, updateCustomer } from "@/lib/job-actions";
-import { customerSchema } from "@/lib/job-schema";
+import { createCustomer, updateCustomer } from "../../../lib/job-actions";
+import { customerSchema } from "../../../lib/job-schema";
+import { brand } from "../../../brand";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@knegarloggen/ui/button";
+import { Input } from "@knegarloggen/ui/input";
+import { Label } from "@knegarloggen/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@knegarloggen/ui/card";
 
 type CustomerFormInput = z.input<typeof customerSchema>;
 type CustomerFormOutput = z.output<typeof customerSchema>;
@@ -231,7 +232,8 @@ export default function CustomerForm({ defaultValues, mode }: Props) {
         </CardContent>
       </Card>
 
-      {/* ROT-uppgifter */}
+      {/* ROT-uppgifter – bara i appar med ROT (RUT kräver ingen fastighet) */}
+      {brand.skatteavdrag?.kraverFastighet && (
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -268,6 +270,7 @@ export default function CustomerForm({ defaultValues, mode }: Props) {
           </div>
         </CardContent>
       </Card>
+      )}
 
       <div className="flex justify-between">
         <Button type="button" variant="outline" onClick={() => router.back()}>

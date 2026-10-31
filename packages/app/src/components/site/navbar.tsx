@@ -14,13 +14,14 @@ import {
   UserPlus,
   type LucideIcon,
 } from "lucide-react";
-import authClient, { useSession } from "@/lib/auth-client";
-import { getNavbarCompany } from "@/lib/navbar-actions";
+import authClient, { useSession } from "../../lib/auth-client";
+import { getNavbarCompany } from "../../lib/navbar-actions";
 import {
   minaSidorLinks,
   COMPANY_UPDATED_EVENT,
-} from "@/components/minasidor/mina-sidor-nav";
+} from "../minasidor/mina-sidor-nav";
 import { ModeToggle } from "../button/theme-button";
+import { BrandLogo } from "./brand-logo";
 
 // ============================================================================
 // Types
@@ -469,20 +470,7 @@ const Navbar: React.FC<NavbarProps> = ({
                     {companyName}
                   </span>
                 ) : (
-                  <>
-                    <Image
-                      src="/knegaloggen-logga.png"
-                      alt="KnegarLoggen"
-                      width={100}
-                      height={100}
-                      className="h-16 w-16 object-contain"
-                      priority
-                    />
-                    <span>
-                      <span className="text-red-600">Knegar</span>
-                      <span className="text-blue-600">Loggen</span>
-                    </span>
-                  </>
+                  <BrandLogo priority />
                 )}
               </Link>
             </div>

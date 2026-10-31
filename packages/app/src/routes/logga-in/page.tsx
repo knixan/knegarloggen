@@ -3,11 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signIn } from "@/lib/auth-client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { signIn } from "../../lib/auth-client";
+import { Button } from "@knegarloggen/ui/button";
+import { Input } from "@knegarloggen/ui/input";
+import { Label } from "@knegarloggen/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@knegarloggen/ui/card";
 import { toast } from "sonner";
 
 export default function LoggaInPage() {

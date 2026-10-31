@@ -3,7 +3,7 @@
 
 import Image from "next/image";
 import { ImagePlus } from "lucide-react";
-import type { Job } from "@/lib/job-schema";
+import type { Job } from "../../../lib/job-schema";
 
 export function JobOverviewImages({
   job,

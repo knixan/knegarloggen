@@ -23,17 +23,17 @@ import {
   ListOrdered,
 } from "lucide-react";
 
-import { useUploadThing } from "@/lib/uploadthing-client";
-import { updateCompanySettings, updateCompanyLogo } from "@/lib/job-actions";
-import { type CompanyInput } from "@/lib/job-schema";
-import { COMPANY_UPDATED_EVENT } from "@/components/minasidor/mina-sidor-nav";
+import { useUploadThing } from "../../../lib/uploadthing-client";
+import { updateCompanySettings, updateCompanyLogo } from "../../../lib/job-actions";
+import { type CompanyInput } from "../../../lib/job-schema";
+import { COMPANY_UPDATED_EVENT } from "../mina-sidor-nav";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@knegarloggen/ui/button";
+import { Input } from "@knegarloggen/ui/input";
+import { Label } from "@knegarloggen/ui/label";
+import { Textarea } from "@knegarloggen/ui/textarea";
+import { Checkbox } from "@knegarloggen/ui/checkbox";
+import { Card, CardContent, CardHeader, CardTitle } from "@knegarloggen/ui/card";
 
 interface CompanySettings extends CompanyInput {
   id: string;

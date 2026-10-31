@@ -1,4 +1,4 @@
-import OversiktSkelett from "@/components/minasidor/startsida/oversikt-skelett";
+import OversiktSkelett from "../../components/minasidor/startsida/oversikt-skelett";
 
 export default function Loading() {
   return (

@@ -1,12 +1,13 @@
+import { brand } from "../../brand";
 import { Suspense } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { getAdminUsers } from "@/lib/admin-actions";
+import { auth } from "../../lib/auth";
+import { prisma } from "../../lib/prisma";
+import { getAdminUsers } from "../../lib/admin-actions";
 import AdminKlient from "./admin-klient";
 
-export const metadata = { title: "Admin – Knegarloggen" };
+export const metadata = { title: `Admin – ${brand.namn}` };
 
 export default function AdminPage() {
   return (

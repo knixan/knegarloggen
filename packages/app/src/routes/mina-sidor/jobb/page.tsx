@@ -2,11 +2,11 @@ import { Suspense } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { auth } from "@/lib/auth";
-import { getJobs } from "@/lib/job-actions";
-import { Button } from "@/components/ui/button";
+import { auth } from "../../../lib/auth";
+import { getJobs } from "../../../lib/job-actions";
+import { Button } from "@knegarloggen/ui/button";
 import { Plus } from "lucide-react";
-import JobDashboard from "@/components/minasidor/jobb/job-dashboard";
+import JobDashboard from "../../../components/minasidor/jobb/job-dashboard";
 
 export default function MinaJobbPage() {
   return (

@@ -2,18 +2,19 @@
 "use client";
 
 import { Printer, User } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@knegarloggen/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { beräknaSummering, type Job } from "@/lib/job-schema";
+} from "@knegarloggen/ui/dialog";
+import { ScrollArea } from "@knegarloggen/ui/scroll-area";
+import { Separator } from "@knegarloggen/ui/separator";
+import { beräknaSummering, type Job } from "../../../lib/job-schema";
 
 import { Badge, StatusBadge } from "./job-overview-badges";
+import { brand } from "../../../brand";
 import { printJob } from "../faktura/print-job";
 import { JobOverviewImages } from "./job-overview-images";
 import {
@@ -68,7 +69,9 @@ export default function JobOverviewDialog({
           <div className="job-overview-print-content space-y-4 pb-4">
             <div className="flex flex-wrap gap-2">
               <StatusBadge job={job} />
-              {job.rotAvdrag && <Badge label="ROT" />}
+              {job.skatteavdrag && brand.skatteavdrag && (
+                    <Badge label={brand.skatteavdrag.typ} />
+                  )}
               {job.fakturerat && <Badge label="Fakturerat" color="orange" />}
               {job.betalt && <Badge label="Betalt" color="green" />}
             </div>

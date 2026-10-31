@@ -4,53 +4,38 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "type-check": "tsc --noEmit",
-    "test": "vitest run"
+    "db:migrate": "prisma migrate dev --config ../../packages/app/prisma.config.ts",
+    "db:deploy": "prisma migrate deploy --config ../../packages/app/prisma.config.ts",
+    "db:reset": "prisma migrate reset --config ../../packages/app/prisma.config.ts",
+    "db:seed": "tsx ../../packages/app/prisma/seed.ts",
+    "db:admin": "tsx ../../packages/app/prisma/gor-admin.ts"
   },
   "dependencies": {
-    "@hookform/resolvers": "catalog:",
-    "@knegarloggen/auth": "workspace:*",
-    "@knegarloggen/stripe": "workspace:*",
+    "@knegarloggen/app": "workspace:*",
     "@knegarloggen/ui": "workspace:*",
-    "@prisma/adapter-pg": "catalog:",
-    "@prisma/client": "catalog:",
-    "@prisma/client-runtime-utils": "catalog:",
-    "@react-pdf/renderer": "catalog:",
-    "@uploadthing/react": "catalog:",
-    "better-auth": "catalog:",
-    "date-fns": "catalog:",
     "dotenv": "catalog:",
-    "geist": "^1.7.2",
     "lucide-react": "catalog:",
     "next": "catalog:",
-    "next-themes": "catalog:",
-    "pg": "catalog:",
     "prisma": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "react-hook-form": "catalog:",
-    "resend": "catalog:",
     "shadcn": "catalog:",
-    "sonner": "catalog:",
-    "stripe": "catalog:",
-    "tw-animate-css": "catalog:",
-    "uploadthing": "catalog:",
-    "zod": "catalog:"
+    "tw-animate-css": "catalog:"
   },
   "devDependencies": {
     "@knegarloggen/config": "workspace:*",
     "@tailwindcss/postcss": "catalog:",
     "@types/node": "catalog:",
-    "@types/pg": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "eslint": "catalog:",
     "eslint-config-next": "catalog:",
     "tailwindcss": "catalog:",
-    "typescript": "catalog:",
-    "vitest": "catalog:"
+    "tsx": "^4.22.3",
+    "typescript": "catalog:"
   }
 }

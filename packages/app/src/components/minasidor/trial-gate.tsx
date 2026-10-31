@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { CreditCard, AlertCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { brand } from "../../brand";
+import { Button } from "@knegarloggen/ui/button";
 
 export default function TrialGate({
   isExpired,
@@ -46,7 +47,7 @@ export default function TrialGate({
             <h2 className="text-xl font-semibold">Provperioden har gått ut</h2>
             <p className="text-sm text-muted-foreground">
               Lägg till betalningsuppgifter för att fortsätta använda
-              Knegarloggen. 99 kr/månad, ingen bindningstid.
+              {brand.namn}. 99 kr/månad, ingen bindningstid.
             </p>
           </div>
           <Button

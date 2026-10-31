@@ -72,7 +72,7 @@ async function main() {
     data: {
       companyId: company.id,
       customerId: customer1.id,
-      rotAvdrag: true,
+      skatteavdrag: true,
       utfort: true,
       fakturerat: false,
       betalt: false,
@@ -120,7 +120,7 @@ async function main() {
     data: {
       companyId: company.id,
       customerId: customer2.id,
-      rotAvdrag: false,
+      skatteavdrag: false,
       utfort: false,
       fakturerat: false,
       betalt: false,

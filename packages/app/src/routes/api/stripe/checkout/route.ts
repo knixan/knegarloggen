@@ -1,9 +1,9 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { stripe } from "@/lib/stripe";
-import { prisma } from "@/lib/prisma";
-import { env } from "@/lib/env";
+import { auth } from "../../../../lib/auth";
+import { stripe } from "../../../../lib/stripe";
+import { prisma } from "../../../../lib/prisma";
+import { env } from "../../../../lib/env";
 
 export async function POST() {
   try {

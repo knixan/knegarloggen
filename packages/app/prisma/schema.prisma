@@ -1,5 +1,5 @@
 // ============================================================
-// Knegarloggen – Prisma Schema
+// Gemensamt schema för Knegarloggen, Giggerloggen och Hemfixloggen
 // ============================================================
 
 generator client {
@@ -162,7 +162,7 @@ model Job {
   customerId String?
 
   // Status
-  rotAvdrag  Boolean @default(false)
+  skatteavdrag  Boolean @default(false)
   pagaende   Boolean @default(false)
   utfort     Boolean @default(false)
   fakturerat Boolean @default(false)

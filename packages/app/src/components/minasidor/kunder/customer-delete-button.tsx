@@ -4,7 +4,7 @@ import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@knegarloggen/ui/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,8 +15,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { deleteCustomer } from "@/lib/job-actions";
+} from "@knegarloggen/ui/alert-dialog";
+import { deleteCustomer } from "../../../lib/job-actions";
 
 export default function CustomerDeleteButton({
   id,

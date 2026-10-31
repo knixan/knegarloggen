@@ -1,8 +1,10 @@
+import { brand } from "../../brand";
+
 export default function IntegritetspolicyPage() {
   return (
     <main className="container mx-auto px-4 py-12 max-w-4xl">
       <h1 className="text-3xl font-bold mb-2 text-foreground">
-        Integritetspolicy för KnegarLoggen
+        Integritetspolicy för {brand.namn}
       </h1>
       <p className="text-muted-foreground mb-8 italic">
         Senast uppdaterad: 2024-05-20
@@ -12,7 +14,7 @@ export default function IntegritetspolicyPage() {
         <section>
           <h2 className="text-xl font-bold mb-3 border-b pb-1">1. Inledning</h2>
           <p>
-            KnegarLoggen värnar om din personliga integritet och behandlar
+            {brand.namn} värnar om din personliga integritet och behandlar
             personuppgifter i enlighet med Dataskyddsförordningen (GDPR).
           </p>
           <p className="mt-2">
@@ -26,10 +28,7 @@ export default function IntegritetspolicyPage() {
             2. Vilka uppgifter vi samlar in
           </h2>
           <p>
-            När du använder KnegarLoggen kan vi samla in följande uppgifter:
-          </p>
-          <p>
-            När du använder KnegarLoggen kan vi samlar in följande uppgifter:
+            När du använder {brand.namn} kan vi samla in följande uppgifter:
           </p>
 
           <div className="space-y-4 mt-4">
@@ -69,7 +68,7 @@ export default function IntegritetspolicyPage() {
                 <li>Telefonnummer</li>
                 <li>E-postadress</li>
                 <li>Organisationsnummer</li>
-                <li>Personnummer (vid exempelvis ROT-arbeten)</li>
+                <li>Personnummer (vid exempelvis ROT- och RUT-arbeten)</li>
               </ul>
             </div>
 
@@ -119,7 +118,7 @@ export default function IntegritetspolicyPage() {
             5. Bilder och dokument
           </h2>
           <p>
-            Bilder och dokument som laddas upp till KnegarLoggen lagras för att
+            Bilder och dokument som laddas upp till {brand.namn} lagras för att
             tillhandahålla tjänstens funktioner. Användaren äger fortsatt sitt
             material. Materialet används aldrig för marknadsföring eller delas
             med tredje part utan användarens samtycke.

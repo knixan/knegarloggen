@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { stripe } from "@/lib/stripe";
-import { prisma } from "@/lib/prisma";
-import { env } from "@/lib/env";
+import { stripe } from "../../../../lib/stripe";
+import { prisma } from "../../../../lib/prisma";
+import { env } from "../../../../lib/env";
 import type Stripe from "stripe";
 
 function getPeriodEnd(sub: Stripe.Subscription): Date | null {

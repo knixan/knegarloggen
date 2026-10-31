@@ -3,19 +3,19 @@
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { KeyRound, CreditCard } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
+import { Button } from "@knegarloggen/ui/button";
+import { Input } from "@knegarloggen/ui/input";
+import { Label } from "@knegarloggen/ui/label";
+import { Separator } from "@knegarloggen/ui/separator";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import authClient from "@/lib/auth-client";
+} from "@knegarloggen/ui/card";
+import { Badge } from "@knegarloggen/ui/badge";
+import authClient from "../../../lib/auth-client";
 import DeleteAccountButton from "./delete-account-button";
 import { format } from "date-fns";
 import { sv } from "date-fns/locale";

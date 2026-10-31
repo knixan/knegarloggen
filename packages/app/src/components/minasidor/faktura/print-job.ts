@@ -1,5 +1,6 @@
-import { type Job } from "@/lib/job-schema";
-import { escapeHtml as e } from "@/lib/utils";
+import { brand } from "../../../brand";
+import { type Job } from "../../../lib/job-schema";
+import { escapeHtml as e } from "../../../lib/utils";
 
 export function printJob(
   job: Job,
@@ -39,7 +40,9 @@ export function printJob(
 
   const badges = [
     `<span class="badge" style="background:${statusFärg};color:white">${status}</span>`,
-    job.rotAvdrag ? `<span class="badge">ROT-avdrag</span>` : "",
+    job.skatteavdrag && brand.skatteavdrag
+      ? `<span class="badge">${brand.skatteavdrag.typ}-avdrag</span>`
+      : "",
     job.fakturerat
       ? `<span class="badge" style="background:#ea580c;color:white">Fakturerat</span>`
       : "",
@@ -145,7 +148,7 @@ export function printJob(
 <html lang="sv">
 <head>
   <meta charset="UTF-8">
-  <title>Knegarloggen – ${customerName}</title>
+  <title>${brand.namn} – ${customerName}</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Arial, sans-serif; font-size: 10pt; color: #1a1a1a; background: white; }
@@ -185,7 +188,7 @@ export function printJob(
       <p>${customerAddress}</p>
     </div>
     <div class="header-right">
-      <strong>Knegarloggen</strong>
+      <strong>${brand.namn}</strong>
       Utskrivet ${new Date().toLocaleDateString("sv-SE")}
     </div>
   </div>
@@ -209,7 +212,7 @@ export function printJob(
   ${job.anteckningar ? `<section><h4>Interna anteckningar</h4><p class="anteckningar">${e(job.anteckningar)}</p></section>` : ""}
   <div class="sidfot">
     <span>${customerName}${customerAddress ? ` · ${customerAddress}` : ""}</span>
-    <span>Knegarloggen</span>
+    <span>${brand.namn}</span>
   </div>
 </div>
 </body>

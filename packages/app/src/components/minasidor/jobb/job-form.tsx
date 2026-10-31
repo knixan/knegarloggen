@@ -33,6 +33,7 @@ import {
   UserPlus,
   Search,
   X as XIcon,
+  Percent,
 } from "lucide-react";
 
 import {
@@ -40,18 +41,19 @@ import {
   type JobInput,
   beräknaSummering,
   type Customer,
-} from "@/lib/job-schema";
-import { useUploadThing } from "@/lib/uploadthing-client";
+} from "../../../lib/job-schema";
+import { useUploadThing } from "../../../lib/uploadthing-client";
+import { brand } from "../../../brand";
 import { ImagePlus, X } from "lucide-react";
 import { useState, useRef } from "react";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Button } from "@knegarloggen/ui/button";
+import { Input } from "@knegarloggen/ui/input";
+import { Label } from "@knegarloggen/ui/label";
+import { Textarea } from "@knegarloggen/ui/textarea";
+import { Checkbox } from "@knegarloggen/ui/checkbox";
+import { Card, CardContent, CardHeader, CardTitle } from "@knegarloggen/ui/card";
+import { Separator } from "@knegarloggen/ui/separator";
 
 interface Props {
   onSubmit: (data: JobInput, bilder: { url: string; key: string }[]) => void;
@@ -71,7 +73,7 @@ const tomDefaults: JobInput = {
   ovrigaKostnader: [],
   timpris: 0,
   milersattning: 0,
-  rotAvdrag: false,
+  skatteavdrag: false,
   pagaende: false,
   utfort: false,
   fakturerat: false,
@@ -110,6 +112,7 @@ export default function JobForm({
 
   const live = useWatch({ control }) as Partial<JobInput>;
   const summering = beräknaSummering({ ...tomDefaults, ...live } as JobInput);
+  const avdragTyp = brand.skatteavdrag?.typ;
 
   // Kundväljare
   const [kundSok, setKundSok] = useState("");
@@ -781,7 +784,7 @@ export default function JobForm({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <ClipboardList className="h-5 w-5 text-muted-foreground" />
-            Hantverkarens status
+            Status
           </CardTitle>
           <p className="text-xs text-muted-foreground">
             Välj aktuell status för jobbet.
@@ -830,12 +833,16 @@ export default function JobForm({
           </p>
         </CardHeader>
         <CardContent className="space-y-3">
-          <ToggleRow
-            id="rot"
-            label="ROT-avdrag ska tillämpas"
-            checked={live.rotAvdrag ?? false}
-            onChange={(v) => setValue("rotAvdrag", v, { shouldDirty: true })}
-          />
+          {avdragTyp && (
+            <ToggleRow
+              id="skatteavdrag"
+              label={`${avdragTyp}-avdrag ska tillämpas`}
+              checked={live.skatteavdrag ?? false}
+              onChange={(v) =>
+                setValue("skatteavdrag", v, { shouldDirty: true })
+              }
+            />
+          )}
           <ToggleRow
             id="fakturerat"
             label="Fakturerat"
@@ -941,13 +948,45 @@ export default function JobForm({
               maximumFractionDigits: 0,
             })}
           />
-          {live.rotAvdrag && (
+          <SumRow
+            label="Moms 25 %"
+            icon={<Percent className="h-3.5 w-3.5" />}
+            value={summering.moms.toLocaleString("sv-SE", {
+              style: "currency",
+              currency: "SEK",
+              maximumFractionDigits: 0,
+            })}
+          />
+          <SumRow
+            label="Totalt inkl. moms"
+            icon={<Receipt className="h-3.5 w-3.5" />}
+            value={summering.totalInklMoms.toLocaleString("sv-SE", {
+              style: "currency",
+              currency: "SEK",
+              maximumFractionDigits: 0,
+            })}
+          />
+          {avdragTyp && live.skatteavdrag && (
             <>
+              <SumRow
+                label={`${avdragTyp}-avdrag (preliminärt)`}
+                icon={<CheckCircle2 className="h-3.5 w-3.5" />}
+                value={`−${summering.avdrag.toLocaleString("sv-SE", {
+              style: "currency",
+              currency: "SEK",
+              maximumFractionDigits: 0,
+            })}`}
+              />
               <Separator />
-              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5" />
-                ROT-avdrag markerat — beräknas av den som fakturerar.
-              </p>
+              <SumRow
+                label="Att betala"
+                icon={<Receipt className="h-3.5 w-3.5" />}
+                value={summering.attBetala.toLocaleString("sv-SE", {
+              style: "currency",
+              currency: "SEK",
+              maximumFractionDigits: 0,
+            })}
+              />
             </>
           )}
         </CardContent>
