@@ -40,7 +40,6 @@ const uppdragsTyper = [
 
 export function UppdragForm({ uppdragId, defaultValues, customers }: Props) {
   const router = useRouter();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const {
     register,
     handleSubmit,
@@ -48,6 +47,7 @@ export function UppdragForm({ uppdragId, defaultValues, customers }: Props) {
     watch,
     formState: { errors, isSubmitting },
   } = useForm<UppdragFormValues>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(uppdragSchema) as any,
     defaultValues: {
       titel: "",

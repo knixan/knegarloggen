@@ -6,9 +6,10 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "stripe": "^22.3.0"
+    "stripe": "catalog:"
   },
   "devDependencies": {
-    "typescript": "^5"
+    "@knegarloggen/config": "workspace:*",
+    "typescript": "catalog:"
   }
 }
