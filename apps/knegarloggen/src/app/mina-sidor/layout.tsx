@@ -1,9 +1,9 @@
 import { Suspense } from "react";
 import { headers } from "next/headers";
-import { differenceInDays } from "date-fns";
 import { cacheLife } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { evaluateSubscription } from "@/lib/subscription";
 import {
   MinaSidorSidebar,
   MinaSidorMobileNav,
@@ -49,23 +49,7 @@ async function MinaSidorGate({
 
   if (session?.user) {
     const subscription = await getSubscriptionStatus(session.user.id);
-
-    if (subscription) {
-      const now = new Date();
-      const isActiveSubscription =
-        subscription.status === "active" ||
-        (subscription.status === "trialing" &&
-          subscription.trialEnd &&
-          subscription.trialEnd > now);
-
-      if (!isActiveSubscription) {
-        isExpired = true;
-      } else if (subscription.status === "trialing" && subscription.trialEnd) {
-        daysLeft = Math.max(0, differenceInDays(subscription.trialEnd, now));
-      }
-    } else {
-      isExpired = true;
-    }
+    ({ isExpired, daysLeft } = evaluateSubscription(subscription));
   }
 
   return (

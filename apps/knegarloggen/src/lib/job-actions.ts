@@ -8,15 +8,23 @@ import { auth } from "./auth";
 import { prisma } from "./prisma";
 import {
   companySchema,
+  customerSchema,
+  jobSchema,
   type JobInput,
   type CustomerInput,
   type CompanyInput,
 } from "./job-schema";
+import type { z } from "zod";
 
 import { stripe } from "./stripe";
+import { hasActiveSubscription } from "./subscription";
 
 const utapi = new UTApi();
 const DEFAULT_COMPANY_NAME = "Mitt företag";
+const SUBSCRIPTION_EXPIRED =
+  "Provperioden har gått ut – lägg till betalning för att fortsätta";
+
+type UploadedFile = { url: string; key: string };
 
 type JobWithRelations = Prisma.JobGetPayload<{
   include: {
@@ -46,18 +54,29 @@ async function getOrCreateCompany(userId: string) {
 type CompanyCtx = { company: Awaited<ReturnType<typeof getOrCreateCompany>> };
 type AuthError = { ok: false; error: string };
 
-async function requireCompany(): Promise<CompanyCtx | AuthError> {
+// Alla skrivande actions kräver inloggning OCH aktiv prenumeration/provperiod.
+// TrialGate döljer bara gränssnittet – den här kontrollen är den som skyddar.
+async function requireActiveUser(): Promise<{ userId: string } | AuthError> {
   const session = await getSession();
   if (!session?.user) return { ok: false, error: "Inte inloggad" };
-  const company = await getOrCreateCompany(session.user.id);
+  if (!(await hasActiveSubscription(session.user.id))) {
+    return { ok: false, error: SUBSCRIPTION_EXPIRED };
+  }
+  return { userId: session.user.id };
+}
+
+async function requireCompany(): Promise<CompanyCtx | AuthError> {
+  const ctx = await requireActiveUser();
+  if ("error" in ctx) return ctx;
+  const company = await getOrCreateCompany(ctx.userId);
   return { company };
 }
 
 async function requireExistingCompany(): Promise<CompanyCtx | AuthError> {
-  const session = await getSession();
-  if (!session?.user) return { ok: false, error: "Inte inloggad" };
+  const ctx = await requireActiveUser();
+  if ("error" in ctx) return ctx;
   const company = await prisma.company.findFirst({
-    where: { ownerId: session.user.id },
+    where: { ownerId: ctx.userId },
   });
   if (!company) return { ok: false, error: "Inget företag hittat" };
   return { company };
@@ -144,6 +163,60 @@ function ids<T extends { id?: string }>(rows: T[]) {
   return rows.flatMap((row) => (row.id ? [row.id] : []));
 }
 
+// Id:n kommer från klienten – varje id som skickas in måste tillhöra jobbet.
+function allBelongToJob<T extends { id?: string }>(
+  rows: T[],
+  existing: { id: string }[],
+) {
+  const known = new Set(existing.map((row) => row.id));
+  return ids(rows).every((id) => known.has(id));
+}
+
+function firstIssue(error: z.ZodError) {
+  return error.issues[0]?.message ?? "Ogiltiga uppgifter";
+}
+
+// UploadThing-URL:er har formen https://<app>.ufs.sh/f/<key> (äldre: utfs.io).
+function isUploadThingUrl({ url, key }: UploadedFile) {
+  if (!key || key.length > 200) return false;
+  try {
+    const u = new URL(url);
+    const hostOk =
+      u.hostname === "utfs.io" || u.hostname.endsWith(".ufs.sh");
+    return u.protocol === "https:" && hostOk && u.pathname === `/f/${key}`;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Validerar nyuppladdade filer innan de kopplas till ett jobb/företag.
+ * Nycklar som redan används någon annanstans avvisas, annars skulle man
+ * kunna "låna" en annan användares fil och sedan radera den via deleteJob.
+ */
+async function validateNewUploads(
+  files: UploadedFile[],
+): Promise<string | null> {
+  if (files.length === 0) return null;
+  if (!files.every(isUploadThingUrl)) return "Ogiltig bild";
+
+  const keys = files.map((f) => f.key);
+  if (new Set(keys).size !== keys.length) return "Ogiltig bild";
+
+  const [imageInUse, logoInUse] = await Promise.all([
+    prisma.jobImage.findFirst({
+      where: { key: { in: keys } },
+      select: { id: true },
+    }),
+    prisma.company.findFirst({
+      where: { logoKey: { in: keys } },
+      select: { id: true },
+    }),
+  ]);
+  if (imageInUse || logoInUse) return "Ogiltig bild";
+  return null;
+}
+
 // ============================================================
 // FÖRETAGSUPPGIFTER
 // ============================================================
@@ -226,6 +299,11 @@ export async function updateCompanyLogo(
   if ("error" in ctx) return ctx;
   const { company } = ctx;
 
+  if (logo && logo.key !== company.logoKey) {
+    const uploadError = await validateNewUploads([logo]);
+    if (uploadError) return { ok: false, error: uploadError };
+  }
+
   if (company.logoKey && company.logoKey !== logo?.key) {
     try {
       await utapi.deleteFiles(company.logoKey);
@@ -285,10 +363,14 @@ export async function getCustomer(id: string) {
   return mapCustomer(c);
 }
 
-export async function createCustomer(data: CustomerInput) {
+export async function createCustomer(input: CustomerInput) {
   const ctx = await requireCompany();
   if ("error" in ctx) return ctx;
   const { company } = ctx;
+
+  const parsed = customerSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: firstIssue(parsed.error) };
+  const data = parsed.data;
 
   const customer = await prisma.customer.create({
     data: {
@@ -314,10 +396,14 @@ export async function createCustomer(data: CustomerInput) {
   return { ok: true as const, id: customer.id };
 }
 
-export async function updateCustomer(id: string, data: CustomerInput) {
+export async function updateCustomer(id: string, input: CustomerInput) {
   const ctx = await requireExistingCompany();
   if ("error" in ctx) return ctx;
   const { company } = ctx;
+
+  const parsed = customerSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: firstIssue(parsed.error) };
+  const data = parsed.data;
 
   const existing = await prisma.customer.findFirst({
     where: { id, companyId: company.id },
@@ -437,12 +523,19 @@ export async function getJob(id: string) {
 }
 
 export async function createJob(
-  data: JobInput,
-  bilder: { url: string; key: string }[] = [],
+  input: JobInput,
+  bilder: UploadedFile[] = [],
 ) {
   const ctx = await requireCompany();
   if ("error" in ctx) return ctx;
   const { company } = ctx;
+
+  const parsed = jobSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: firstIssue(parsed.error) };
+  const data = parsed.data;
+
+  const uploadError = await validateNewUploads(bilder);
+  if (uploadError) return { ok: false, error: uploadError };
 
   if (data.customerId) {
     const customer = await prisma.customer.findFirst({
@@ -506,12 +599,16 @@ export async function createJob(
 
 export async function updateJob(
   id: string,
-  data: JobInput,
-  bilder: { url: string; key: string }[] = [],
+  input: JobInput,
+  bilder: UploadedFile[] = [],
 ) {
   const ctx = await requireExistingCompany();
   if ("error" in ctx) return ctx;
   const { company } = ctx;
+
+  const parsed = jobSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: firstIssue(parsed.error) };
+  const data = parsed.data;
 
   const existing = await prisma.job.findFirst({
     where: { id, companyId: company.id },
@@ -532,7 +629,21 @@ export async function updateJob(
     if (!customer) return { ok: false, error: "Kund hittades inte" };
   }
 
+  if (
+    !allBelongToJob(data.artiklar, existing.artiklar) ||
+    !allBelongToJob(data.resor, existing.resor) ||
+    !allBelongToJob(data.arbetstider, existing.arbetspass) ||
+    !allBelongToJob(data.ovrigaKostnader ?? [], existing.ovrigaKostnader)
+  ) {
+    return { ok: false, error: "Ogiltiga rader i jobbet" };
+  }
+
   const existingImageKeys = existing.images.map((i) => i.key);
+  const uploadError = await validateNewUploads(
+    bilder.filter((b) => !existingImageKeys.includes(b.key)),
+  );
+  if (uploadError) return { ok: false, error: uploadError };
+
   const newImageKeys = bilder.map((b) => b.key);
   const toDelete = existingImageKeys.filter((k) => !newImageKeys.includes(k));
 
@@ -566,7 +677,7 @@ export async function updateJob(
     ...data.artiklar.map((a) =>
       a.id
         ? prisma.article.update({
-            where: { id: a.id },
+            where: { id: a.id, jobId: id },
             data: {
               namn: a.namn,
               artikelnr: a.artikelnr ?? "",
@@ -593,7 +704,7 @@ export async function updateJob(
     ...data.resor.map((r) =>
       r.id
         ? prisma.trip.update({
-            where: { id: r.id },
+            where: { id: r.id, jobId: id },
             data: { datum: new Date(r.datum), stracka: r.stracka },
           })
         : prisma.trip.create({
@@ -607,7 +718,7 @@ export async function updateJob(
     ...data.arbetstider.map((w) =>
       w.id
         ? prisma.workSession.update({
-            where: { id: w.id },
+            where: { id: w.id, jobId: id },
             data: { datum: new Date(w.datum), timmar: w.timmar },
           })
         : prisma.workSession.create({
@@ -621,7 +732,7 @@ export async function updateJob(
     ...(data.ovrigaKostnader ?? []).map((k) =>
       k.id
         ? prisma.ovrigKostnad.update({
-            where: { id: k.id },
+            where: { id: k.id, jobId: id },
             data: { beskrivning: k.beskrivning, pris: k.pris },
           })
         : prisma.ovrigKostnad.create({
@@ -745,13 +856,13 @@ export async function deleteAccount(): Promise<{
 export async function reserverFakturanummer(
   jobId: string,
 ): Promise<{ ok: true; nummer: number } | { ok: false; error: string }> {
-  const session = await getSession();
-  if (!session?.user) return { ok: false, error: "Inte inloggad" };
+  const ctx = await requireActiveUser();
+  if ("error" in ctx) return ctx;
 
   try {
     const nummer = await prisma.$transaction(async (tx) => {
       const company = await tx.company.findFirst({
-        where: { ownerId: session.user.id },
+        where: { ownerId: ctx.userId },
       });
       if (!company) throw new Error("Inget företag hittat");
 
