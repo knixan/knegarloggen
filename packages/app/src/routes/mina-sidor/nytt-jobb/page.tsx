@@ -8,7 +8,9 @@ import NyttJobbClient from "../../../components/minasidor/jobb/nytt-jobb-client"
 export default function NyttJobbPage() {
   return (
     <main className="container mx-auto px-4 py-8 max-w-3xl">
-      <Suspense fallback={<div className="animate-pulse h-8 w-48 bg-muted rounded" />}>
+      <Suspense
+        fallback={<div className="animate-pulse h-8 w-48 bg-muted rounded" />}
+      >
         <NyttJobbInnehall />
       </Suspense>
     </main>

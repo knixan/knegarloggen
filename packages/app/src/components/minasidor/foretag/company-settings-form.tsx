@@ -24,7 +24,10 @@ import {
 } from "lucide-react";
 
 import { useUploadThing } from "../../../lib/uploadthing-client";
-import { updateCompanySettings, updateCompanyLogo } from "../../../lib/job-actions";
+import {
+  updateCompanySettings,
+  updateCompanyLogo,
+} from "../../../lib/job-actions";
 import { type CompanyInput } from "../../../lib/job-schema";
 import { COMPANY_UPDATED_EVENT } from "../mina-sidor-nav";
 
@@ -33,7 +36,12 @@ import { Input } from "@knegarloggen/ui/input";
 import { Label } from "@knegarloggen/ui/label";
 import { Textarea } from "@knegarloggen/ui/textarea";
 import { Checkbox } from "@knegarloggen/ui/checkbox";
-import { Card, CardContent, CardHeader, CardTitle } from "@knegarloggen/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@knegarloggen/ui/card";
 
 interface CompanySettings extends CompanyInput {
   id: string;

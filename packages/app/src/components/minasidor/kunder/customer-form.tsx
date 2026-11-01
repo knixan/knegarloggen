@@ -27,7 +27,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@knegarloggen/ui/button";
 import { Input } from "@knegarloggen/ui/input";
 import { Label } from "@knegarloggen/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@knegarloggen/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@knegarloggen/ui/card";
 
 type CustomerFormInput = z.input<typeof customerSchema>;
 type CustomerFormOutput = z.output<typeof customerSchema>;
@@ -234,42 +239,45 @@ export default function CustomerForm({ defaultValues, mode }: Props) {
 
       {/* ROT-uppgifter – bara i appar med ROT (RUT kräver ingen fastighet) */}
       {brand.skatteavdrag?.kraverFastighet && (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Home className="h-5 w-5 text-muted-foreground" />
-            ROT-uppgifter
-          </CardTitle>
-          <p className="text-xs text-muted-foreground">
-            Fyll i om kunden kan nyttja ROT-avdrag.
-          </p>
-        </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2">
-          <Field
-            label="Fastighetsbeteckning"
-            icon={<Home className="h-3.5 w-3.5" />}
-          >
-            <Input
-              {...register("fastighetsbeteckning")}
-              placeholder="Berga 1:23"
-            />
-          </Field>
-          <Field label="Lägenhetsnummer" icon={<Key className="h-3.5 w-3.5" />}>
-            <Input {...register("lagenhetsnummer")} placeholder="1101" />
-          </Field>
-          <div className="sm:col-span-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Home className="h-5 w-5 text-muted-foreground" />
+              ROT-uppgifter
+            </CardTitle>
+            <p className="text-xs text-muted-foreground">
+              Fyll i om kunden kan nyttja ROT-avdrag.
+            </p>
+          </CardHeader>
+          <CardContent className="grid gap-4 sm:grid-cols-2">
             <Field
-              label="Bostadsrättsförening"
-              icon={<Building2 className="h-3.5 w-3.5" />}
+              label="Fastighetsbeteckning"
+              icon={<Home className="h-3.5 w-3.5" />}
             >
               <Input
-                {...register("bostadsrattsforening")}
-                placeholder="BRF Solrosen"
+                {...register("fastighetsbeteckning")}
+                placeholder="Berga 1:23"
               />
             </Field>
-          </div>
-        </CardContent>
-      </Card>
+            <Field
+              label="Lägenhetsnummer"
+              icon={<Key className="h-3.5 w-3.5" />}
+            >
+              <Input {...register("lagenhetsnummer")} placeholder="1101" />
+            </Field>
+            <div className="sm:col-span-2">
+              <Field
+                label="Bostadsrättsförening"
+                icon={<Building2 className="h-3.5 w-3.5" />}
+              >
+                <Input
+                  {...register("bostadsrattsforening")}
+                  placeholder="BRF Solrosen"
+                />
+              </Field>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       <div className="flex justify-between">

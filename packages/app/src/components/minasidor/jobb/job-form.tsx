@@ -52,7 +52,12 @@ import { Input } from "@knegarloggen/ui/input";
 import { Label } from "@knegarloggen/ui/label";
 import { Textarea } from "@knegarloggen/ui/textarea";
 import { Checkbox } from "@knegarloggen/ui/checkbox";
-import { Card, CardContent, CardHeader, CardTitle } from "@knegarloggen/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@knegarloggen/ui/card";
 import { Separator } from "@knegarloggen/ui/separator";
 
 interface Props {
@@ -972,20 +977,20 @@ export default function JobForm({
                 label={`${avdragTyp}-avdrag (preliminärt)`}
                 icon={<CheckCircle2 className="h-3.5 w-3.5" />}
                 value={`−${summering.avdrag.toLocaleString("sv-SE", {
-              style: "currency",
-              currency: "SEK",
-              maximumFractionDigits: 0,
-            })}`}
+                  style: "currency",
+                  currency: "SEK",
+                  maximumFractionDigits: 0,
+                })}`}
               />
               <Separator />
               <SumRow
                 label="Att betala"
                 icon={<Receipt className="h-3.5 w-3.5" />}
                 value={summering.attBetala.toLocaleString("sv-SE", {
-              style: "currency",
-              currency: "SEK",
-              maximumFractionDigits: 0,
-            })}
+                  style: "currency",
+                  currency: "SEK",
+                  maximumFractionDigits: 0,
+                })}
               />
             </>
           )}

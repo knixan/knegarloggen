@@ -1,8 +1,10 @@
-// PostToolUse(Edit|Write): kör ESLint på filen som just ändrades, med samma
-// config som CI (närmaste eslint.config.mjs – appen eller paketet). Fel skickas
-// tillbaka till agenten (exit 2 + stderr) medan ändringen fortfarande är färsk.
+// PostToolUse(Edit|Write): formaterar filen som just ändrades med Prettier och
+// kör sedan ESLint med samma config som CI (närmaste eslint.config.mjs – appen
+// eller paketet). Lintfel skickas tillbaka till agenten (exit 2 + stderr)
+// medan ändringen fortfarande är färsk.
 //
-// Bara fel rapporteras, inte varningar – CI stoppar också bara på fel.
+// Prettier körs först så att ESLint ser den slutliga koden. Bara lintfel
+// rapporteras, inte varningar – CI stoppar också bara på fel.
 // Fail-open: allt vi inte kan hantera säkert släpps igenom med exit 0.
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
@@ -19,15 +21,44 @@ try {
 } catch {
   process.exit(0);
 }
-
-if (!/\.(ts|tsx|mts|mjs)$/.test(fil) || !existsSync(fil)) process.exit(0);
+if (!fil || !existsSync(fil)) process.exit(0);
 
 const abs = path.resolve(fil);
 const rel = path.relative(repo, abs);
 if (rel.startsWith("..") || path.isAbsolute(rel)) process.exit(0);
 if (/(^|[\\/])(node_modules|generated|\.next)[\\/]/.test(rel)) process.exit(0);
 
-// Närmaste mapp med eslint.config.mjs, men aldrig utanför repot.
+/** Sökväg till ett pakets CLI, löst från en viss mapps package.json. */
+function bin(fran, paket, ...delar) {
+  try {
+    const req = createRequire(path.join(fran, "package.json"));
+    return path.join(
+      path.dirname(req.resolve(`${paket}/package.json`)),
+      ...delar,
+    );
+  } catch {
+    return null;
+  }
+}
+
+// 1. Prettier – .prettierrc.json och .prettierignore i roten gäller.
+//    --ignore-unknown: filtyper Prettier inte kan (t.ex. .sql) hoppas över.
+const prettier = bin(repo, "prettier", "bin", "prettier.cjs");
+if (prettier) {
+  try {
+    execFileSync(
+      process.execPath,
+      [prettier, "--write", "--ignore-unknown", "--log-level", "warn", rel],
+      { cwd: repo, stdio: "ignore" },
+    );
+  } catch {
+    // Syntaxfel o.d. – ESLint nedan (eller typkontrollen) säger mer.
+  }
+}
+
+// 2. ESLint – bara för kod.
+if (!/\.(ts|tsx|mts|mjs)$/.test(abs)) process.exit(0);
+
 let dir = path.dirname(abs);
 while (!existsSync(path.join(dir, "eslint.config.mjs"))) {
   const upp = path.dirname(dir);
@@ -35,17 +66,8 @@ while (!existsSync(path.join(dir, "eslint.config.mjs"))) {
   dir = upp;
 }
 
-let eslint;
-try {
-  const req = createRequire(path.join(dir, "package.json"));
-  eslint = path.join(
-    path.dirname(req.resolve("eslint/package.json")),
-    "bin",
-    "eslint.js",
-  );
-} catch {
-  process.exit(0);
-}
+const eslint = bin(dir, "eslint", "bin", "eslint.js");
+if (!eslint) process.exit(0);
 
 try {
   execFileSync(

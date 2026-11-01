@@ -67,7 +67,10 @@ describe("beräknaSummering", () => {
   });
 
   it("ROT med fast pris: underlaget blir aldrig större än det fasta priset", () => {
-    const s = beräknaSummering({ ...jobb({ fastPris: 5000 }), skatteavdrag: true });
+    const s = beräknaSummering({
+      ...jobb({ fastPris: 5000 }),
+      skatteavdrag: true,
+    });
     expect(s.avdragUnderlagInklMoms).toBe(6250); // min(6 000, 5 000) × 1,25
     expect(s.avdrag).toBe(1875);
     expect(s.attBetala).toBe(4375);

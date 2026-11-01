@@ -66,7 +66,9 @@ export async function POST() {
         cancel_url: `${appUrl}/mina-sidor/installningar`,
         locale: "sv",
       },
-      { idempotencyKey: `checkout-${user.id}-${Math.floor(Date.now() / 60000)}` },
+      {
+        idempotencyKey: `checkout-${user.id}-${Math.floor(Date.now() / 60000)}`,
+      },
     );
 
     return NextResponse.json({ url: checkoutSession.url });

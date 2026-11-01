@@ -15,7 +15,8 @@ try {
 }
 
 // `git commit`, `git push`, även efter && / ; / | och med flaggor före (git -C x commit).
-const blockerat = /(^|[;&|(]\s*|\s)git(\s+-[^\s]+(\s+[^\s-][^\s]*)?)*\s+(commit|push)\b/;
+const blockerat =
+  /(^|[;&|(]\s*|\s)git(\s+-[^\s]+(\s+[^\s-][^\s]*)?)*\s+(commit|push)\b/;
 
 if (blockerat.test(command)) {
   console.error(

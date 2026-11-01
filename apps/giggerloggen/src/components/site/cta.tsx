@@ -17,7 +17,10 @@ export function CTA() {
         <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
           <Link
             href="/registrera"
-            className={cn(buttonVariants({ size: "lg", variant: "secondary" }), "gap-2")}
+            className={cn(
+              buttonVariants({ size: "lg", variant: "secondary" }),
+              "gap-2",
+            )}
           >
             Skapa konto gratis <ArrowRight className="h-4 w-4" />
           </Link>

@@ -7,7 +7,9 @@ import CustomerForm from "../../../../components/minasidor/kunder/customer-form"
 export default function NyKundPage() {
   return (
     <main className="container mx-auto max-w-3xl px-4 py-8">
-      <Suspense fallback={<div className="animate-pulse h-8 w-48 bg-muted rounded" />}>
+      <Suspense
+        fallback={<div className="animate-pulse h-8 w-48 bg-muted rounded" />}
+      >
         <NyKundInnehall />
       </Suspense>
     </main>

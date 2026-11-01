@@ -7,7 +7,12 @@ import { signUp } from "../../lib/auth-client";
 import { Button } from "@knegarloggen/ui/button";
 import { Input } from "@knegarloggen/ui/input";
 import { Label } from "@knegarloggen/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@knegarloggen/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@knegarloggen/ui/card";
 import { toast } from "sonner";
 
 export default function RegistreraPage() {

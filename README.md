@@ -1,4 +1,5 @@
 # Tre Syskon Appar för att Logga Tjänster och Jobb
+
 ## Knegarloggen - Giggerloggen - Hemfixloggen
 
 [![CI](https://github.com/knixan/knegarloggen/actions/workflows/ci.yml/badge.svg)](https://github.com/knixan/knegarloggen/actions/workflows/ci.yml)
@@ -13,11 +14,11 @@ Monorepo med tre jobblogg- och fakturaverktyg för svenska småföretagare. Hål
 
 ## Appar
 
-| App | Målgrupp | Skatteavdrag |
-|-----|----------|--------------|
-| [`apps/knegarloggen`](apps/knegarloggen) | Hantverkare | ROT 30 % |
-| [`apps/hemfixloggen`](apps/hemfixloggen) | Hushållsnära tjänster (städ, trädgård m.m.) | RUT 50 % |
-| [`apps/giggerloggen`](apps/giggerloggen) | Frilansare och konsulter | inget |
+| App                                      | Målgrupp                                    | Skatteavdrag |
+| ---------------------------------------- | ------------------------------------------- | ------------ |
+| [`apps/knegarloggen`](apps/knegarloggen) | Hantverkare                                 | ROT 30 %     |
+| [`apps/hemfixloggen`](apps/hemfixloggen) | Hushållsnära tjänster (städ, trädgård m.m.) | RUT 50 %     |
+| [`apps/giggerloggen`](apps/giggerloggen) | Frilansare och konsulter                    | inget        |
 
 Apparna delar **all kod** i `packages/app` och skiljer sig bara i startsida, färger, bilder och [`brand.ts`](packages/app/src/brand.ts) (namn, logga, målgrupp och skatteavdrag). Varje app är ändå en egen produkt med egen databas, egna miljövariabler och eget Stripe-pris.
 
@@ -41,21 +42,21 @@ ROT och RUT blandas aldrig: varje app har ett skatteavdrag eller inget.
 
 ## Teknisk stack
 
-| Lager | Teknik |
-|---|---|
-| Monorepo | pnpm workspaces + catalog (gemensamma versioner) |
-| Framework | Next.js 16 (App Router, Cache Components) |
-| Språk | TypeScript |
-| Styling | Tailwind CSS v4 + shadcn/ui |
-| Formulär | React Hook Form + zod 4 |
-| Databas | PostgreSQL (Neon) + Prisma 7 |
-| Auth | Better Auth |
-| Betalning | Stripe |
-| E-post | Resend |
-| Filer | UploadThing |
-| PDF | @react-pdf/renderer |
-| Test | Vitest |
-| CI | GitHub Actions |
+| Lager     | Teknik                                           |
+| --------- | ------------------------------------------------ |
+| Monorepo  | pnpm workspaces + catalog (gemensamma versioner) |
+| Framework | Next.js 16 (App Router, Cache Components)        |
+| Språk     | TypeScript                                       |
+| Styling   | Tailwind CSS v4 + shadcn/ui                      |
+| Formulär  | React Hook Form + zod 4                          |
+| Databas   | PostgreSQL (Neon) + Prisma 7                     |
+| Auth      | Better Auth                                      |
+| Betalning | Stripe                                           |
+| E-post    | Resend                                           |
+| Filer     | UploadThing                                      |
+| PDF       | @react-pdf/renderer                              |
+| Test      | Vitest                                           |
+| CI        | GitHub Actions                                   |
 
 ---
 
@@ -181,6 +182,8 @@ stripe listen --forward-to localhost:3000/api/stripe/webhook
 ```bash
 pnpm type-check     # TypeScript i alla appar och paket
 pnpm lint           # ESLint
+pnpm format         # Prettier – formaterar hela repot
+pnpm format:check   # Prettier – kontrollerar bara (körs i CI)
 pnpm test           # Vitest – beräkningar, moms, ROT/RUT, faktura, validering
 pnpm build          # Bygger alla tre apparna
 ```
@@ -206,7 +209,7 @@ pnpm build          # Bygger alla tre apparna
 Hooks i [`.claude/`](.claude/settings.json):
 
 - **`blockera-git.mjs`** – stoppar `git commit` och `git push` från agenter (du committar själv)
-- **`linta-fil.mjs`** – kör ESLint på varje fil en agent ändrar och skickar tillbaka felen direkt
+- **`formatera-och-linta.mjs`** – formaterar varje fil en agent ändrar med Prettier och kör ESLint, så att felen skickas tillbaka direkt
 
 Planering sker i [GitHub Project 15](https://github.com/users/knixan/projects/15), med flikar per app.
 

@@ -15,7 +15,12 @@ import {
 } from "lucide-react";
 import { Button } from "@knegarloggen/ui/button";
 import { Input } from "@knegarloggen/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@knegarloggen/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@knegarloggen/ui/card";
 import {
   AlertDialog,
   AlertDialogAction,

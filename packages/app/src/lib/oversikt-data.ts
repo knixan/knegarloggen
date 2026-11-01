@@ -143,21 +143,21 @@ export async function getOversikt(ownerId: string) {
     // ROT/RUT-uppgifter behövs först vid fakturering – betalda jobb är klara.
     brand.skatteavdrag
       ? prisma.job.findMany({
-      where: { companyId, skatteavdrag: true, betalt: false },
-      select: {
-        id: true,
-        customerId: true,
-        customer: {
+          where: { companyId, skatteavdrag: true, betalt: false },
           select: {
-            ...kund.select,
-            personnummer: true,
-            fastighetsbeteckning: true,
-            lagenhetsnummer: true,
-            bostadsrattsforening: true,
+            id: true,
+            customerId: true,
+            customer: {
+              select: {
+                ...kund.select,
+                personnummer: true,
+                fastighetsbeteckning: true,
+                lagenhetsnummer: true,
+                bostadsrattsforening: true,
+              },
+            },
           },
-        },
-      },
-    })
+        })
       : Promise.resolve([]),
   ]);
 

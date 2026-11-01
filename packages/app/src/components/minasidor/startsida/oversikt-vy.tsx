@@ -14,7 +14,12 @@ import {
 } from "lucide-react";
 
 import { Button } from "@knegarloggen/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@knegarloggen/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@knegarloggen/ui/card";
 import { brand } from "../../../brand";
 import type { Oversikt } from "../../../lib/oversikt-data";
 

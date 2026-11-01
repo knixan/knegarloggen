@@ -65,10 +65,16 @@ export default function Hero() {
             {steps.map((step, i) => {
               const Icon = step.icon;
               return (
-                <li key={step.label} className="flex items-start gap-1 sm:gap-2">
+                <li
+                  key={step.label}
+                  className="flex items-start gap-1 sm:gap-2"
+                >
                   <div className="flex w-16 sm:w-20 flex-col items-center gap-2">
                     <div className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-secondary text-secondary-foreground shadow-md">
-                      <Icon className="h-6 w-6 sm:h-8 sm:w-8" strokeWidth={1.5} />
+                      <Icon
+                        className="h-6 w-6 sm:h-8 sm:w-8"
+                        strokeWidth={1.5}
+                      />
                     </div>
                     <span className="text-[11px] sm:text-xs font-bold text-center leading-tight">
                       {step.label}
@@ -96,7 +102,6 @@ export default function Hero() {
           >
             Prova gratis 30 dagar
           </Link>
-
         </div>
       </div>
 

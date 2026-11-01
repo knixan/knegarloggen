@@ -70,8 +70,8 @@ export default function JobOverviewDialog({
             <div className="flex flex-wrap gap-2">
               <StatusBadge job={job} />
               {job.skatteavdrag && brand.skatteavdrag && (
-                    <Badge label={brand.skatteavdrag.typ} />
-                  )}
+                <Badge label={brand.skatteavdrag.typ} />
+              )}
               {job.fakturerat && <Badge label="Fakturerat" color="orange" />}
               {job.betalt && <Badge label="Betalt" color="green" />}
             </div>

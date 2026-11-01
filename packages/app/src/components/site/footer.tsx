@@ -22,7 +22,10 @@ export default function Footer() {
   };
 
   return (
-    <footer id="kontakt" className="w-full border-t bg-white dark:bg-gray-950 py-12 mt-auto">
+    <footer
+      id="kontakt"
+      className="w-full border-t bg-white dark:bg-gray-950 py-12 mt-auto"
+    >
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-sm">
           {/* Logga och Brand */}
@@ -124,8 +127,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="border-t mt-12 pt-8 text-center text-xs text-muted-foreground">
-          © {CURRENT_YEAR} {brand.namn}. Alla rättigheter
-          förbehållna.
+          © {CURRENT_YEAR} {brand.namn}. Alla rättigheter förbehållna.
         </div>
       </div>
     </footer>

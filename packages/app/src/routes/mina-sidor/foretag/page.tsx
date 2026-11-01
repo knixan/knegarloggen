@@ -8,7 +8,9 @@ import CompanySettingsForm from "../../../components/minasidor/foretag/company-s
 export default function ForetagsuppgifterPage() {
   return (
     <main className="container mx-auto max-w-3xl px-4 py-8">
-      <Suspense fallback={<div className="animate-pulse h-8 w-48 bg-muted rounded" />}>
+      <Suspense
+        fallback={<div className="animate-pulse h-8 w-48 bg-muted rounded" />}
+      >
         <ForetagInnehall />
       </Suspense>
     </main>

@@ -197,7 +197,11 @@ export default function SkrivUtKlient({ job, company, fakturanummer }: Props) {
                 <tr
                   key={rad.label}
                   className={
-                    rad.ton === "avdrag" ? "rot" : rad.ton ? "dampad" : undefined
+                    rad.ton === "avdrag"
+                      ? "rot"
+                      : rad.ton
+                        ? "dampad"
+                        : undefined
                   }
                 >
                   <td>{rad.label}</td>

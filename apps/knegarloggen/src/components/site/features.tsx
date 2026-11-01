@@ -1,11 +1,4 @@
-import {
-  Camera,
-  Clock,
-  FileText,
-  Package,
-  Users,
-  Wrench,
-} from "lucide-react";
+import { Camera, Clock, FileText, Package, Users, Wrench } from "lucide-react";
 
 const features = [
   {
@@ -48,7 +41,10 @@ const features = [
 
 export default function Features() {
   return (
-    <section id="funktioner" className="scroll-mt-16 py-20 lg:py-24 bg-surface-tertiary">
+    <section
+      id="funktioner"
+      className="scroll-mt-16 py-20 lg:py-24 bg-surface-tertiary"
+    >
       <div className="container mx-auto px-4">
         <div className="text-center max-w-xl mx-auto mb-12">
           <p className="text-base font-bold tracking-[0.1em] uppercase text-accent">

@@ -55,7 +55,8 @@ export const BRANDS: Record<AppId, Brand> = {
     id: "giggerloggen",
     namn: "Giggerloggen",
     namnDelar: ["Gigger", "Loggen"],
-    beskrivning: "Logga, fakturera och håll koll på dina uppdrag som frilansare",
+    beskrivning:
+      "Logga, fakturera och håll koll på dina uppdrag som frilansare",
     malgrupp: "frilansare och konsulter",
     logo: null,
     skatteavdrag: null,

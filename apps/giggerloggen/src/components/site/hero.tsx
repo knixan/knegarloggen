@@ -37,11 +37,9 @@ export function Hero() {
             </p>
 
             <h1 className="text-5xl font-black tracking-tight leading-[1.07] sm:text-6xl">
-              Mer tid åt{" "}
-              <span className="text-primary">kunder.</span>
+              Mer tid åt <span className="text-primary">kunder.</span>
               <br />
-              Mindre{" "}
-              <span className="text-secondary">administration.</span>
+              Mindre <span className="text-secondary">administration.</span>
             </h1>
 
             <p className="text-lg text-muted-foreground leading-relaxed max-w-md mx-auto min-[900px]:mx-0">

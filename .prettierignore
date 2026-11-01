@@ -1,0 +1,10 @@
+# Genererat och byggt
+**/generated/**
+**/.next/**
+**/node_modules/**
+coverage/
+next-env.d.ts
+
+# Lås- och migreringsfiler ska inte formateras om
+pnpm-lock.yaml
+**/prisma/migrations/**

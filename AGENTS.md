@@ -14,11 +14,11 @@ Skriv på **svenska**: UI-texter, kommentarer, kanban-kort och commit-meddelande
 
 Tre produkter, en kodbas:
 
-| App | Målgrupp | Skatteavdrag |
-|---|---|---|
-| `apps/knegarloggen` | Hantverkare | ROT 30 % |
-| `apps/hemfixloggen` | Hushållsnära tjänster | RUT 50 % |
-| `apps/giggerloggen` | Frilansare/konsulter | inget |
+| App                 | Målgrupp              | Skatteavdrag |
+| ------------------- | --------------------- | ------------ |
+| `apps/knegarloggen` | Hantverkare           | ROT 30 %     |
+| `apps/hemfixloggen` | Hushållsnära tjänster | RUT 50 %     |
+| `apps/giggerloggen` | Frilansare/konsulter  | inget        |
 
 - **`packages/app`** – allt gemensamt: mina sidor, översikt, faktura/PDF, kunder, admin, inloggning, villkor, server actions, auth, Stripe, e-post, uppladdning, Prisma-schema och migreringar.
 - **`packages/app/src/brand.ts`** – det enda stället där apparna skiljer sig i logik: namn, logga, målgrupp, skatteavdrag. Väljs med `NEXT_PUBLIC_APP` i appens `next.config.ts`.
@@ -26,6 +26,7 @@ Tre produkter, en kodbas:
 - **`packages/ui`** (shadcn), **`packages/auth`** (`createAuth`), **`packages/stripe`**, **`packages/config`** (tsconfig/eslint).
 
 ### Gör så här
+
 - Ny funktion → bygg den i `packages/app`. Lägg aldrig app-specifik logik i `apps/`.
 - Ny sida → skapa den i `packages/app/src/routes/...` och lägg en tunn route-fil i **alla tre** apparna (`export { default } from "@knegarloggen/app/routes/..."`).
 - Skillnad mellan apparna → lägg till ett fält i `brand.ts`. Kopiera aldrig kod mellan apparna.
@@ -47,17 +48,17 @@ Tre produkter, en kodbas:
 
 Versionerna är nyare än det du lärt dig. Slå upp i dokumentationen innan du använder ett API du är osäker på, och **alltid** när det gäller auth, betalning, databas eller säkerhet. Läs bara den sida som behövs – ladda inte in hela filer.
 
-| Bibliotek | Version | Dokumentation |
-|---|---|---|
-| Next.js | 16.2 | `node_modules/next/dist/docs/` (lokalt, rätt version) |
-| better-auth | 1.6 | https://better-auth.com/docs/1.6/llms.txt |
-| Prisma | 7 | https://www.prisma.io/llms.txt |
-| zod | 4 | https://zod.dev/llms.txt |
-| shadcn/ui | – | https://ui.shadcn.com/llms.txt |
-| Stripe | 22 | https://docs.stripe.com/llms.txt |
-| Resend | 6 | https://resend.com/llms.txt |
-| react-pdf | – | https://react-pdf.org/llms.txt |
-| UploadThing | 7 | https://docs.uploadthing.com (ingen llms.txt) |
+| Bibliotek   | Version | Dokumentation                                         |
+| ----------- | ------- | ----------------------------------------------------- |
+| Next.js     | 16.2    | `node_modules/next/dist/docs/` (lokalt, rätt version) |
+| better-auth | 1.6     | https://better-auth.com/docs/1.6/llms.txt             |
+| Prisma      | 7       | https://www.prisma.io/llms.txt                        |
+| zod         | 4       | https://zod.dev/llms.txt                              |
+| shadcn/ui   | –       | https://ui.shadcn.com/llms.txt                        |
+| Stripe      | 22      | https://docs.stripe.com/llms.txt                      |
+| Resend      | 6       | https://resend.com/llms.txt                           |
+| react-pdf   | –       | https://react-pdf.org/llms.txt                        |
+| UploadThing | 7       | https://docs.uploadthing.com (ingen llms.txt)         |
 
 ## Kommandon
 
@@ -65,6 +66,7 @@ Versionerna är nyare än det du lärt dig. Slå upp i dokumentationen innan du 
 pnpm dev:knegarloggen        # (eller giggerloggen / hemfixloggen)
 pnpm type-check              # alla appar och paket
 pnpm lint
+pnpm format                  # Prettier på hela repot (format:check i CI)
 pnpm test                    # vitest i packages/app
 pnpm build                   # alla tre apparna
 
@@ -77,7 +79,7 @@ pnpm db:admin <e-post>       # gör ett konto till admin
 
 ## Klart betyder
 
-1. `pnpm type-check`, `pnpm lint` och `pnpm test` går igenom. Kör `pnpm build` vid ändringar i routes, konfig, beroenden eller sådant som påverkar flera appar.
+1. `pnpm format:check`, `pnpm type-check`, `pnpm lint` och `pnpm test` går igenom. Filer du ändrar formateras automatiskt av hooken – kör `pnpm format` om du skapat filer på annat sätt (t.ex. med skript). Kör `pnpm build` vid ändringar i routes, konfig, beroenden eller sådant som påverkar flera appar.
 2. Nya eller ändrade beräkningar (belopp, moms, ROT/RUT, validering) har tester i `packages/app/src/**/*.test.ts`.
 3. Ändringar i UI: säg tydligt vad du **inte** har kunnat testa (t.ex. inloggade sidor).
 4. Kanban är uppdaterad (se nedan).
@@ -105,11 +107,11 @@ GitHub Project 15 (`knixan`, "@Loggen-apparna"), repo `knixan/knegarloggen`.
 - Skriv kortets body i en fil och använd `--body-file` (långa heredocs i bash går sönder).
 - Flytta inte kort, skapa inte kort och stäng inte issues utan att användaren har bett om kanban-uppdatering eller att det ingår i uppgiften.
 
-| Vad | ID |
-|---|---|
-| Projekt | `PVT_kwHODHG13M4BYlIN` |
-| Status-fält | `PVTSSF_lAHODHG13M4BYlINzhTp-T0` – Backlog `f75ad846`, In progress `47fc9ee4`, Done `98236657` |
-| App-fält | `PVTSSF_lAHODHG13M4BYlINzhn_Dw0` – Knegarloggen `2f377aff`, Giggerloggen `603f3456`, Hemfixloggen `37dbdb12`, Gemensamt `9d751719` |
+| Vad         | ID                                                                                                                                 |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Projekt     | `PVT_kwHODHG13M4BYlIN`                                                                                                             |
+| Status-fält | `PVTSSF_lAHODHG13M4BYlINzhTp-T0` – Backlog `f75ad846`, In progress `47fc9ee4`, Done `98236657`                                     |
+| App-fält    | `PVTSSF_lAHODHG13M4BYlINzhn_Dw0` – Knegarloggen `2f377aff`, Giggerloggen `603f3456`, Hemfixloggen `37dbdb12`, Gemensamt `9d751719` |
 
 ```bash
 gh issue create -R knixan/knegarloggen --title "…" --body-file kort.md

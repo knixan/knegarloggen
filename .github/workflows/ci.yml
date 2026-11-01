@@ -48,6 +48,7 @@ jobs:
       - name: Generera Prisma-klienten
         run: pnpm --filter @knegarloggen/app generate
 
+      - run: pnpm format:check
       - run: pnpm type-check
       - run: pnpm lint
       - run: pnpm test

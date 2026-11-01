@@ -14,6 +14,11 @@
     "build:hemfixloggen": "pnpm --filter hemfixloggen run build",
     "lint": "pnpm -r --if-present run lint",
     "type-check": "pnpm -r --if-present run type-check",
-    "test": "pnpm -r --if-present run test"
+    "test": "pnpm -r --if-present run test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "prettier": "catalog:"
   }
 }

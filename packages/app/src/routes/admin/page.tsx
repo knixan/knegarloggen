@@ -12,7 +12,9 @@ export const metadata = { title: `Admin – ${brand.namn}` };
 export default function AdminPage() {
   return (
     <main className="container mx-auto px-4 py-8">
-      <Suspense fallback={<div className="animate-pulse h-8 w-32 bg-muted rounded" />}>
+      <Suspense
+        fallback={<div className="animate-pulse h-8 w-32 bg-muted rounded" />}
+      >
         <AdminInnehall />
       </Suspense>
     </main>

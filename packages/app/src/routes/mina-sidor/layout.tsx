@@ -30,11 +30,7 @@ export default function MinaSidorLayout({
   );
 }
 
-async function MinaSidorGate({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+async function MinaSidorGate({ children }: { children: React.ReactNode }) {
   const session = await auth.api.getSession({ headers: await headers() });
 
   let isExpired = false;
