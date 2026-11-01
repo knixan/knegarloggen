@@ -90,6 +90,27 @@ pnpm db:admin <e-post>       # gör ett konto till admin
 3. Ändringar i UI: säg tydligt vad du **inte** har kunnat testa (t.ex. inloggade sidor).
 4. Kanban är uppdaterad (se nedan).
 5. Du har skrivit ett commit-meddelande.
+6. Du har avslutat med ett "Lär dig"-block (se nedan), om uppgiften var större än en småfix.
+
+## Lärande
+
+Användaren vill fräscha upp och fördjupa sina kunskaper medan hen bygger – inte bara få koden skriven. Avsluta därför varje **större** uppgift (ny funktion, buggfix med en lärdom, säkerhet, databas, arkitektur) med ett kort block, **efter** sammanfattning och commit-meddelande:
+
+```
+**Lär dig: <ämne>**
+**Fakta:** en sak från koden du just skrev, med länk till filen/raden.
+**Varför:** varför man gör så – och vad som händer om man inte gör det.
+**Frågor:**
+1. en fråga om just den här koden (förstå, förutsäga eller hitta i koden),
+2. en fråga till – gärna en vanlig intervjufråga inom samma ämne.
+```
+
+- **Max ca 10 rader och 2 frågor.** Hoppa över för småfix (stavfel, formatering, kanban, konfig utan lärdom).
+- **Utgå från det som just byggdes**, inte allmänna övningar. Rotera ämnen: TypeScript, Prisma/PostgreSQL, Next.js, säkerhet, arkitektur, testning, verktyg (git, pnpm, CI).
+- **Avslöja inte svaren.** Vänta på användarens svar, rätta kort (rätt/delvis/fel + det viktigaste i 2–4 meningar). Säger hen "vet inte": ledtråd först.
+- **Logga** varje block i `.claude/larande/logg.md` (privat, gitignore) i samma format som de som redan finns, och uppdatera status när användaren har svarat (`ny` → `rätt`/`delvis`/`fel` + datum). Frågor med `fel` tas upp igen i ett senare block eller i `/quiz`.
+- **Nivå:** användaren kan bygga projekt och förstår helheten, men har skrivit lite kod själv på sistone. Svarar hen lätt rätt – gå djupare (avvägningar, alternativ). Svarar hen fel – enklare och mer konkret.
+- Användaren styr: "hoppa över" hoppar över ett block, "pausa lärandet" stänger av blocken tills hen säger till, "mer om det här" ger en fördjupning. `/quiz` ger 5 repetitionsfrågor ur loggen (`.claude/skills/quiz`, privat).
 
 ## Git
 

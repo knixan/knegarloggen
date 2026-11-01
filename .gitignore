@@ -50,3 +50,7 @@ next-env.d.ts
 
 # prisma generated client (per-app, regenerated via `prisma generate`)
 **/src/generated/prisma
+
+# Privat lärande (AGENTS.md § Lärande): lärlogg och /quiz-skill
+.claude/larande/
+.claude/skills/quiz/
