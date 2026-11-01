@@ -1,156 +1,60 @@
 # Knegarloggen
 
+[![CI](https://github.com/knixan/knegarloggen/actions/workflows/ci.yml/badge.svg)](https://github.com/knixan/knegarloggen/actions/workflows/ci.yml)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js)](https://nextjs.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
 [![Prisma](https://img.shields.io/badge/Prisma-v7-2D3748?style=flat-square&logo=prisma)](https://www.prisma.io/)
 [![pnpm](https://img.shields.io/badge/pnpm-workspaces-F69220?style=flat-square&logo=pnpm)](https://pnpm.io/)
-[![License](https://img.shields.io/badge/License-Privat-gray?style=flat-square)](LICENSE)
 
-Monorepo (pnpm workspaces) med jobblogg- och fakturaverktyg för svenska hantverkare, frilansare, konsulter och hushållsnära tjänster. Håll koll på kunder, jobb/uppdrag, material, resor, arbetstid och fakturor – allt på ett ställe.
+Monorepo med tre jobblogg- och fakturaverktyg för svenska småföretagare. Håll koll på kunder, jobb, material, resor, arbetstid och fakturor på ett ställe.
 
 ---
 
 ## Appar
 
-| App | Målgrupp | Beskrivning |
-|-----|----------|-------------|
-| [`apps/knegarloggen`](apps/knegarloggen) | Hantverkare | Jobbhantering med artiklar/material, ROT-avdrag och milersättning |
-| [`apps/giggerloggen`](apps/giggerloggen) | Frilansare & konsulter | Uppdragshantering (konsulting, design, utbildning, IT, juridik m.fl.) — inget ROT/RUT |
-| [`apps/hemfixloggen`](apps/hemfixloggen) | Städ & trädgård | Uppdragshantering med RUT-avdrag (städning, trädgårdsskötsel, flyttstädning m.fl.) |
+| App | Målgrupp | Skatteavdrag |
+|-----|----------|--------------|
+| [`apps/knegarloggen`](apps/knegarloggen) | Hantverkare | ROT 30 % |
+| [`apps/hemfixloggen`](apps/hemfixloggen) | Hushållsnära tjänster (städ, trädgård m.m.) | RUT 50 % |
+| [`apps/giggerloggen`](apps/giggerloggen) | Frilansare och konsulter | inget |
 
-Apparna delar samma tekniska grund (Next.js, Prisma, Better Auth, Stripe) men är **helt separata produkter**: egen databas, eget auth och egna miljövariabler per app. Stripe-priser/webhooks är separata per app även om de kan ligga på samma Stripe-konto. Vilken avdragstyp (ROT/RUT/ingen) varje app stödjer är medvetet — se [Databasmodeller](#databasmodeller).
+Apparna delar **all kod** i `packages/app` och skiljer sig bara i startsida, färger, bilder och [`brand.ts`](packages/app/src/brand.ts) (namn, logga, målgrupp och skatteavdrag). Varje app är ändå en egen produkt med egen databas, egna miljövariabler och eget Stripe-pris.
+
+ROT och RUT blandas aldrig: varje app har ett skatteavdrag eller inget.
 
 ---
 
 ## Funktioner
 
-- **Jobb-/uppdragshantering** – Skapa och redigera med status (pågående / utfört / fakturerat / betalt)
-- **Kundregister** – Privatpersoner och företagskunder med adress, personnummer/org.nummer
-- **Artiklar/material** – Artikelnummer, återförsäljare, inköpspris och utpris (Knegarloggen)
-- **Reslogg** – Körda sträckor per datum med automatisk milersättning
-- **Arbetstid** – Arbetspass per datum med automatisk timprisberäkning
-- **Övriga kostnader** – Fri rad för förbrukningsmaterial, hyrd utrustning m.m.
-- **Faktura som PDF/utskrift** – Med logotyp, automatiskt fakturanummer, moms och ROT-/RUT-avdrag
-- **Skicka faktura via e-post** – Skickas med Resend, med företagets avsändare och svarskopia
-- **ROT-avdrag** (Knegarloggen) – 30 % av arbetskostnad inkl. moms enligt Skatteverkets regler
-- **RUT-avdrag** (Hemfixloggen) – 50 % av arbetskostnad inkl. moms. Satsen har ändrats historiskt, så dubbelkolla mot aktuella Skatteverket-regler innan produktionsdrift (`RUT_AVDRAG_RATE` i `uppdrag-schema.ts`)
-- **Fast pris** – Fakturera ett fast pris istället för beräknad summa
-- **Bilder** – Ladda upp jobb-/uppdragsfoton via UploadThing (Knegarloggen, Hemfixloggen)
-- **Prenumeration** – Gratis provperiod, därefter via Stripe
-- **Självbetjäning** – Stripe Billing Portal för att hantera/avsluta abonnemang
-- **Admin** – Rollbaserad adminpanel för användarhantering
-- **GDPR** – Kontoborttagning raderar all data inklusive filer
-- **Mörkt/ljust läge** – Systemanpassat tema
+- **Översikt** – nyckeltal (pågående jobb, timmar, att fakturera, obetalt), att göra-listor och varningar för saknade uppgifter
+- **Jobb** – status (pågående / utfört / fakturerat / betalt), arbetstid, resor, material med inköpspris och artikelnummer, övriga kostnader, bilder och fast pris
+- **Kundregister** – privatpersoner och företag. Fastighetsuppgifter för ROT visas bara i Knegarloggen
+- **Faktura** – förhandsvisning, utskrift och PDF från samma fakturamodell, med logga, fakturanummer, moms och ROT-/RUT-avdrag
+- **ROT/RUT** – preliminärt avdrag på arbetskostnaden inkl. moms, i jobbformuläret och på fakturan
+- **Prenumeration** – 30 dagars provperiod, sedan Stripe. Kontrolleras både i UI och i varje server action
+- **Admin** – användare och roller
+- **GDPR** – radera konto tar bort all data och alla filer (och avbryts om Stripe-prenumerationen inte kan avslutas)
+- **Mobil** – flikrad längst ner med ikoner, mörkt/ljust läge
 
 ---
 
 ## Teknisk stack
 
-| Lager       | Teknik                        |
-|-------------|-------------------------------|
-| Monorepo    | pnpm workspaces               |
-| Framework   | Next.js 16 (App Router)       |
-| Språk       | TypeScript                    |
-| Styling     | Tailwind CSS v4 + shadcn/ui   |
-| Formulär    | React Hook Form + Zod         |
-| ORM         | Prisma 7                      |
-| Databas     | PostgreSQL                    |
-| Auth        | Better Auth                   |
-| Betalning   | Stripe (subscriptions)        |
-| E-post      | Resend                        |
-| Filuppl.    | UploadThing                   |
-| PDF         | @react-pdf/renderer           |
-| Deploy      | Vercel                        |
-
----
-
-## Kom igång
-
-### Förutsättningar
-
-- Node.js 20+
-- [pnpm](https://pnpm.io/) 11+
-- En PostgreSQL-databas per app (t.ex. [Neon](https://neon.tech))
-- Konton hos [Stripe](https://stripe.com), [Resend](https://resend.com) och [UploadThing](https://uploadthing.com)
-
-### Installation
-
-```bash
-git clone https://github.com/knixan/knegarloggen.git
-cd knegarloggen
-pnpm install
-```
-
-### Miljövariabler
-
-Varje app har sin **egen** `.env`-fil i sin egen mapp (inte en delad fil i roten) – appar har olika databaser, auth-secrets och Stripe-priser.
-
-```bash
-cp apps/knegarloggen/.env.example apps/knegarloggen/.env
-cp apps/giggerloggen/.env.local.example apps/giggerloggen/.env.local
-cp apps/hemfixloggen/.env.local.example apps/hemfixloggen/.env.local
-```
-
-```env
-# Databas
-DATABASE_URL="postgresql://USER:PASSWORD@HOST/dbnamn?sslmode=require"
-
-# Better Auth
-BETTER_AUTH_SECRET="minst-32-tecken-lång-hemlighet"  # openssl rand -base64 32
-NEXT_PUBLIC_APP_URL="http://localhost:3000"
-
-# E-post (Resend) – verifiera din domän på resend.com/domains
-RESEND_API_KEY="re_..."
-RESEND_FROM="noreply@dindomän.se"
-
-# Betalning (Stripe)
-STRIPE_SECRET_KEY="sk_test_..."
-STRIPE_WEBHOOK_SECRET="whsec_..."   # från: stripe listen --print-secret
-STRIPE_PRICE_ID="price_..."
-
-# Filuppladdning (UploadThing)
-UPLOADTHING_TOKEN="..."
-```
-
-I produktion – sätt `NEXT_PUBLIC_APP_URL` till appens faktiska domän. `NEXT_PUBLIC_`-variabler bäddas in vid byggtid.
-
-### Databas
-
-Kör migrationer per app:
-
-```bash
-pnpm --filter knegarloggen exec prisma migrate deploy
-pnpm --filter giggerloggen exec prisma migrate deploy
-pnpm --filter hemfixloggen exec prisma migrate deploy
-```
-
-> Första gången en app kopplas till en helt tom databas finns ingen migrering att köra `deploy` mot. Kör då `pnpm --filter <app> exec prisma migrate dev --name init` istället för att skapa och applicera den första migreringen.
-
-### Stripe webhook lokalt
-
-```bash
-# Knegarloggen (port 3000)
-stripe listen --forward-to localhost:3000/api/stripe/webhook
-
-# Giggerloggen (annan port, t.ex. 3001)
-stripe listen --forward-to localhost:3001/api/stripe/webhook
-
-# Hemfixloggen (annan port, t.ex. 3002)
-stripe listen --forward-to localhost:3002/api/stripe/webhook
-```
-
-### Starta
-
-```bash
-pnpm dev                    # Startar alla appar parallellt
-pnpm dev:knegarloggen       # Endast Knegarloggen
-pnpm dev:giggerloggen       # Endast Giggerloggen
-pnpm dev:hemfixloggen       # Endast Hemfixloggen
-```
-
-Alla appars dev-server default:ar till port 3000 – kör bara en åt gången med `pnpm dev`, eller starta dem separat i egna terminaler med `--port` om du vill köra flera samtidigt.
-
-Öppna [http://localhost:3000](http://localhost:3000).
+| Lager | Teknik |
+|---|---|
+| Monorepo | pnpm workspaces + catalog (gemensamma versioner) |
+| Framework | Next.js 16 (App Router, Cache Components) |
+| Språk | TypeScript |
+| Styling | Tailwind CSS v4 + shadcn/ui |
+| Formulär | React Hook Form + zod 4 |
+| Databas | PostgreSQL (Neon) + Prisma 7 |
+| Auth | Better Auth |
+| Betalning | Stripe |
+| E-post | Resend |
+| Filer | UploadThing |
+| PDF | @react-pdf/renderer |
+| Test | Vitest |
+| CI | GitHub Actions |
 
 ---
 
@@ -159,98 +63,151 @@ Alla appars dev-server default:ar till port 3000 – kör bara en åt gången me
 ```
 knegarloggen/
 ├── apps/
-│   ├── knegarloggen/              # Jobblogg för hantverkare
-│   │   ├── src/
-│   │   │   ├── app/
-│   │   │   │   ├── api/
-│   │   │   │   │   ├── auth/[...all]/     # Better Auth handler
-│   │   │   │   │   ├── stripe/            # Checkout, portal, webhook
-│   │   │   │   │   └── uploadthing/       # Filuppladdning
-│   │   │   │   ├── logga-in/ registrera/
-│   │   │   │   ├── admin/                 # Adminpanel (kräver roll "admin")
-│   │   │   │   └── mina-sidor/            # Skyddade sidor (jobb, kunder, företag, inställningar)
-│   │   │   ├── components/
-│   │   │   │   ├── button/                # Tema-toggle (re-export från @knegarloggen/ui)
-│   │   │   │   ├── minasidor/             # Affärslogik-UI: jobb, kunder, faktura, översikt
-│   │   │   │   ├── site/                  # Landningssida (hero, features, navbar, footer)
-│   │   │   │   └── ui/                    # Re-export-stubbar mot @knegarloggen/ui
-│   │   │   ├── lib/                       # auth, prisma, stripe, email, env, job-actions/-schema
-│   │   │   └── types/
-│   │   └── prisma/                        # schema.prisma, migrations/, seed.ts
-│   ├── giggerloggen/               # Uppdragslogg för frilansare & konsulter
-│   │   └── (samma struktur som ovan, med "uppdrag" istället för "jobb", ingen seed.ts)
-│   └── hemfixloggen/               # Uppdragslogg för städ & trädgård (RUT)
-│       └── (samma struktur som giggerloggen, med RUT istället för inget avdrag)
+│   ├── knegarloggen/            # Tunn app: startsida, färger, bilder
+│   │   ├── src/app/
+│   │   │   ├── page.tsx         # Startsidan (egen per app)
+│   │   │   ├── globals.css      # Importerar det delade temat + appens färger
+│   │   │   └── …                # Tunna route-filer → @knegarloggen/app/routes/…
+│   │   ├── src/components/site/ # Startsidans komponenter (hero, features …)
+│   │   ├── src/proxy.ts         # Inloggningsskydd (matcher + delad logik)
+│   │   ├── public/              # Logga och bilder
+│   │   └── next.config.ts       # NEXT_PUBLIC_APP väljer märke
+│   ├── giggerloggen/            # Samma upplägg
+│   └── hemfixloggen/            # Samma upplägg
 ├── packages/
-│   ├── ui/                        # Delade shadcn-komponenter (@knegarloggen/ui)
-│   ├── stripe/                    # Delad Stripe-klient (@knegarloggen/stripe)
-│   └── auth/                      # Delad Better Auth-konfiguration (@knegarloggen/auth)
-├── pnpm-workspace.yaml
+│   ├── app/                     # ALLT gemensamt (@knegarloggen/app)
+│   │   ├── src/brand.ts         # Skillnaderna mellan apparna
+│   │   ├── src/routes/          # Sidor och API-routes (mina sidor, admin, inloggning …)
+│   │   ├── src/components/      # Mina sidor, faktura, navbar, footer
+│   │   ├── src/lib/             # Server actions, beräkningar, auth, Stripe, e-post, uppladdning
+│   │   ├── src/theme.css        # Delat Tailwind-tema
+│   │   └── prisma/              # Ett schema + migreringar för alla appar
+│   ├── ui/                      # shadcn-komponenter (@knegarloggen/ui)
+│   ├── auth/                    # createAuth för Better Auth
+│   ├── stripe/                  # Stripe-klient
+│   └── config/                  # Delad tsconfig och ESLint
+├── .claude/                     # Hooks för AI-agenter (se AGENTS.md)
+├── .github/workflows/ci.yml
+├── AGENTS.md                    # Regler för AI-agenter
+├── pnpm-workspace.yaml          # Workspaces, versioner (catalog), overrides
 └── package.json
+```
+
+En ny funktion byggs i `packages/app`. Om apparna ska skilja sig åt läggs det till i `brand.ts`, inte som kopierad kod.
+
+---
+
+## Kom igång
+
+### Förutsättningar
+
+- Node.js 24
+- [pnpm](https://pnpm.io/) 11
+- En PostgreSQL-databas per app, t.ex. [Neon](https://neon.tech)
+- Konton hos [Stripe](https://stripe.com), [Resend](https://resend.com) och [UploadThing](https://uploadthing.com)
+
+### Installation
+
+```bash
+git clone https://github.com/knixan/knegarloggen.git
+cd knegarloggen
+pnpm install        # genererar även Prisma-klienten (postinstall i packages/app)
+```
+
+### Miljövariabler
+
+Varje app har en egen `.env` i sin mapp, med egen databas, auth-hemlighet och Stripe-pris:
+
+```bash
+cp apps/knegarloggen/.env.example apps/knegarloggen/.env
+cp apps/giggerloggen/.env.example apps/giggerloggen/.env
+cp apps/hemfixloggen/.env.example apps/hemfixloggen/.env
+```
+
+```env
+DATABASE_URL="postgresql://USER:PASSWORD@HOST/db?sslmode=require"
+
+BETTER_AUTH_SECRET="minst-32-tecken"        # openssl rand -base64 32
+BETTER_AUTH_URL="http://localhost:3000"
+NEXT_PUBLIC_APP_URL="http://localhost:3000"  # appens egen port/domän
+
+RESEND_API_KEY="re_..."
+RESEND_FROM="noreply@dindomän.se"
+
+STRIPE_SECRET_KEY="sk_test_..."
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_..."
+STRIPE_PRICE_ID="price_..."
+STRIPE_WEBHOOK_SECRET="whsec_..."            # stripe listen --print-secret
+
+UPLOADTHING_TOKEN="..."
+```
+
+`NEXT_PUBLIC_`-variabler bäddas in när appen byggs. Sätt `NEXT_PUBLIC_APP_URL` till rätt domän i produktion.
+
+### Databas
+
+Alla appar använder samma schema (`packages/app/prisma/schema.prisma`) men var sin databas. Kör kommandona i appens mapp, så används den appens `.env`:
+
+```bash
+cd apps/knegarloggen
+pnpm db:deploy                  # kör migreringarna
+pnpm db:migrate                 # skapa en ny migrering efter schemaändring
+pnpm db:reset                   # nollställ databasen – raderar ALL data
+pnpm db:seed                    # demodata
+pnpm db:admin din@epost.se      # gör ett konto till admin
+```
+
+### Starta
+
+```bash
+pnpm dev:knegarloggen
+pnpm dev:giggerloggen
+pnpm dev:hemfixloggen
+```
+
+Alla appar startar på port 3000 som standard. Kör en i taget, eller ge dem olika portar (`pnpm --filter giggerloggen dev --port 3001`) och matcha `NEXT_PUBLIC_APP_URL` i appens `.env`.
+
+### Stripe-webhook lokalt
+
+```bash
+stripe listen --forward-to localhost:3000/api/stripe/webhook
 ```
 
 ---
 
-## Databasmodeller
+## Kontroller och CI
 
-| Modell        | Beskrivning |
-|---------------|-------------|
-| `User`        | Hanteras av Better Auth. Har `role`-fält (`user` / `admin`). |
-| `Company`     | Företagsuppgifter, fakturainställningar och logotyp per användare. |
-| `Customer`    | Privat- eller företagskund kopplad till ett företag. |
-| `Job` / `Uppdrag` | Jobb/uppdrag med status, prissättning, fakturanummer och avdragsflagga (`rotAvdrag` i Knegarloggen, `rutAvdrag` i Hemfixloggen — inget avdrag i Giggerloggen). |
-| `Article`     | Materialrad per jobb (Knegarloggen). |
-| `Trip` / `Resa` | Resrad per datum. |
-| `WorkSession` / `Arbetspass` | Arbetspass per datum. |
-| `OvrigKostnad`| Övrig kostnad per jobb/uppdrag. |
-| `JobImage` / `UppdragImage` | Bild uppladdad via UploadThing (Knegarloggen, Hemfixloggen). |
-| `Subscription`| Stripe-prenumeration med status och perioder. |
+```bash
+pnpm type-check     # TypeScript i alla appar och paket
+pnpm lint           # ESLint
+pnpm test           # Vitest – beräkningar, moms, ROT/RUT, faktura, validering
+pnpm build          # Bygger alla tre apparna
+```
+
+[CI](.github/workflows/ci.yml) kör samma steg vid varje push till `main` och på pull requests.
 
 ---
 
 ## Prenumerationsflöde
 
-1. Användare registrerar sig → provperiod skapas automatiskt
-2. Proven visas i layouten via `TrialGate` – spärrar UI när provperiod gått ut
-3. Användaren klickar "Lägg till betalning" → Stripe Checkout öppnas
-4. Stripe-webhook (`checkout.session.completed`) aktiverar prenumerationen i DB
-5. Löpande events (`customer.subscription.updated`, `customer.subscription.deleted`) håller DB synkad
-6. Stripe Billing Portal används för att ändra kortuppgifter eller avsluta
+1. Användaren registrerar sig och får 30 dagars provperiod
+2. `TrialGate` spärrar mina sidor när provperioden har gått ut. Server actions kräver aktiv prenumeration (utom radera konto)
+3. "Lägg till betalning" öppnar Stripe Checkout
+4. Webhooken (`checkout.session.completed`, `customer.subscription.*`) håller databasen synkad
+5. Stripe Billing Portal används för kortbyte och uppsägning
 
 ---
 
-## Admin
+## Arbeta med AI-agenter
 
-Adminpanelen nås på `/admin` i respektive app och kräver `role = "admin"`. Sätt första admin direkt i databasen:
+[`AGENTS.md`](AGENTS.md) innehåller reglerna för AI-agenter (Claude Code m.fl.): struktur, domänregler, länkar till dokumentation för rätt versioner, vad "klart" betyder, databasregler och hur kanban uppdateras. `CLAUDE.md` importerar den.
 
-```sql
-UPDATE "user" SET role = 'admin' WHERE email = 'din@epost.se';
-```
+Hooks i [`.claude/`](.claude/settings.json):
 
----
+- **`blockera-git.mjs`** – stoppar `git commit` och `git push` från agenter (du committar själv)
+- **`linta-fil.mjs`** – kör ESLint på varje fil en agent ändrar och skickar tillbaka felen direkt
 
-## Scripts
-
-Körs från roten via pnpms inbyggda workspace-stöd (`--filter` kör mot en specifik app):
-
-```bash
-pnpm dev                        # Starta alla appar i dev-läge
-pnpm dev:knegarloggen           # Starta endast Knegarloggen
-pnpm dev:giggerloggen           # Starta endast Giggerloggen
-pnpm dev:hemfixloggen           # Starta endast Hemfixloggen
-pnpm build                      # Bygg alla appar (prisma generate + next build)
-pnpm build:knegarloggen         # Bygg endast Knegarloggen
-pnpm build:giggerloggen         # Bygg endast Giggerloggen
-pnpm build:hemfixloggen         # Bygg endast Hemfixloggen
-pnpm lint                       # ESLint för alla appar
-pnpm type-check                 # TypeScript-kontroll för alla appar
-```
-
-Per-app scripts (kör inifrån `apps/<app>` eller med `pnpm --filter <app>`):
-
-```bash
-npm run db:seed                 # Seed-data (Knegarloggen, kräver prisma/seed.ts)
-```
+Planering sker i [GitHub Project 15](https://github.com/users/knixan/projects/15), med flikar per app.
 
 ---
 
