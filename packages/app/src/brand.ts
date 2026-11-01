@@ -50,7 +50,7 @@ export const BRANDS: Record<AppId, Brand> = {
     namnDelar: ["Knegar", "Loggen"],
     beskrivning: "Jobblogg för hantverkare",
     malgrupp: "hantverkare",
-    logo: "/knegaloggen-logga.png",
+    logo: "/knegarloggen-logga-v2.png",
     skatteavdrag: ROT,
     prisPerManad: 99,
   },
