@@ -1,4 +1,5 @@
-# Knegarloggen
+# Tre Syskon Appar för att Logga Tjänster och Jobb
+## Knegarloggen - Giggerloggen - Hemfixloggen
 
 [![CI](https://github.com/knixan/knegarloggen/actions/workflows/ci.yml/badge.svg)](https://github.com/knixan/knegarloggen/actions/workflows/ci.yml)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js)](https://nextjs.org/)
