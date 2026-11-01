@@ -121,6 +121,8 @@ export function FakturaPdf({ data }: { data: FakturaData }) {
         <View style={S.header}>
           <View>
             {data.foretag.logoUrl && (
+              // react-pdf:s <Image> har ingen alt-prop – regeln gäller HTML-<img>.
+              // eslint-disable-next-line jsx-a11y/alt-text
               <Image src={data.foretag.logoUrl} style={S.logo} />
             )}
             <Text style={S.companyName}>{data.foretag.namn}</Text>
@@ -132,7 +134,7 @@ export function FakturaPdf({ data }: { data: FakturaData }) {
           </View>
 
           <View style={S.fakturaRight}>
-            <Text style={S.fakturaTitle}>FAKTURA</Text>
+            <Text style={S.fakturaTitle}>{data.titel}</Text>
             <View style={{ marginTop: 8 }}>
               {data.infoRader.map(({ label, value, fet }) => (
                 <View style={S.fakturaRow} key={label}>

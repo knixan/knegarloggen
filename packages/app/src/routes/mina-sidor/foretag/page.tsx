@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "../../../lib/auth";
-import { getCompanySettings } from "../../../lib/job-actions";
+import { getCompanySettings } from "../../../lib/jobb-data";
 import CompanySettingsForm from "../../../components/minasidor/foretag/company-settings-form";
 
 export default function ForetagsuppgifterPage() {

@@ -18,6 +18,11 @@ import { Badge } from "@knegarloggen/ui/badge";
 import authClient from "../../../lib/auth-client";
 import DeleteAccountButton from "./delete-account-button";
 import { format } from "date-fns";
+import { brand } from "../../../brand";
+import {
+  evaluateSubscription,
+  kanStartaCheckout,
+} from "../../../lib/prenumeration-regel";
 import { sv } from "date-fns/locale";
 
 type Subscription = {
@@ -182,10 +187,17 @@ function PrenumerationSection({
     }
   }
 
+  const pris = `${brand.prisPerManad} kr`;
+  // Samma regel som spärren i layouten och server actions.
+  const { isExpired } = evaluateSubscription(
+    subscription && {
+      status: subscription.status,
+      trialEnd: subscription.trialEnd ? new Date(subscription.trialEnd) : null,
+    },
+  );
+  const harStripePrenumeration = !kanStartaCheckout(subscription);
   const isTrialExpired =
-    subscription?.status === "trialing" &&
-    subscription.trialEnd !== null &&
-    new Date(subscription.trialEnd) < new Date();
+    subscription?.status === "trialing" && isExpired && !harStripePrenumeration;
 
   const renderContent = () => {
     if (!subscription || isTrialExpired) {
@@ -193,8 +205,8 @@ function PrenumerationSection({
         <>
           <CardDescription>
             {isTrialExpired
-              ? "Provperioden har gått ut. Lägg till kortuppgifter för att fortsätta — 99 kr/månad, ingen bindningstid."
-              : "Första månaden är gratis utan att ange kortuppgifter. Därefter 99 kr/månad."}
+              ? `Provperioden har gått ut. Lägg till kortuppgifter för att fortsätta — ${pris}/månad, ingen bindningstid.`
+              : `Första månaden är gratis utan att ange kortuppgifter. Därefter ${pris}/månad.`}
           </CardDescription>
           <CardContent className="pt-0">
             <Button onClick={startCheckout} disabled={isPending}>
@@ -207,6 +219,24 @@ function PrenumerationSection({
 
     const { status, trialEnd, currentPeriodEnd, cancelAtPeriodEnd } =
       subscription;
+
+    // Betalat under provperioden: kortet är registrerat, första dragningen
+    // sker när provperioden tar slut. Ändringar görs i kundportalen.
+    if (status === "trialing" && harStripePrenumeration) {
+      return (
+        <>
+          <CardDescription>
+            Betalning är registrerad. Provperioden pågår till{" "}
+            {formatDatum(trialEnd)}, därefter {pris}/månad.
+          </CardDescription>
+          <CardContent className="pt-0">
+            <Button variant="outline" onClick={openPortal} disabled={isPending}>
+              {isPending ? "Laddar..." : "Hantera prenumeration"}
+            </Button>
+          </CardContent>
+        </>
+      );
+    }
 
     if (status === "trialing") {
       return (
@@ -234,7 +264,7 @@ function PrenumerationSection({
           <CardDescription>
             {cancelAtPeriodEnd
               ? `Prenumerationen avslutas ${formatDatum(currentPeriodEnd)}. Du har tillgång till och med det datumet.`
-              : `Din prenumeration är aktiv. Nästa faktura ${formatDatum(currentPeriodEnd)} — 99 kr.`}
+              : `Din prenumeration är aktiv. Nästa faktura ${formatDatum(currentPeriodEnd)} — ${pris}.`}
           </CardDescription>
           <CardContent className="pt-0">
             <Button variant="outline" onClick={openPortal} disabled={isPending}>

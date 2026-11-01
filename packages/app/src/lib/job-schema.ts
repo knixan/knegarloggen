@@ -45,40 +45,76 @@ export type Customer = CustomerInput & {
 // Jobb-schema
 // ============================================================
 
+// Övre gränser – skyddar mot orimliga belopp och enorma anrop.
+const MAX_RADER = 200;
+const MAX_BILDER = 30;
+const MAX_BELOPP = 10_000_000;
+
+/** ÅÅÅÅ-MM-DD som är ett riktigt datum (inte t.ex. 2026-02-31). */
+export const datumSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Ogiltigt datum")
+  .refine((d) => {
+    const dt = new Date(`${d}T00:00:00Z`);
+    return !Number.isNaN(dt.getTime()) && dt.toISOString().startsWith(d);
+  }, "Ogiltigt datum");
+
+/** Datum från formuläret som UTC-midnatt – samma som @db.Date i databasen. */
+export function tillDbDatum(datum: string) {
+  return new Date(`${datum}T00:00:00Z`);
+}
+
 export const articleSchema = z.object({
   id: z.string().optional(),
   namn: z.string().trim().min(1, "Namn krävs").max(120),
   artikelnr: z.string().trim().max(50).optional().default(""),
   aterforsaljare: z.string().trim().max(120).optional().default(""),
-  inkopspris: z.coerce.number().min(0).optional().default(0),
-  pris: z.coerce.number().min(0, "Pris får inte vara negativt"),
-  antal: z.coerce.number().min(1, "Minst 1").default(1),
+  inkopspris: z.coerce.number().min(0).max(MAX_BELOPP).optional().default(0),
+  pris: z.coerce
+    .number()
+    .min(0, "Pris får inte vara negativt")
+    .max(MAX_BELOPP, "För stort belopp"),
+  antal: z.coerce
+    .number()
+    .int("Antal måste vara ett heltal")
+    .min(1, "Minst 1")
+    .max(100_000)
+    .default(1),
 });
 
 export const resaSchema = z.object({
   id: z.string().optional(),
-  datum: z.string().min(1, "Datum krävs"),
-  stracka: z.coerce.number().min(0, "Sträcka får inte vara negativ"),
+  datum: datumSchema,
+  stracka: z.coerce
+    .number()
+    .min(0, "Sträcka får inte vara negativ")
+    .max(10_000, "Orimligt lång sträcka"),
 });
 
 export const arbetstidSchema = z.object({
   id: z.string().optional(),
-  datum: z.string().min(1, "Datum krävs"),
-  timmar: z.coerce.number().min(0, "Timmar får inte vara negativt"),
+  datum: datumSchema,
+  timmar: z.coerce
+    .number()
+    .min(0, "Timmar får inte vara negativt")
+    .max(24, "Max 24 timmar per pass"),
 });
 
 export const ovrigKostnadSchema = z.object({
   id: z.string().optional(),
   beskrivning: z.string().trim().min(1, "Beskrivning krävs").max(200),
-  pris: z.coerce.number().min(0, "Pris får inte vara negativt"),
+  pris: z.coerce
+    .number()
+    .min(0, "Pris får inte vara negativt")
+    .max(MAX_BELOPP, "För stort belopp"),
 });
 
 export const jobSchema = z
   .object({
     customerId: z.string().optional(),
 
-    timpris: z.coerce.number().min(0).default(0),
-    milersattning: z.coerce.number().min(0).default(0),
+    timpris: z.coerce.number().min(0).max(100_000).default(0),
+    milersattning: z.coerce.number().min(0).max(1_000).default(0),
 
     skatteavdrag: z.boolean().default(false),
     pagaende: z.boolean().default(false),
@@ -86,18 +122,21 @@ export const jobSchema = z
     fakturerat: z.boolean().default(false),
     betalt: z.boolean().default(false),
 
-    artiklar: z.array(articleSchema).default([]),
-    resor: z.array(resaSchema).default([]),
-    arbetstider: z.array(arbetstidSchema).default([]),
-    ovrigaKostnader: z.array(ovrigKostnadSchema).default([]),
+    artiklar: z.array(articleSchema).max(MAX_RADER).default([]),
+    resor: z.array(resaSchema).max(MAX_RADER).default([]),
+    arbetstider: z.array(arbetstidSchema).max(MAX_RADER).default([]),
+    ovrigaKostnader: z.array(ovrigKostnadSchema).max(MAX_RADER).default([]),
 
     anteckningar: z.string().max(2000).optional().default(""),
     utfortArbete: z.string().max(2000).optional().default(""),
     planeratArbete: z.string().max(2000).optional().default(""),
 
-    bilder: z.array(z.object({ url: z.string(), key: z.string() })).default([]),
+    bilder: z
+      .array(z.object({ url: z.string(), key: z.string() }))
+      .max(MAX_BILDER)
+      .default([]),
 
-    fastPris: z.coerce.number().min(0).optional(),
+    fastPris: z.coerce.number().min(0).max(MAX_BELOPP).optional(),
   })
   .refine((data) => !(data.betalt && !data.fakturerat), {
     message: "Kan inte markera som betalt utan att ha fakturerat",

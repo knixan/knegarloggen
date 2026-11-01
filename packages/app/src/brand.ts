@@ -24,6 +24,8 @@ export type Brand = {
   /** Logga i appens public-mapp, eller null för bara namnet. */
   logo: string | null;
   skatteavdrag: Skatteavdrag | null;
+  /** Pris per månad exkl. moms, för texter. Det som dras styrs av STRIPE_PRICE_ID. */
+  prisPerManad: number;
 };
 
 const ROT: Skatteavdrag = {
@@ -50,6 +52,7 @@ export const BRANDS: Record<AppId, Brand> = {
     malgrupp: "hantverkare",
     logo: "/knegaloggen-logga.png",
     skatteavdrag: ROT,
+    prisPerManad: 99,
   },
   giggerloggen: {
     id: "giggerloggen",
@@ -60,6 +63,7 @@ export const BRANDS: Record<AppId, Brand> = {
     malgrupp: "frilansare och konsulter",
     logo: null,
     skatteavdrag: null,
+    prisPerManad: 99,
   },
   hemfixloggen: {
     id: "hemfixloggen",
@@ -69,6 +73,7 @@ export const BRANDS: Record<AppId, Brand> = {
     malgrupp: "företag inom hushållsnära tjänster",
     logo: null,
     skatteavdrag: RUT,
+    prisPerManad: 99,
   },
 };
 

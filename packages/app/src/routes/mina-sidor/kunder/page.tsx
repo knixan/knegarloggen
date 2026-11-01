@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "../../../lib/auth";
-import { getCustomers } from "../../../lib/job-actions";
+import { getCustomers } from "../../../lib/jobb-data";
 import { Button } from "@knegarloggen/ui/button";
 import { Card, CardContent } from "@knegarloggen/ui/card";
 import { Plus, Pencil, User, Building2, Phone, Mail } from "lucide-react";

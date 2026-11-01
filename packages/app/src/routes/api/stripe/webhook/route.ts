@@ -3,6 +3,17 @@ import { stripe } from "../../../../lib/stripe";
 import { prisma } from "../../../../lib/prisma";
 import { env } from "../../../../lib/env";
 import type Stripe from "stripe";
+import { brand } from "../../../../brand";
+import { tillhorAppen } from "../../../../lib/prenumeration-regel";
+
+/** Användaren måste finnas i den här appens databas – annars kraschar upsert. */
+async function anvandareFinns(userId: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true },
+  });
+  return Boolean(user);
+}
 
 function getPeriodEnd(sub: Stripe.Subscription): Date | null {
   const ts = sub.cancel_at ?? sub.items.data[0]?.current_period_end ?? null;
@@ -33,12 +44,14 @@ export async function POST(request: NextRequest) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
         if (session.mode !== "subscription") break;
+        // Apparna delar Stripe-konto – hoppa över andra appars händelser.
+        if (!tillhorAppen(session.metadata, brand.id)) break;
 
         const userId = session.metadata?.userId;
         const stripeCustomerId = session.customer as string;
         const stripeSubscriptionId = session.subscription as string;
 
-        if (!userId) break;
+        if (!userId || !(await anvandareFinns(userId))) break;
 
         const sub = await stripe.subscriptions.retrieve(stripeSubscriptionId);
 
@@ -67,8 +80,9 @@ export async function POST(request: NextRequest) {
 
       case "customer.subscription.updated": {
         const sub = event.data.object as Stripe.Subscription;
+        if (!tillhorAppen(sub.metadata, brand.id)) break;
         const userId = sub.metadata?.userId;
-        if (!userId) break;
+        if (!userId || !(await anvandareFinns(userId))) break;
 
         await prisma.subscription.upsert({
           where: { userId },
@@ -93,6 +107,7 @@ export async function POST(request: NextRequest) {
 
       case "customer.subscription.deleted": {
         const sub = event.data.object as Stripe.Subscription;
+        if (!tillhorAppen(sub.metadata, brand.id)) break;
         await prisma.subscription.updateMany({
           where: { stripeSubscriptionId: sub.id },
           data: { status: "canceled", cancelAtPeriodEnd: false },

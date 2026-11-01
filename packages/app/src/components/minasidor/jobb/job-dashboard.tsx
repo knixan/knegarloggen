@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Search } from "lucide-react";
 import JobList from "./job-list";
-import { deleteJob, getJobs } from "../../../lib/job-actions";
+import { deleteJob, hamtaFlerJobb } from "../../../lib/job-actions";
 import type { Job } from "../../../lib/job-schema";
 import { Input } from "@knegarloggen/ui/input";
 import { Button } from "@knegarloggen/ui/button";
@@ -144,7 +144,7 @@ export default function JobDashboard({
   function loadMore() {
     if (!cursor) return;
     startTransition(async () => {
-      const result = await getJobs(cursor);
+      const result = await hamtaFlerJobb(cursor);
       setAllJobs((prev) => [...prev, ...result.jobs]);
       setCursor(result.nextCursor);
     });

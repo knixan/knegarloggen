@@ -120,4 +120,53 @@ describe("jobSchema", () => {
         .success,
     ).toBe(false);
   });
+
+  it("nekar ogiltiga datum (annars kraschar Prisma med fel 500)", () => {
+    for (const datum of [
+      "",
+      "igår",
+      "2026-02-31",
+      "2026-13-01",
+      "31/10/2026",
+    ]) {
+      expect(
+        jobSchema.safeParse(jobb({ arbetstider: [{ datum, timmar: 1 }] }))
+          .success,
+      ).toBe(false);
+      expect(
+        jobSchema.safeParse(jobb({ resor: [{ datum, stracka: 10 }] })).success,
+      ).toBe(false);
+    }
+  });
+
+  it("nekar orimliga värden och för många rader", () => {
+    const artikel = jobb().artiklar[0];
+    expect(
+      jobSchema.safeParse(jobb({ artiklar: [{ ...artikel, antal: 1.5 }] }))
+        .success,
+    ).toBe(false);
+    expect(
+      jobSchema.safeParse(
+        jobb({ arbetstider: [{ datum: "2026-10-01", timmar: 25 }] }),
+      ).success,
+    ).toBe(false);
+    expect(
+      jobSchema.safeParse(
+        jobb({ artiklar: Array.from({ length: 201 }, () => artikel) }),
+      ).success,
+    ).toBe(false);
+  });
+});
+
+describe("skatteavdrag per app", () => {
+  it("sats 0 (Giggerloggen) ger inget avdrag även om flaggan är satt", () => {
+    const s = beräknaSummering({ ...jobb(), skatteavdrag: true }, 0);
+    expect(s.avdrag).toBe(0);
+    expect(s.attBetala).toBe(s.totalInklMoms);
+  });
+
+  it("RUT 50 % av arbetskostnaden inkl. moms", () => {
+    const s = beräknaSummering({ ...jobb(), skatteavdrag: true }, 0.5);
+    expect(s.avdrag).toBe(3750); // 6 000 × 1,25 × 0,5
+  });
 });

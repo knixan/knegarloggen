@@ -14,7 +14,7 @@ export function PdfKnapp({ data }: Props) {
   return (
     <PDFDownloadLink
       document={<FakturaPdf data={data} />}
-      fileName={`faktura-${data.ocr}.pdf`}
+      fileName={data.filnamn}
     >
       {({ loading }) => (
         <Button variant="outline" size="sm" disabled={loading} asChild={false}>

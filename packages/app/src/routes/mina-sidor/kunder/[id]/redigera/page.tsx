@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { headers } from "next/headers";
 import { redirect, notFound } from "next/navigation";
 import { auth } from "../../../../../lib/auth";
-import { getCustomer } from "../../../../../lib/job-actions";
+import { getCustomer } from "../../../../../lib/jobb-data";
 import CustomerForm from "../../../../../components/minasidor/kunder/customer-form";
 
 export default function RedigeraKundPage({

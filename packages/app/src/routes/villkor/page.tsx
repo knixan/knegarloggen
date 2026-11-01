@@ -7,7 +7,7 @@ export default function AnvandarvillkorPage() {
         Användarvillkor för {brand.namn}
       </h1>
       <p className="text-muted-foreground mb-8 italic">
-        Senast uppdaterad: 2024-05-20
+        Senast uppdaterad: 2026-11-01
       </p>
 
       <div className="space-y-8 text-foreground leading-relaxed">
@@ -137,8 +137,47 @@ export default function AnvandarvillkorPage() {
           </p>
         </section>
 
+        <section>
+          <h2 className="text-xl font-bold mb-3 border-b pb-1">
+            13. Personuppgiftsbiträdesavtal (PUB-avtal)
+          </h2>
+          <p>
+            När du registrerar uppgifter om dina kunder är ditt företag
+            personuppgiftsansvarigt och {brand.namn} personuppgiftsbiträde.
+            Genom att godkänna villkoren ingår vi detta avtal, där {brand.namn}{" "}
+            åtar sig att:
+          </p>
+          <ul className="list-disc pl-6 mt-2 space-y-1">
+            <li>
+              bara behandla uppgifterna för att tillhandahålla tjänsten och
+              enligt dina dokumenterade instruktioner,
+            </li>
+            <li>
+              se till att alla som behandlar uppgifterna har tystnadsplikt,
+            </li>
+            <li>
+              vidta lämpliga tekniska och organisatoriska säkerhetsåtgärder,
+            </li>
+            <li>
+              bara anlita de underbiträden som anges i integritetspolicyn och
+              informera om ändringar i förväg,
+            </li>
+            <li>
+              hjälpa dig att uppfylla de registrerades rättigheter (t.ex. utdrag
+              och radering),
+            </li>
+            <li>
+              meddela dig utan onödigt dröjsmål vid en personuppgiftsincident,
+            </li>
+            <li>
+              radera uppgifterna när du raderar ditt konto, och ge dig möjlighet
+              att ta ut dem innan dess.
+            </li>
+          </ul>
+        </section>
+
         <section className="bg-muted p-6 rounded-lg">
-          <h2 className="text-xl font-bold mb-3">13. Kontakt</h2>
+          <h2 className="text-xl font-bold mb-3">14. Kontakt</h2>
           <p>E-post: [Din e-postadress]</p>
           <p>Företag: [Företagsnamn]</p>
           <p>Organisationsnummer: [Organisationsnummer]</p>

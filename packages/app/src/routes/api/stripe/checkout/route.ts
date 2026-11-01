@@ -1,9 +1,14 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
+import { brand } from "../../../../brand";
 import { auth } from "../../../../lib/auth";
 import { stripe } from "../../../../lib/stripe";
 import { prisma } from "../../../../lib/prisma";
 import { env } from "../../../../lib/env";
+import {
+  kanStartaCheckout,
+  stripeTrialEnd,
+} from "../../../../lib/prenumeration-regel";
 
 export async function POST() {
   try {
@@ -17,8 +22,28 @@ export async function POST() {
 
     const existing = await prisma.subscription.findUnique({
       where: { userId: user.id },
-      select: { stripeCustomerId: true },
+      select: {
+        stripeCustomerId: true,
+        stripeSubscriptionId: true,
+        status: true,
+        trialEnd: true,
+      },
     });
+
+    // En prenumeration som redan löper ska ändras i kundportalen – en ny
+    // checkout skulle ge dubbla prenumerationer och dubbel debitering.
+    if (!kanStartaCheckout(existing)) {
+      return NextResponse.json(
+        {
+          error:
+            "Du har redan en prenumeration. Hantera den via Hantera prenumeration.",
+        },
+        { status: 409 },
+      );
+    }
+
+    // Märker allt med appen – apparna delar Stripe-konto (se webhooken).
+    const metadata = { userId: user.id, app: brand.id };
 
     let stripeCustomerId: string;
 
@@ -29,9 +54,9 @@ export async function POST() {
         {
           email: user.email,
           name: user.name,
-          metadata: { userId: user.id },
+          metadata,
         },
-        { idempotencyKey: `stripe-customer-${user.id}` },
+        { idempotencyKey: `stripe-customer-${brand.id}-${user.id}` },
       );
       stripeCustomerId = customer.id;
 
@@ -47,6 +72,13 @@ export async function POST() {
       });
     }
 
+    // Betalar man under provperioden ska resten av den följa med – första
+    // dragningen sker när provperioden tar slut.
+    const trialEnd =
+      existing?.status === "trialing"
+        ? stripeTrialEnd(existing.trialEnd)
+        : undefined;
+
     const checkoutSession = await stripe.checkout.sessions.create(
       {
         customer: stripeCustomerId,
@@ -59,22 +91,26 @@ export async function POST() {
           },
         ],
         subscription_data: {
-          metadata: { userId: user.id },
+          metadata,
+          ...(trialEnd ? { trial_end: trialEnd } : {}),
         },
-        metadata: { userId: user.id },
+        metadata,
         success_url: `${appUrl}/mina-sidor/installningar?checkout=success`,
         cancel_url: `${appUrl}/mina-sidor/installningar`,
         locale: "sv",
       },
       {
-        idempotencyKey: `checkout-${user.id}-${Math.floor(Date.now() / 60000)}`,
+        idempotencyKey: `checkout-${brand.id}-${user.id}-${Math.floor(Date.now() / 60000)}`,
       },
     );
 
     return NextResponse.json({ url: checkoutSession.url });
   } catch (err) {
+    // Detaljerna loggas – kunden får ett allmänt fel.
     console.error("Checkout-fel:", err);
-    const message = err instanceof Error ? err.message : "Okänt fel";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json(
+      { error: "Kunde inte starta betalningen. Försök igen om en stund." },
+      { status: 500 },
+    );
   }
 }

@@ -1,31 +1,7 @@
-import { differenceInDays } from "date-fns";
 import { prisma } from "./prisma";
+import { evaluateSubscription, nyProvperiod } from "./prenumeration-regel";
 
-type SubscriptionRow = { status: string; trialEnd: Date | null } | null;
-
-/**
- * Gemensam regel för om ett konto får använda appen.
- * Används både av layouten (TrialGate) och av server actions.
- */
-export function evaluateSubscription(subscription: SubscriptionRow) {
-  if (!subscription) return { isExpired: true, daysLeft: 0 };
-
-  const now = new Date();
-  const isActive =
-    subscription.status === "active" ||
-    (subscription.status === "trialing" &&
-      !!subscription.trialEnd &&
-      subscription.trialEnd > now);
-
-  if (!isActive) return { isExpired: true, daysLeft: 0 };
-
-  const daysLeft =
-    subscription.status === "trialing" && subscription.trialEnd
-      ? Math.max(0, differenceInDays(subscription.trialEnd, now))
-      : 30;
-
-  return { isExpired: false, daysLeft };
-}
+export { evaluateSubscription } from "./prenumeration-regel";
 
 export async function hasActiveSubscription(userId: string) {
   const subscription = await prisma.subscription.findUnique({
@@ -33,4 +9,17 @@ export async function hasActiveSubscription(userId: string) {
     select: { status: true, trialEnd: true },
   });
   return !evaluateSubscription(subscription).isExpired;
+}
+
+/**
+ * Skapar provperioden för ett nytt konto. Anropas av better-auth
+ * (databaseHooks.user.create.after) – oavsett hur kontot skapades.
+ * upsert + update: {} gör att en befintlig prenumeration aldrig skrivs över.
+ */
+export async function skapaProvperiod(userId: string) {
+  await prisma.subscription.upsert({
+    where: { userId },
+    create: { userId, ...nyProvperiod() },
+    update: {},
+  });
 }

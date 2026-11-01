@@ -167,7 +167,7 @@ pnpm dev:giggerloggen
 pnpm dev:hemfixloggen
 ```
 
-Alla appar startar på port 3000 som standard. Kör en i taget, eller ge dem olika portar (`pnpm --filter giggerloggen dev --port 3001`) och matcha `NEXT_PUBLIC_APP_URL` i appens `.env`.
+Varje app har en egen port – Knegarloggen 3000, Giggerloggen 3001, Hemfixloggen 3002 – så de kan köras samtidigt. `NEXT_PUBLIC_APP_URL` och `BETTER_AUTH_URL` i appens `.env` ska ha samma port.
 
 ### Stripe-webhook lokalt
 

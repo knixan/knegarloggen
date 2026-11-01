@@ -2,7 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
-import type { Prisma } from "../generated/prisma";
 import { UTApi } from "uploadthing/server";
 import { auth } from "./auth";
 import { prisma } from "./prisma";
@@ -13,8 +12,17 @@ import {
   type JobInput,
   type CustomerInput,
   type CompanyInput,
+  tillDbDatum,
 } from "./job-schema";
-import type { z } from "zod";
+import { brand } from "../brand";
+import { getJobs } from "./jobb-data";
+import {
+  allBelongToJob,
+  firstIssue,
+  ids,
+  isUploadThingUrl,
+  type UploadedFile,
+} from "./validering";
 
 import { stripe } from "./stripe";
 import { hasActiveSubscription } from "./subscription";
@@ -23,19 +31,6 @@ const utapi = new UTApi();
 const DEFAULT_COMPANY_NAME = "Mitt företag";
 const SUBSCRIPTION_EXPIRED =
   "Provperioden har gått ut – lägg till betalning för att fortsätta";
-
-type UploadedFile = { url: string; key: string };
-
-type JobWithRelations = Prisma.JobGetPayload<{
-  include: {
-    artiklar: true;
-    resor: true;
-    arbetspass: true;
-    images: true;
-    customer: true;
-    ovrigaKostnader: true;
-  };
-}>;
 
 async function getSession() {
   return auth.api.getSession({ headers: await headers() });
@@ -88,119 +83,28 @@ async function requireSession(): Promise<{ userId: string } | AuthError> {
   return { userId: session.user.id };
 }
 
-function mapCustomer(c: NonNullable<JobWithRelations["customer"]>) {
-  return {
-    id: c.id,
-    companyId: c.companyId,
-    typ: c.typ as "privat" | "foretag",
-    namn: c.namn,
-    adress: c.adress,
-    postnummer: c.postnummer,
-    ort: c.ort,
-    telefon: c.telefon,
-    epost: c.epost,
-    personnummer: c.personnummer,
-    foretagsnamn: c.foretagsnamn,
-    kontaktperson: c.kontaktperson,
-    orgNummer: c.orgNummer,
-    fastighetsbeteckning: c.fastighetsbeteckning,
-    lagenhetsnummer: c.lagenhetsnummer,
-    bostadsrattsforening: c.bostadsrattsforening,
-    skapad: c.createdAt.toISOString(),
-  };
-}
-
-function mapJob(j: JobWithRelations) {
-  return {
-    id: j.id,
-    customerId: j.customerId ?? undefined,
-    customer: j.customer ? mapCustomer(j.customer) : null,
-    skatteavdrag: j.skatteavdrag,
-    fakturanummer: j.fakturanummer ?? undefined,
-    timpris: j.timpris,
-    milersattning: j.milersattning,
-    fastPris: j.fastPris ?? undefined,
-    pagaende: j.pagaende,
-    utfort: j.utfort,
-    fakturerat: j.fakturerat,
-    betalt: j.betalt,
-    anteckningar: j.anteckningar,
-    utfortArbete: j.utfortArbete,
-    planeratArbete: j.planeratArbete,
-    artiklar: j.artiklar.map((a) => ({
-      id: a.id,
-      namn: a.namn,
-      artikelnr: a.artikelnr,
-      aterforsaljare: a.aterforsaljare,
-      inkopspris: a.inkopspris,
-      pris: a.pris,
-      antal: a.antal,
-    })),
-    resor: j.resor.map((r) => ({
-      id: r.id,
-      datum: r.datum.toISOString().slice(0, 10),
-      stracka: r.stracka,
-    })),
-    arbetstider: j.arbetspass.map((w) => ({
-      id: w.id,
-      datum: w.datum.toISOString().slice(0, 10),
-      timmar: w.timmar,
-    })),
-    ovrigaKostnader: j.ovrigaKostnader.map((k) => ({
-      id: k.id,
-      beskrivning: k.beskrivning,
-      pris: k.pris,
-    })),
-    bilder: j.images.map((img) => ({
-      url: img.url,
-      key: img.key,
-    })),
-    skapad: j.skapad.toISOString(),
-  };
-}
-
-function ids<T extends { id?: string }>(rows: T[]) {
-  return rows.flatMap((row) => (row.id ? [row.id] : []));
-}
-
-// Id:n kommer från klienten – varje id som skickas in måste tillhöra jobbet.
-function allBelongToJob<T extends { id?: string }>(
-  rows: T[],
-  existing: { id: string }[],
-) {
-  const known = new Set(existing.map((row) => row.id));
-  return ids(rows).every((id) => known.has(id));
-}
-
-function firstIssue(error: z.ZodError) {
-  return error.issues[0]?.message ?? "Ogiltiga uppgifter";
-}
-
-// UploadThing-URL:er har formen https://<app>.ufs.sh/f/<key> (äldre: utfs.io).
-function isUploadThingUrl({ url, key }: UploadedFile) {
-  if (!key || key.length > 200) return false;
-  try {
-    const u = new URL(url);
-    const hostOk = u.hostname === "utfs.io" || u.hostname.endsWith(".ufs.sh");
-    return u.protocol === "https:" && hostOk && u.pathname === `/f/${key}`;
-  } catch {
-    return false;
-  }
-}
-
 /**
- * Validerar nyuppladdade filer innan de kopplas till ett jobb/företag.
- * Nycklar som redan används någon annanstans avvisas, annars skulle man
- * kunna "låna" en annan användares fil och sedan radera den via deleteJob.
+ * Validerar nyuppladdade filer innan de kopplas till ett jobb/företag:
+ * 1. riktig UploadThing-URL,
+ * 2. uppladdad av den här användaren i den här appen (tabellen Uppladdning,
+ *    fylls i av uploadthing.ts) – apparna delar UploadThing-app, så annars
+ *    kunde man "låna" någon annans fil och sedan radera den,
+ * 3. inte redan kopplad till ett jobb eller en logga.
  */
 async function validateNewUploads(
   files: UploadedFile[],
+  userId: string,
 ): Promise<string | null> {
   if (files.length === 0) return null;
   if (!files.every(isUploadThingUrl)) return "Ogiltig bild";
 
   const keys = files.map((f) => f.key);
   if (new Set(keys).size !== keys.length) return "Ogiltig bild";
+
+  const egna = await prisma.uppladdning.count({
+    where: { key: { in: keys }, userId },
+  });
+  if (egna !== keys.length) return "Ogiltig bild";
 
   const [imageInUse, logoInUse] = await Promise.all([
     prisma.jobImage.findFirst({
@@ -219,35 +123,6 @@ async function validateNewUploads(
 // ============================================================
 // FÖRETAGSUPPGIFTER
 // ============================================================
-
-export async function getCompanySettings() {
-  const session = await getSession();
-  if (!session?.user) return null;
-
-  const company = await getOrCreateCompany(session.user.id);
-
-  return {
-    id: company.id,
-    name: company.name,
-    orgNummer: company.orgNummer,
-    adress: company.adress,
-    postnummer: company.postnummer,
-    ort: company.ort,
-    telefon: company.telefon,
-    epost: company.epost,
-    fSkatt: company.fSkatt,
-    momsNummer: company.momsNummer,
-    bankgiro: company.bankgiro,
-    plusgiro: company.plusgiro,
-    swish: company.swish,
-    logoUrl: company.logoUrl,
-    logoKey: company.logoKey,
-    nastaFakturanummer: company.nastaFakturanummer,
-    forfallodagar: company.forfallodagar,
-    drojsmalsranta: company.drojsmalsranta,
-    fakturatext: company.fakturatext,
-  };
-}
 
 export async function updateCompanySettings(data: CompanyInput) {
   const ctx = await requireCompany();
@@ -299,7 +174,7 @@ export async function updateCompanyLogo(
   const { company } = ctx;
 
   if (logo && logo.key !== company.logoKey) {
-    const uploadError = await validateNewUploads([logo]);
+    const uploadError = await validateNewUploads([logo], company.ownerId);
     if (uploadError) return { ok: false, error: uploadError };
   }
 
@@ -327,40 +202,6 @@ export async function updateCompanyLogo(
 // ============================================================
 // KUNDREGISTER
 // ============================================================
-
-export async function getCustomers() {
-  const session = await getSession();
-  if (!session?.user) return [];
-
-  const company = await prisma.company.findFirst({
-    where: { ownerId: session.user.id },
-  });
-  if (!company) return [];
-
-  const customers = await prisma.customer.findMany({
-    where: { companyId: company.id },
-    orderBy: { namn: "asc" },
-  });
-
-  return customers.map(mapCustomer);
-}
-
-export async function getCustomer(id: string) {
-  const session = await getSession();
-  if (!session?.user) return null;
-
-  const company = await prisma.company.findFirst({
-    where: { ownerId: session.user.id },
-  });
-  if (!company) return null;
-
-  const c = await prisma.customer.findFirst({
-    where: { id, companyId: company.id },
-  });
-  if (!c) return null;
-
-  return mapCustomer(c);
-}
 
 export async function createCustomer(input: CustomerInput) {
   const ctx = await requireCompany();
@@ -461,66 +302,6 @@ export async function deleteCustomer(id: string) {
 // JOBB
 // ============================================================
 
-const JOBS_PER_PAGE = 50;
-
-export async function getJobs(cursor?: string) {
-  const session = await getSession();
-  if (!session?.user) return { jobs: [], nextCursor: null };
-
-  const company = await prisma.company.findFirst({
-    where: { ownerId: session.user.id },
-  });
-  if (!company) return { jobs: [], nextCursor: null };
-
-  const items = await prisma.job.findMany({
-    where: { companyId: company.id },
-    include: {
-      artiklar: true,
-      resor: true,
-      arbetspass: true,
-      images: true,
-      customer: true,
-      ovrigaKostnader: true,
-    },
-    orderBy: { skapad: "desc" },
-    take: JOBS_PER_PAGE + 1,
-    ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
-  });
-
-  const hasMore = items.length > JOBS_PER_PAGE;
-  if (hasMore) items.pop();
-
-  return {
-    jobs: items.map(mapJob),
-    nextCursor: hasMore ? (items[items.length - 1]?.id ?? null) : null,
-  };
-}
-
-export async function getJob(id: string) {
-  const session = await getSession();
-  if (!session?.user) return null;
-
-  const company = await prisma.company.findFirst({
-    where: { ownerId: session.user.id },
-  });
-  if (!company) return null;
-
-  const j = await prisma.job.findFirst({
-    where: { id, companyId: company.id },
-    include: {
-      artiklar: true,
-      resor: true,
-      arbetspass: true,
-      images: true,
-      customer: true,
-      ovrigaKostnader: true,
-    },
-  });
-  if (!j) return null;
-
-  return mapJob(j);
-}
-
 export async function createJob(input: JobInput, bilder: UploadedFile[] = []) {
   const ctx = await requireCompany();
   if ("error" in ctx) return ctx;
@@ -530,7 +311,7 @@ export async function createJob(input: JobInput, bilder: UploadedFile[] = []) {
   if (!parsed.success) return { ok: false, error: firstIssue(parsed.error) };
   const data = parsed.data;
 
-  const uploadError = await validateNewUploads(bilder);
+  const uploadError = await validateNewUploads(bilder, company.ownerId);
   if (uploadError) return { ok: false, error: uploadError };
 
   if (data.customerId) {
@@ -540,11 +321,11 @@ export async function createJob(input: JobInput, bilder: UploadedFile[] = []) {
     if (!customer) return { ok: false, error: "Kund hittades inte" };
   }
 
-  await prisma.job.create({
+  const nyttJobb = await prisma.job.create({
     data: {
       companyId: company.id,
       customerId: data.customerId ?? null,
-      skatteavdrag: data.skatteavdrag,
+      skatteavdrag: Boolean(brand.skatteavdrag) && data.skatteavdrag,
       timpris: data.timpris ?? 0,
       milersattning: data.milersattning ?? 0,
       fastPris: data.fastPris ?? null,
@@ -567,13 +348,13 @@ export async function createJob(input: JobInput, bilder: UploadedFile[] = []) {
       },
       resor: {
         create: data.resor.map((r) => ({
-          datum: new Date(r.datum),
+          datum: tillDbDatum(r.datum),
           stracka: r.stracka,
         })),
       },
       arbetspass: {
         create: data.arbetstider.map((w) => ({
-          datum: new Date(w.datum),
+          datum: tillDbDatum(w.datum),
           timmar: w.timmar,
         })),
       },
@@ -588,6 +369,13 @@ export async function createJob(input: JobInput, bilder: UploadedFile[] = []) {
       },
     },
   });
+
+  // Markerat som fakturerat direkt → jobbet får sitt fakturanummer nu.
+  if (data.fakturerat) {
+    await prisma.$transaction((tx) =>
+      tilldelaFakturanummer(tx, company.id, nyttJobb.id),
+    );
+  }
 
   revalidatePath("/mina-sidor", "layout");
   return { ok: true as const };
@@ -637,6 +425,7 @@ export async function updateJob(
   const existingImageKeys = existing.images.map((i) => i.key);
   const uploadError = await validateNewUploads(
     bilder.filter((b) => !existingImageKeys.includes(b.key)),
+    company.ownerId,
   );
   if (uploadError) return { ok: false, error: uploadError };
 
@@ -701,10 +490,14 @@ export async function updateJob(
       r.id
         ? prisma.trip.update({
             where: { id: r.id, jobId: id },
-            data: { datum: new Date(r.datum), stracka: r.stracka },
+            data: { datum: tillDbDatum(r.datum), stracka: r.stracka },
           })
         : prisma.trip.create({
-            data: { jobId: id, datum: new Date(r.datum), stracka: r.stracka },
+            data: {
+              jobId: id,
+              datum: tillDbDatum(r.datum),
+              stracka: r.stracka,
+            },
           }),
     ),
     // Arbetspass
@@ -715,10 +508,10 @@ export async function updateJob(
       w.id
         ? prisma.workSession.update({
             where: { id: w.id, jobId: id },
-            data: { datum: new Date(w.datum), timmar: w.timmar },
+            data: { datum: tillDbDatum(w.datum), timmar: w.timmar },
           })
         : prisma.workSession.create({
-            data: { jobId: id, datum: new Date(w.datum), timmar: w.timmar },
+            data: { jobId: id, datum: tillDbDatum(w.datum), timmar: w.timmar },
           }),
     ),
     // Övriga kostnader
@@ -747,7 +540,7 @@ export async function updateJob(
       where: { id },
       data: {
         customerId: data.customerId ?? null,
-        skatteavdrag: data.skatteavdrag,
+        skatteavdrag: Boolean(brand.skatteavdrag) && data.skatteavdrag,
         timpris: data.timpris ?? 0,
         milersattning: data.milersattning ?? 0,
         fastPris: data.fastPris ?? null,
@@ -761,6 +554,12 @@ export async function updateJob(
       },
     }),
   ]);
+
+  if (data.fakturerat && !existing.fakturanummer) {
+    await prisma.$transaction((tx) =>
+      tilldelaFakturanummer(tx, company.id, id),
+    );
+  }
 
   if (toDelete.length > 0) {
     try {
@@ -824,10 +623,17 @@ export async function deleteAccount(): Promise<{
     }),
   ]);
 
-  const keys: string[] = [];
-  if (company?.logoKey) keys.push(company.logoKey);
+  // Alla filer användaren laddat upp i appen – även sådana som aldrig
+  // kopplades till ett jobb. (Logga och jobbilder finns också i Uppladdning,
+  // men tas med för säkerhets skull.)
+  const uppladdningar = await prisma.uppladdning.findMany({
+    where: { userId },
+    select: { key: true },
+  });
+  const keys = new Set<string>(uppladdningar.map((u) => u.key));
+  if (company?.logoKey) keys.add(company.logoKey);
   company?.jobs.forEach((job) =>
-    job.images.forEach((img) => keys.push(img.key)),
+    job.images.forEach((img) => keys.add(img.key)),
   );
 
   // Avbryt prenumerationen först. Misslyckas det får kontot inte raderas –
@@ -847,9 +653,9 @@ export async function deleteAccount(): Promise<{
 
   await prisma.user.delete({ where: { id: userId } });
 
-  if (keys.length > 0) {
+  if (keys.size > 0) {
     try {
-      await utapi.deleteFiles(keys);
+      await utapi.deleteFiles([...keys]);
     } catch (err) {
       console.error("Kunde inte radera filer vid kontoborttagning:", err);
     }
@@ -858,44 +664,55 @@ export async function deleteAccount(): Promise<{
   return { ok: true as const };
 }
 
-export async function reserverFakturanummer(
+type Tx = Parameters<Parameters<typeof prisma.$transaction>[0]>[0];
+
+/**
+ * Ger jobbet nästa fakturanummer om det inte redan har ett. Atomärt: raden
+ * låses och gamla värdet returneras i en enda SQL-sats, så två samtidiga
+ * anrop aldrig får samma nummer.
+ */
+async function tilldelaFakturanummer(tx: Tx, companyId: string, jobId: string) {
+  const job = await tx.job.findFirst({
+    where: { id: jobId, companyId },
+    select: { fakturanummer: true },
+  });
+  if (!job) throw new Error("Jobb hittades inte");
+  if (job.fakturanummer) return job.fakturanummer;
+
+  const result = await tx.$queryRaw<[{ nummer: number }]>`
+    UPDATE company
+    SET "nastaFakturanummer" = "nastaFakturanummer" + 1
+    WHERE id = ${companyId}
+    RETURNING "nastaFakturanummer" - 1 AS nummer
+  `;
+  const n = result[0]?.nummer;
+  if (n == null) throw new Error("Kunde inte reservera fakturanummer");
+
+  await tx.job.update({ where: { id: jobId }, data: { fakturanummer: n } });
+  return n;
+}
+
+/**
+ * Skapar fakturan: jobbet får ett fakturanummer och markeras som fakturerat.
+ * Förhandsvisningen (skriv-ut) delar inte ut något nummer själv (#49).
+ */
+export async function faktureraJobb(
   jobId: string,
 ): Promise<{ ok: true; nummer: number } | { ok: false; error: string }> {
-  const ctx = await requireActiveUser();
+  const ctx = await requireExistingCompany();
   if ("error" in ctx) return ctx;
+  const { company } = ctx;
 
   try {
     const nummer = await prisma.$transaction(async (tx) => {
-      const company = await tx.company.findFirst({
-        where: { ownerId: ctx.userId },
-      });
-      if (!company) throw new Error("Inget företag hittat");
-
-      const job = await tx.job.findFirst({
-        where: { id: jobId, companyId: company.id },
-        select: { fakturanummer: true },
-      });
-      if (!job) throw new Error("Jobb hittades inte");
-
-      if (job.fakturanummer) return job.fakturanummer;
-
-      // Atomärt: låser raden och returnerar gamla värdet i en enda SQL-sats,
-      // vilket förhindrar race conditions vid parallella anrop.
-      const result = await tx.$queryRaw<[{ nummer: number }]>`
-        UPDATE company
-        SET "nastaFakturanummer" = "nastaFakturanummer" + 1
-        WHERE id = ${company.id}
-        RETURNING "nastaFakturanummer" - 1 AS nummer
-      `;
-      const n = result[0]?.nummer;
-      if (n == null) throw new Error("Kunde inte reservera fakturanummer");
-
+      const n = await tilldelaFakturanummer(tx, company.id, jobId);
       await tx.job.update({
         where: { id: jobId },
-        data: { fakturanummer: n },
+        data: { fakturerat: true, pagaende: false, utfort: true },
       });
       return n;
     });
+    revalidatePath("/mina-sidor", "layout");
     return { ok: true, nummer };
   } catch (err) {
     return {
@@ -903,4 +720,9 @@ export async function reserverFakturanummer(
       error: err instanceof Error ? err.message : "Okänt fel",
     };
   }
+}
+
+/** "Visa fler jobb" i jobblistan (klienten). Läsningen ligger i jobb-data.ts. */
+export async function hamtaFlerJobb(cursor: string) {
+  return getJobs(cursor);
 }

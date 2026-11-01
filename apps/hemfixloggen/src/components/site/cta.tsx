@@ -1,3 +1,4 @@
+import { brand } from "@knegarloggen/app/brand";
 import Link from "next/link";
 import { buttonVariants } from "@knegarloggen/ui/button";
 import { ArrowRight } from "lucide-react";
@@ -12,7 +13,7 @@ export function CTA() {
         </h2>
         <p className="mt-4 text-primary-foreground/80">
           Starta din gratis provperiod idag. Inga kortuppgifter krävs de första
-          30 dagarna. Därefter 99 kr/månad.
+          30 dagarna. Därefter {brand.prisPerManad} kr/månad.
         </p>
         <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
           <Link

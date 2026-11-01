@@ -12,6 +12,11 @@ const schema = z.object({
   STRIPE_PRICE_ID: z.string().min(1, "STRIPE_PRICE_ID saknas"),
   UPLOADTHING_TOKEN: z.string().min(1, "UPLOADTHING_TOKEN saknas"),
   NEXT_PUBLIC_APP_URL: z.string().min(1, "NEXT_PUBLIC_APP_URL saknas"),
+  // Valfri: skyddar /api/cron/* (Vercel Cron skickar den som Bearer-token).
+  CRON_SECRET: z.preprocess(
+    (v) => (v === "" ? undefined : v),
+    z.string().min(16, "CRON_SECRET måste vara minst 16 tecken").optional(),
+  ),
 });
 
 const result = schema.safeParse(process.env);

@@ -2,11 +2,8 @@ import { Suspense } from "react";
 import { headers } from "next/headers";
 import { redirect, notFound } from "next/navigation";
 import { auth } from "../../../../../lib/auth";
-import {
-  getJob,
-  getCompanySettings,
-  reserverFakturanummer,
-} from "../../../../../lib/job-actions";
+import { getJob, getCompanySettings } from "../../../../../lib/jobb-data";
+import { hasActiveSubscription } from "../../../../../lib/subscription";
 import SkrivUtKlient from "../../../../../components/minasidor/faktura/skriv-ut-klient";
 
 export default function SkrivUtPage({
@@ -30,16 +27,24 @@ async function SkrivUtInnehall({
   if (!session?.user) redirect("/logga-in");
 
   const { id } = await params;
-  const [job, company] = await Promise.all([getJob(id), getCompanySettings()]);
+  const [job, company, aktiv] = await Promise.all([
+    getJob(id),
+    getCompanySettings(),
+    hasActiveSubscription(session.user.id),
+  ]);
 
   if (!job) notFound();
   if (!company) notFound();
 
-  const fakturaResult = await reserverFakturanummer(id);
-  if (!fakturaResult.ok) notFound();
-  const fakturanummer = fakturaResult.nummer;
-
+  // Att visa fakturan kräver bara inloggning – befintliga fakturor ska gå att
+  // ta fram även när prenumerationen gått ut (bokföringslagen: spara 7 år).
+  // Fakturanummer delas bara ut när fakturan skapas (faktureraJobb).
   return (
-    <SkrivUtKlient job={job} company={company} fakturanummer={fakturanummer} />
+    <SkrivUtKlient
+      job={job}
+      company={company}
+      fakturanummer={job.fakturanummer ?? null}
+      kanSkapaFaktura={aktiv}
+    />
   );
 }

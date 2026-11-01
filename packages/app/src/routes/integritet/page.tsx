@@ -7,7 +7,7 @@ export default function IntegritetspolicyPage() {
         Integritetspolicy för {brand.namn}
       </h1>
       <p className="text-muted-foreground mb-8 italic">
-        Senast uppdaterad: 2024-05-20
+        Senast uppdaterad: 2026-11-01
       </p>
 
       <div className="space-y-8 text-foreground leading-relaxed">
@@ -103,13 +103,16 @@ export default function IntegritetspolicyPage() {
             4. Hur länge uppgifterna sparas
           </h2>
           <p>
-            Personuppgifter sparas så länge kontot är aktivt. Efter att ett
-            konto avslutats kan uppgifter sparas under en begränsad tid för
-            säkerhetskopiering, juridiska skyldigheter och bokföringskrav.
+            Personuppgifter sparas så länge kontot är aktivt. När du raderar
+            ditt konto raderas kontot, företagsuppgifter, kunder, jobb och
+            uppladdade filer direkt ur tjänsten. Uppgifterna kan finnas kvar en
+            begränsad tid i våra leverantörers säkerhetskopior innan de skrivs
+            över.
           </p>
           <p className="mt-4 text-sm text-muted-foreground italic">
-            Normalt raderas personuppgifter inom 12 månader efter att kontot
-            avslutats, om inte lag kräver längre lagring.
+            Enligt bokföringslagen ska fakturor och underlag sparas i 7 år. Det
+            ansvaret ligger hos ditt företag – ladda ner dina fakturor innan du
+            raderar kontot.
           </p>
         </section>
 
@@ -129,11 +132,30 @@ export default function IntegritetspolicyPage() {
           <h2 className="text-xl font-bold mb-3 border-b pb-1">
             6. Delning av uppgifter
           </h2>
-          <p>
-            Vi säljer aldrig personuppgifter till tredje part. Uppgifter kan
-            delas med leverantörer som hjälper oss att driva tjänsten (t.ex.
-            hosting och betalningsleverantörer). Dessa leverantörer får endast
-            behandla uppgifterna enligt våra instruktioner.
+          <p>Vi säljer aldrig personuppgifter till tredje part.</p>
+          <p className="mt-4">
+            <strong>Roller.</strong> För uppgifter om dig som användare är vi
+            personuppgiftsansvariga. För uppgifter om dina kunder som du
+            registrerar i tjänsten är ditt företag personuppgiftsansvarigt och
+            vi personuppgiftsbiträde. Det regleras i
+            personuppgiftsbiträdesavtalet (PUB-avtalet) i användarvillkoren.
+          </p>
+          <p className="mt-4">
+            <strong>Underbiträden.</strong> Vi anlitar följande leverantörer för
+            att driva tjänsten. De får bara behandla uppgifterna enligt våra
+            instruktioner:
+          </p>
+          <ul className="list-disc pl-6 mt-2 space-y-1">
+            <li>Vercel – drift av webbplatsen</li>
+            <li>Neon – databas</li>
+            <li>UploadThing – lagring av bilder och logotyper</li>
+            <li>Stripe – betalning av prenumerationen</li>
+            <li>Resend – utskick av e-post (t.ex. verifiering)</li>
+          </ul>
+          <p className="mt-4">
+            Om en leverantör behandlar uppgifter utanför EU/EES sker
+            överföringen med stöd av EU-kommissionens standardavtalsklausuler
+            eller EU–US Data Privacy Framework.
           </p>
         </section>
 

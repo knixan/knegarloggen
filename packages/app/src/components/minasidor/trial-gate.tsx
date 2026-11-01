@@ -25,7 +25,7 @@ export default function TrialGate({
       if (data.url) {
         window.location.href = data.url;
       } else {
-        toast.error("Kunde inte starta betalning");
+        toast.error(data.error ?? "Kunde inte starta betalning");
       }
     } catch {
       toast.error("Något gick fel");
@@ -47,7 +47,7 @@ export default function TrialGate({
             <h2 className="text-xl font-semibold">Provperioden har gått ut</h2>
             <p className="text-sm text-muted-foreground">
               Lägg till betalningsuppgifter för att fortsätta använda
-              {brand.namn}. 99 kr/månad, ingen bindningstid.
+              {brand.namn}. {brand.prisPerManad} kr/månad, ingen bindningstid.
             </p>
           </div>
           <Button

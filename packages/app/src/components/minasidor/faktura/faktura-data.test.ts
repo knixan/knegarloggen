@@ -129,4 +129,19 @@ describe("fakturaData", () => {
     const d = fakturaData(jobb(), company, 1, idag);
     expect(d.fotnoter[0]).toContain("SE556677889901");
   });
+
+  it("utan fakturanummer är det ett utkast", () => {
+    const d = fakturaData(jobb(), company, null, idag);
+    expect(d.utkast).toBe(true);
+    expect(d.titel).toBe("UTKAST");
+    expect(d.infoRader[0].value).toBe("Utkast");
+    expect(d.filnamn).toBe("faktura-utkast.pdf");
+  });
+
+  it("med fakturanummer är det en faktura", () => {
+    const d = fakturaData(jobb(), company, 7, idag);
+    expect(d.utkast).toBe(false);
+    expect(d.titel).toBe("FAKTURA");
+    expect(d.filnamn).toBe("faktura-7.pdf");
+  });
 });

@@ -53,7 +53,8 @@ const datum = (d: Date) => d.toLocaleDateString("sv-SE");
 export function fakturaData(
   job: Job,
   company: FakturaCompany,
-  fakturanummer: number,
+  /** null = utkast: fakturan är inte skapad än och har inget nummer. */
+  fakturanummer: number | null,
   idag: Date = new Date(),
 ) {
   const summary = beräknaSummering(job);
@@ -71,7 +72,11 @@ export function fakturaData(
   ].filter((x): x is string => Boolean(x));
 
   const infoRader: { label: string; value: string; fet?: boolean }[] = [
-    { label: "Fakturanummer", value: String(fakturanummer), fet: true },
+    {
+      label: "Fakturanummer",
+      value: fakturanummer ? String(fakturanummer) : "Utkast",
+      fet: true,
+    },
     { label: "Fakturadatum", value: datum(idag) },
     { label: "Förfallodatum", value: datum(forfallo) },
     { label: "Betalningsvillkor", value: `${forfallodagar} dagar netto` },
@@ -196,7 +201,12 @@ export function fakturaData(
     summering,
     attBetala: kr(summary.attBetala),
     betalning,
-    ocr: String(fakturanummer),
+    ocr: fakturanummer ? String(fakturanummer) : "–",
+    utkast: fakturanummer === null,
+    titel: fakturanummer ? "FAKTURA" : "UTKAST",
+    filnamn: fakturanummer
+      ? `faktura-${fakturanummer}.pdf`
+      : "faktura-utkast.pdf",
     fakturatext: company.fakturatext || undefined,
     fotnoter,
   };

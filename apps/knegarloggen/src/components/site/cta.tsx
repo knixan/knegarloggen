@@ -1,3 +1,4 @@
+import { brand } from "@knegarloggen/app/brand";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -37,7 +38,7 @@ export default function Cta() {
             <ul className="mt-6 space-y-2 lg:pl-4">
               <li>30 dagars gratis provperiod.</li>
               <li>Ingen bindningstid. Avsluta när du vill.</li>
-              <li>Därefter 99 kr/mån exkl. moms.</li>
+              <li>Därefter {brand.prisPerManad} kr/mån exkl. moms.</li>
               <li className="text-sm opacity-80">+ 49 kr per extra medlem.</li>
             </ul>
           </div>

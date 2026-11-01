@@ -1,10 +1,14 @@
 "use client";
 
+import { useState, useTransition } from "react";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import type { Job } from "../../../lib/job-schema";
 import { fakturaData, type FakturaCompany } from "./faktura-data";
 import { Button } from "@knegarloggen/ui/button";
-import { Printer } from "lucide-react";
+import { FileCheck2, Printer } from "lucide-react";
+import { faktureraJobb } from "../../../lib/job-actions";
 
 const PdfKnapp = dynamic(() => import("./pdf-knapp").then((m) => m.PdfKnapp), {
   ssr: false,
@@ -18,13 +22,37 @@ const PdfKnapp = dynamic(() => import("./pdf-knapp").then((m) => m.PdfKnapp), {
 interface Props {
   job: Job;
   company: FakturaCompany;
-  fakturanummer: number;
+  /** null = utkast, fakturan är inte skapad än. */
+  fakturanummer: number | null;
+  /** Aktiv prenumeration krävs för att skapa nya fakturor, inte för att visa. */
+  kanSkapaFaktura: boolean;
 }
 
 // Förhandsvisning/utskrift. Ritar samma fakturaData() som PDF:en
 // (faktura-pdf.tsx) – ändra innehåll i faktura-data.ts, inte här.
-export default function SkrivUtKlient({ job, company, fakturanummer }: Props) {
-  const data = fakturaData(job, company, fakturanummer);
+export default function SkrivUtKlient({
+  job,
+  company,
+  fakturanummer,
+  kanSkapaFaktura,
+}: Props) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [nummer, setNummer] = useState(fakturanummer);
+  const data = fakturaData(job, company, nummer);
+
+  function skapaFaktura() {
+    startTransition(async () => {
+      const result = await faktureraJobb(job.id);
+      if (!result.ok) {
+        toast.error(result.error);
+        return;
+      }
+      setNummer(result.nummer);
+      toast.success(`Faktura ${result.nummer} skapad`);
+      router.refresh();
+    });
+  }
 
   return (
     <>
@@ -97,6 +125,18 @@ export default function SkrivUtKlient({ job, company, fakturanummer }: Props) {
           Skriv ut
         </Button>
         <PdfKnapp data={data} />
+        {data.utkast && kanSkapaFaktura && (
+          <Button size="sm" onClick={skapaFaktura} disabled={isPending}>
+            <FileCheck2 className="h-4 w-4 mr-2" />
+            {isPending ? "Skapar..." : "Skapa faktura"}
+          </Button>
+        )}
+        {data.utkast && (
+          <span style={{ alignSelf: "center", fontSize: 13, color: "#6b7280" }}>
+            Utkast – fakturanummer tilldelas när du skapar fakturan
+            {!kanSkapaFaktura && " (kräver aktiv prenumeration)"}.
+          </span>
+        )}
       </div>
 
       <div className="sida">
@@ -116,7 +156,7 @@ export default function SkrivUtKlient({ job, company, fakturanummer }: Props) {
           </div>
 
           <div className="faktura-info">
-            <h1>FAKTURA</h1>
+            <h1>{data.titel}</h1>
             <table>
               <tbody>
                 {data.infoRader.map(({ label, value, fet }) => (

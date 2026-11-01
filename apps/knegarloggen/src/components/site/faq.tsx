@@ -1,11 +1,11 @@
+import { brand } from "@knegarloggen/app/brand";
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 
 const faqs: { question: string; answer: React.ReactNode }[] = [
   {
     question: "Vad händer när provperioden tar slut?",
-    answer:
-      "Du behöver inget kort under provperioden. När de 30 dagarna har gått lägger du till kortuppgifter för att fortsätta, 99 kr/mån exkl. moms.",
+    answer: `Du behöver inget kort under provperioden. När de 30 dagarna har gått lägger du till kortuppgifter för att fortsätta, ${brand.prisPerManad} kr/mån exkl. moms.`,
   },
   {
     question: "Hur säger jag upp?",

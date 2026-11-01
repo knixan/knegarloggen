@@ -36,11 +36,17 @@ Tre produkter, en kodbas:
 
 - **ROT och RUT blandas aldrig.** En app har ett `brand.skatteavdrag` (ROT, RUT eller `null`). Visa inga ROT/RUT-fält när det är `null`.
 - **Alla belopp räknas i `beräknaSummering`** (`packages/app/src/lib/job-schema.ts`). Fakturans innehåll byggs i `fakturaData` (`components/minasidor/faktura/faktura-data.ts`). Förhandsvisning och PDF ritar bara upp det – räkna aldrig belopp i en komponent.
-- **Server actions** (`lib/job-actions.ts` m.fl.) ska alltid:
+- **Server actions** (`lib/job-actions.ts` m.fl., `"use server"`) är bara för **skrivningar** och ska alltid:
   1. kräva inloggning och aktiv prenumeration (`requireActiveUser`/`requireCompany`) – undantag: radera konto,
-  2. validera indata med zod på servern,
+  2. validera indata med zod på servern (datum med `datumSchema`, övre gränser på tal och listor),
   3. kontrollera ägarskap (`companyId`) för varje id från klienten, även underrader och `customerId`,
-  4. validera uppladdade filer med `validateNewUploads` (UploadThing-URL + oanvänd nyckel).
+  4. validera uppladdade filer med `validateNewUploads(files, userId)` – filen måste vara registrerad i tabellen `Uppladdning` av samma användare (görs i `lib/uploadthing.ts`).
+- **Läsningar** ligger i `lib/jobb-data.ts` (vanlig servermodul, inte `"use server"`) och används från serverkomponenter. En läsning får aldrig skapa eller ändra något.
+- **Rena regler** som går att testa ligger utan databas: `lib/prenumeration-regel.ts` (provperiod, checkout, Stripe-appfilter) och `lib/validering.ts` (ägarskap för rader, UploadThing-URL).
+- **Prenumeration:** provperioden skapas i better-auths `databaseHooks.user.create.after` (`onUserCreated` → `skapaProvperiod`). Samma regel (`evaluateSubscription`) används i spärren, inställningarna och actions.
+- **Stripe:** apparna delar Stripe-konto. Checkout märker allt med `metadata.app = brand.id`, och webhooken ignorerar andra appars händelser (`tillhorAppen`). En löpande prenumeration får inte starta en ny checkout (`kanStartaCheckout`).
+- **Faktura:** att visa en faktura kräver bara inloggning. Fakturanummer delas ut när fakturan skapas (`faktureraJobb`) eller när jobbet sparas som fakturerat – aldrig vid förhandsvisning.
+- **UploadThing:** apparna delar UploadThing-app. Radera bara filer som finns i den här appens databas – aldrig "allt som inte används".
 - **`role`** får aldrig kunna sättas av klienten (`input: false` i `packages/auth`). Roller ändras bara via adminsidan eller `pnpm db:admin`.
 - Personnummer visas bara där det behövs (ROT/RUT, faktura).
 
@@ -63,7 +69,7 @@ Versionerna är nyare än det du lärt dig. Slå upp i dokumentationen innan du 
 ## Kommandon
 
 ```bash
-pnpm dev:knegarloggen        # (eller giggerloggen / hemfixloggen)
+pnpm dev:knegarloggen        # port 3000 (giggerloggen 3001, hemfixloggen 3002)
 pnpm type-check              # alla appar och paket
 pnpm lint
 pnpm format                  # Prettier på hela repot (format:check i CI)

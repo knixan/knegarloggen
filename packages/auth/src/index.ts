@@ -7,6 +7,11 @@ export function createAuth(config: {
   appUrl: string;
   prisma: PrismaClientLike;
   sendVerificationEmail: (email: string, url: string) => Promise<void>;
+  /**
+   * Körs när ett konto har skapats – oavsett hur (klientens signUp, server,
+   * admin). Används för att skapa provperioden.
+   */
+  onUserCreated?: (user: { id: string; email: string }) => Promise<void>;
 }) {
   return betterAuth({
     baseURL: config.appUrl,
@@ -17,6 +22,8 @@ export function createAuth(config: {
     }),
 
     rateLimit: {
+      // Databasen – minnet fungerar inte på Vercel (en räknare per instans).
+      storage: "database",
       window: 60,
       max: 10,
       customRules: {
@@ -37,6 +44,16 @@ export function createAuth(config: {
       },
       sendOnSignUp: true,
       autoSignInAfterVerification: true,
+    },
+
+    databaseHooks: {
+      user: {
+        create: {
+          after: async (user) => {
+            await config.onUserCreated?.({ id: user.id, email: user.email });
+          },
+        },
+      },
     },
 
     user: {

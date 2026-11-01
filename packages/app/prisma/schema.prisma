@@ -8,9 +8,7 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
- 
-
+  provider = "postgresql"
 }
 
 // ============================================================
@@ -18,19 +16,20 @@ datasource db {
 // ============================================================
 
 model User {
-  id            String    @id @default(cuid())
+  id            String   @id @default(cuid())
   name          String
-  email         String    @unique
-  emailVerified Boolean   @default(false)
+  email         String   @unique
+  emailVerified Boolean  @default(false)
   image         String?
-  role          String    @default("user")
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  role          String   @default("user")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   accounts      Account[]
   sessions      Session[]
   companies     Company[]
   subscription  Subscription?
+  uppladdningar Uppladdning[]
 
   @@map("user")
 }
@@ -83,6 +82,33 @@ model Verification {
   @@map("verification")
 }
 
+// Rate limit för better-auth (rateLimit.storage = "database"). Minnet räcker
+// inte på Vercel – varje serverinstans har sitt eget.
+model RateLimit {
+  id          String @id @default(cuid())
+  key         String @unique
+  count       Int
+  lastRequest BigInt
+
+  @@map("rateLimit")
+}
+
+// Varje fil som laddats upp via UploadThing i den här appen, med vem som
+// laddade upp den. Bara egna, registrerade filer får kopplas till jobb/logga,
+// och städningen rör bara filer som finns här (apparna delar UploadThing-app).
+model Uppladdning {
+  key       String   @id
+  url       String
+  userId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("uppladdning")
+}
+
 model Company {
   id        String   @id @default(cuid())
   name      String
@@ -90,24 +116,24 @@ model Company {
   createdAt DateTime @default(now())
 
   // Företagsuppgifter
-  orgNummer       String  @default("")
-  adress          String  @default("")
-  postnummer      String  @default("")
-  ort             String  @default("")
-  telefon         String  @default("")
-  epost           String  @default("")
-  fSkatt          Boolean @default(false)
-  momsNummer      String  @default("")
-  bankgiro        String  @default("")
-  plusgiro        String  @default("")
-  swish           String  @default("")
-  logoUrl         String  @default("")
-  logoKey         String  @default("")
+  orgNummer  String  @default("")
+  adress     String  @default("")
+  postnummer String  @default("")
+  ort        String  @default("")
+  telefon    String  @default("")
+  epost      String  @default("")
+  fSkatt     Boolean @default(false)
+  momsNummer String  @default("")
+  bankgiro   String  @default("")
+  plusgiro   String  @default("")
+  swish      String  @default("")
+  logoUrl    String  @default("")
+  logoKey    String  @default("")
 
   // Fakturainställningar
-  nastaFakturanummer Int   @default(1)
-  forfallodagar      Int   @default(30)
-  drojsmalsranta     Float @default(0)
+  nastaFakturanummer Int    @default(1)
+  forfallodagar      Int    @default(30)
+  drojsmalsranta     Float  @default(0)
   fakturatext        String @default("")
 
   owner     User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
@@ -129,20 +155,20 @@ model Customer {
   updatedAt DateTime @updatedAt
 
   // Gemensamma fält
-  namn        String
-  adress      String  @default("")
-  postnummer  String  @default("")
-  ort         String  @default("")
-  telefon     String  @default("")
-  epost       String  @default("")
+  namn       String
+  adress     String @default("")
+  postnummer String @default("")
+  ort        String @default("")
+  telefon    String @default("")
+  epost      String @default("")
 
   // Privatperson
   personnummer String @default("")
 
   // Företagskund
-  foretagsnamn   String @default("")
-  kontaktperson  String @default("")
-  orgNummer      String @default("")
+  foretagsnamn  String @default("")
+  kontaktperson String @default("")
+  orgNummer     String @default("")
 
   // ROT-specifikt
   fastighetsbeteckning String @default("")
@@ -162,11 +188,11 @@ model Job {
   customerId String?
 
   // Status
-  skatteavdrag  Boolean @default(false)
-  pagaende   Boolean @default(false)
-  utfort     Boolean @default(false)
-  fakturerat Boolean @default(false)
-  betalt     Boolean @default(false)
+  skatteavdrag Boolean @default(false)
+  pagaende     Boolean @default(false)
+  utfort       Boolean @default(false)
+  fakturerat   Boolean @default(false)
+  betalt       Boolean @default(false)
 
   // Fakturering
   fakturanummer Int?
@@ -186,8 +212,8 @@ model Job {
   updatedAt DateTime @updatedAt
 
   // Relationer
-  company    Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  customer   Customer?    @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  company         Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  customer        Customer?      @relation(fields: [customerId], references: [id], onDelete: SetNull)
   artiklar        Article[]
   resor           Trip[]
   arbetspass      WorkSession[]

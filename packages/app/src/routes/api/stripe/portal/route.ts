@@ -32,8 +32,11 @@ export async function POST() {
     });
     return NextResponse.json({ url: portalSession.url });
   } catch (err) {
+    // Detaljerna loggas – kunden får ett allmänt fel.
     console.error("Portal-fel:", err);
-    const message = err instanceof Error ? err.message : "Okänt fel";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json(
+      { error: "Kunde inte öppna kundportalen. Försök igen om en stund." },
+      { status: 500 },
+    );
   }
 }
