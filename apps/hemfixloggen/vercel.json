@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "pnpm --filter @knegarloggen/app generate && pnpm run build",
   "crons": [
     { "path": "/api/cron/stada-uppladdningar", "schedule": "0 3 * * *" }
   ]
