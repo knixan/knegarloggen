@@ -370,7 +370,7 @@ const Navbar: React.FC<NavbarProps> = ({
     { href: "/#funktioner", label: "Hur funkar det?" },
     { href: "/integritet", label: "Integritet" },
     { href: "/villkor", label: "Villkor" },
-    { href: "#kontakt", label: "Kontakt" },
+    { href: "/kontakt", label: "Kontakt" },
   ],
   showThemeToggle = true,
 }) => {

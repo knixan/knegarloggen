@@ -26,7 +26,12 @@ export type Brand = {
   skatteavdrag: Skatteavdrag | null;
   /** Pris per månad exkl. moms, för texter. Det som dras styrs av STRIPE_PRICE_ID. */
   prisPerManad: number;
+  /** Adress för support och GDPR-förfrågningar (kontakt, integritet, villkor). */
+  kontaktEpost: string;
 };
+
+/** Var verksamheten finns – samma för alla appar. */
+export const ORT = "Mjölby, Östergötland";
 
 const ROT: Skatteavdrag = {
   typ: "ROT",
@@ -53,6 +58,7 @@ export const BRANDS: Record<AppId, Brand> = {
     logo: "/knegarloggen-logga-v2.png",
     skatteavdrag: ROT,
     prisPerManad: 99,
+    kontaktEpost: "kontakt@knegarloggen.se",
   },
   giggerloggen: {
     id: "giggerloggen",
@@ -64,6 +70,8 @@ export const BRANDS: Record<AppId, Brand> = {
     logo: null,
     skatteavdrag: null,
     prisPerManad: 99,
+    // Tillfälligt: egen adress saknas ännu.
+    kontaktEpost: "kontakt@knegarloggen.se",
   },
   hemfixloggen: {
     id: "hemfixloggen",
@@ -74,6 +82,8 @@ export const BRANDS: Record<AppId, Brand> = {
     logo: null,
     skatteavdrag: RUT,
     prisPerManad: 99,
+    // Tillfälligt: egen adress saknas ännu.
+    kontaktEpost: "kontakt@knegarloggen.se",
   },
 };
 

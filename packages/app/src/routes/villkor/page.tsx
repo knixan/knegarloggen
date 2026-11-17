@@ -1,188 +1,237 @@
+import Link from "next/link";
 import { brand } from "../../brand";
+import { PROVPERIOD_DAGAR } from "../../lib/prenumeration-regel";
+import {
+  Avsnitt,
+  JuridikSida,
+  KontaktRuta,
+  Lista,
+} from "../../components/site/juridik";
 
 export default function AnvandarvillkorPage() {
+  const avdrag = brand.skatteavdrag;
+
   return (
-    <main className="container mx-auto px-4 py-12 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-2 text-foreground">
-        Användarvillkor för {brand.namn}
-      </h1>
-      <p className="text-muted-foreground mb-8 italic">
-        Senast uppdaterad: 2026-11-01
-      </p>
+    <JuridikSida
+      titel={`Användarvillkor för ${brand.namn}`}
+      ingress={
+        <p>
+          Villkoren gäller mellan dig som användare och {brand.namn}. Genom att
+          skapa ett konto godkänner du villkoren och vår{" "}
+          <Link href="/integritet" className="underline">
+            integritetspolicy
+          </Link>
+          .
+        </p>
+      }
+    >
+      <Avsnitt rubrik="1. Tjänsten">
+        <p>
+          {brand.namn} är en webbaserad tjänst för {brand.malgrupp} som vill
+          hålla ordning på kunder, arbetstid, material, resor, bilder och
+          fakturaunderlag.
+        </p>
+        <p>
+          Tjänsten riktar sig till näringsidkare. Genom att skapa ett konto
+          intygar du att du använder tjänsten i din yrkesverksamhet och har rätt
+          att ingå avtal för företagets räkning.
+        </p>
+      </Avsnitt>
 
-      <div className="space-y-8 text-foreground leading-relaxed">
-        <section>
-          <h2 className="text-xl font-bold mb-3 border-b pb-1">1. Allmänt</h2>
+      <Avsnitt rubrik="2. Konto">
+        <p>
+          Du ansvarar för att uppgifterna du lämnar är korrekta, att hålla ditt
+          lösenord hemligt och för allt som görs via ditt konto. Misstänker du
+          att någon annan har kommit åt kontot ska du byta lösenord och kontakta
+          oss.
+        </p>
+      </Avsnitt>
+
+      <Avsnitt rubrik="3. Gratis provperiod">
+        <p>
+          Nya konton får prova {brand.namn} kostnadsfritt i {PROVPERIOD_DAGAR}{" "}
+          dagar. Provperioden kräver inga kortuppgifter och övergår inte
+          automatiskt till en betald prenumeration. För att fortsätta efter
+          provperioden startar du en prenumeration under Inställningar.
+        </p>
+      </Avsnitt>
+
+      <Avsnitt rubrik="4. Pris och betalning">
+        <p>
+          Prenumerationen kostar {brand.prisPerManad} kr per månad exklusive
+          moms, om inget annat anges vid köpet. Betalning sker i förskott per
+          månad med kort via Stripe och förnyas automatiskt tills du säger upp
+          den.
+        </p>
+        <p>
+          Vi får ändra priset. Ett nytt pris meddelas via e-post minst 30 dagar
+          innan det börjar gälla, och du kan säga upp prenumerationen innan
+          dess.
+        </p>
+      </Avsnitt>
+
+      <Avsnitt rubrik="5. Uppsägning – ingen bindningstid">
+        <p>
+          Du kan säga upp prenumerationen när som helst under Inställningar. Den
+          gäller då till slutet av den period du redan betalat för. Redan
+          betalda perioder återbetalas inte.
+        </p>
+      </Avsnitt>
+
+      <Avsnitt rubrik="6. Utebliven betalning">
+        <p>
+          Om en betalning inte går igenom kan åtkomsten till tjänsten begränsas
+          tills betalningen är ordnad. Dina uppgifter raderas inte för att en
+          betalning uteblir, men vi kan avsluta kontot efter långvarig utebliven
+          betalning. Det meddelar vi i så fall i förväg via e-post.
+        </p>
+      </Avsnitt>
+
+      <Avsnitt rubrik="7. Radera konto">
+        <p>
+          Du kan radera ditt konto när som helst under Inställningar. Då raderas
+          kontot och allt du registrerat direkt och kan inte återställas. Ladda
+          ner de fakturor du behöver spara innan du raderar kontot.
+        </p>
+      </Avsnitt>
+
+      <Avsnitt rubrik="8. Användning av tjänsten">
+        <p>Du får inte använda tjänsten för att:</p>
+        <Lista>
+          <li>bedriva olaglig verksamhet eller upprätta falska fakturor,</li>
+          <li>
+            ladda upp material som är olagligt, kränkande eller som du inte har
+            rätt att använda,
+          </li>
+          <li>
+            försöka komma åt andras uppgifter eller störa tjänstens drift.
+          </li>
+        </Lista>
+        <p>
+          Bryter du mot villkoren kan vi stänga av kontot, i allvarliga fall
+          utan förvarning.
+        </p>
+      </Avsnitt>
+
+      <Avsnitt rubrik="9. Fakturor och underlag">
+        <p>
+          {brand.namn} räknar fram belopp, moms
+          {avdrag && ` och ${avdrag.typ}-avdrag`} utifrån de uppgifter du
+          registrerar. Du ansvarar själv för att kontrollera uppgifterna, att
+          fakturorna uppfyller gällande regler och att moms och skatter
+          redovisas rätt.
+        </p>
+        {avdrag && (
           <p>
-            {brand.namn} är ett webbaserat system för {brand.malgrupp}
-            som vill hantera kunder, arbetstid, material, resor, dokumentation
-            och fakturaunderlag. Genom att registrera ett konto och använda
-            tjänsten accepterar du dessa villkor.
+            Det är du som utförare som ansöker om utbetalning av {avdrag.typ}
+            -avdrag hos Skatteverket och ansvarar för att arbetet och kunden
+            uppfyller kraven för avdraget.
           </p>
-        </section>
+        )}
+        <p>
+          Du ansvarar också för att spara fakturor och underlag så länge
+          bokföringslagen kräver (7 år). {brand.namn} är inget bokföringssystem
+          eller arkiv.
+        </p>
+      </Avsnitt>
 
-        <section>
-          <h2 className="text-xl font-bold mb-3 border-b pb-1">2. Konto</h2>
-          <p>
-            För att använda tjänsten måste du skapa ett konto. Du ansvarar för
-            att uppgifterna du lämnar är korrekta, att hålla dina
-            inloggningsuppgifter säkra samt för all aktivitet som sker via ditt
-            konto.
-          </p>
-        </section>
+      <Avsnitt rubrik="10. Dina uppgifter och vårt innehåll">
+        <p>
+          Allt du registrerar och laddar upp – kunder, jobb, bilder och fakturor
+          – tillhör dig. Du ger oss rätt att lagra och behandla materialet bara
+          i den mån det behövs för att tillhandahålla tjänsten. Du intygar att
+          du har rätt att ladda upp materialet.
+        </p>
+        <p>
+          Tjänsten, dess kod, design och varumärke tillhör {brand.namn} och får
+          inte kopieras eller återförsäljas.
+        </p>
+      </Avsnitt>
 
-        <section>
-          <h2 className="text-xl font-bold mb-3 border-b pb-1">
-            3. Gratis provperiod
-          </h2>
-          <p>
-            Nya användare får prova {brand.namn} kostnadsfritt i 30 dagar. Efter
-            provperiodens slut krävs en aktiv prenumeration för fortsatt
-            användning.
-          </p>
-        </section>
+      <Avsnitt rubrik="11. Tillgänglighet och ändringar i tjänsten">
+        <p>
+          Vi strävar efter att tjänsten ska vara tillgänglig dygnet runt, men
+          kan inte lova att den alltid fungerar utan avbrott, t.ex. vid
+          underhåll eller tekniska problem hos oss eller våra leverantörer. Vi
+          utvecklar tjänsten löpande och kan ändra, lägga till eller ta bort
+          funktioner.
+        </p>
+      </Avsnitt>
 
-        <section>
-          <h2 className="text-xl font-bold mb-3 border-b pb-1">4. Betalning</h2>
-          <p>
-            Betalning kan ske via Stripe, PayPal eller faktura (om
-            tillgängligt). Prenumerationsavgifter debiteras enligt den plan som
-            användaren valt.
-          </p>
-        </section>
+      <Avsnitt rubrik="12. Ansvarsbegränsning">
+        <p>
+          Tjänsten tillhandahålls i befintligt skick. {brand.namn} ansvarar inte
+          för indirekta skador som utebliven vinst, förlorade affärer eller
+          följder av felaktiga uppgifter som du registrerat. Vårt samlade ansvar
+          är begränsat till det belopp du betalat för tjänsten de senaste 12
+          månaderna.
+        </p>
+        <p>
+          Vi ansvarar inte heller för förseningar eller avbrott som beror på
+          omständigheter utanför vår kontroll (force majeure), t.ex. fel hos
+          leverantörer, myndighetsbeslut eller omfattande nätverksstörningar.
+        </p>
+      </Avsnitt>
 
-        <section>
-          <h2 className="text-xl font-bold mb-3 border-b pb-1">
-            5. Ingen bindningstid
-          </h2>
-          <p>
-            {brand.namn} har ingen bindningstid. Du kan avsluta din
-            prenumeration när som helst. Redan genomförda betalningar
-            återbetalas normalt inte.
-          </p>
-        </section>
+      <Avsnitt rubrik="13. Personuppgiftsbiträdesavtal (PUB-avtal)">
+        <p>
+          När du registrerar uppgifter om dina kunder är ditt företag
+          personuppgiftsansvarigt och {brand.namn} personuppgiftsbiträde. Genom
+          att godkänna villkoren ingår vi detta avtal, där {brand.namn} åtar sig
+          att:
+        </p>
+        <Lista>
+          <li>
+            bara behandla uppgifterna för att tillhandahålla tjänsten och enligt
+            dina dokumenterade instruktioner, som består av dessa villkor och
+            det du gör i tjänsten,
+          </li>
+          <li>se till att alla som behandlar uppgifterna har tystnadsplikt,</li>
+          <li>
+            vidta lämpliga tekniska och organisatoriska säkerhetsåtgärder,
+          </li>
+          <li>
+            bara anlita de underbiträden som anges i integritetspolicyn och
+            informera dig i förväg om ändringar, så att du kan invända,
+          </li>
+          <li>
+            hjälpa dig att uppfylla de registrerades rättigheter, t.ex. utdrag
+            och radering,
+          </li>
+          <li>
+            meddela dig utan onödigt dröjsmål vid en personuppgiftsincident,
+          </li>
+          <li>
+            ge dig den information som behövs för att visa att avtalet följs,
+          </li>
+          <li>
+            radera uppgifterna när du raderar ditt konto, och ge dig möjlighet
+            att ta ut dem innan dess.
+          </li>
+        </Lista>
+        <p>
+          Du ansvarar för att du har rättslig grund för att registrera dina
+          kunders uppgifter och att du informerar dem om behandlingen.
+        </p>
+      </Avsnitt>
 
-        <section>
-          <h2 className="text-xl font-bold mb-3 border-b pb-1">
-            6. Utebliven betalning
-          </h2>
-          <p>
-            Vid utebliven betalning förbehåller sig {brand.namn} rätten att
-            begränsa åtkomsten till tjänsten, stänga av kontot eller avsluta
-            kontot vid långvarig utebliven betalning.
-          </p>
-        </section>
+      <Avsnitt rubrik="14. Ändringar av villkoren">
+        <p>
+          Vi kan uppdatera villkoren. Väsentliga ändringar meddelas via e-post
+          minst 30 dagar innan de börjar gälla. Fortsätter du använda tjänsten
+          efter det godkänner du de nya villkoren. Vill du inte det kan du säga
+          upp prenumerationen och radera kontot.
+        </p>
+      </Avsnitt>
 
-        <section>
-          <h2 className="text-xl font-bold mb-3 border-b pb-1">
-            7. Användning av tjänsten
-          </h2>
-          <p>
-            Användaren ansvarar för att följa svensk lagstiftning och att inte
-            använda tjänsten för olaglig verksamhet eller ladda upp kränkande
-            material.
-          </p>
-        </section>
+      <Avsnitt rubrik="15. Tillämplig lag och tvister">
+        <p>
+          Svensk lag gäller för villkoren. Tvister som vi inte kan lösa
+          tillsammans avgörs av allmän domstol i Sverige.
+        </p>
+      </Avsnitt>
 
-        <section>
-          <h2 className="text-xl font-bold mb-3 border-b pb-1">
-            8. Fakturor och underlag
-          </h2>
-          <p>
-            Användaren ansvarar själv för att kontrollera alla uppgifter,
-            säkerställa att fakturor följer gällande regler samt att moms och
-            skatter hanteras korrekt.
-          </p>
-        </section>
-
-        <section>
-          <h2 className="text-xl font-bold mb-3 border-b pb-1">
-            9. Bilder och material
-          </h2>
-          <p>
-            Användaren ansvarar för allt material som laddas upp till tjänsten
-            och intygar att denne har rätt att använda och lagra materialet.
-          </p>
-        </section>
-
-        <section>
-          <h2 className="text-xl font-bold mb-3 border-b pb-1">
-            10. Tillgänglighet
-          </h2>
-          <p>
-            Vi strävar efter att tjänsten ska vara tillgänglig dygnet runt.
-            Tillfälliga avbrott kan förekomma på grund av underhåll eller
-            tekniska problem.
-          </p>
-        </section>
-
-        <section>
-          <h2 className="text-xl font-bold mb-3 border-b pb-1">
-            11. Ansvarsbegränsning
-          </h2>
-          <p>
-            {brand.namn} ansvarar inte för förlorad data, förlorade
-            affärsmöjligheter eller felaktiga uppgifter som registrerats av
-            användaren.
-          </p>
-        </section>
-
-        <section>
-          <h2 className="text-xl font-bold mb-3 border-b pb-1">
-            12. Ändringar
-          </h2>
-          <p>
-            {brand.namn} kan uppdatera dessa villkor vid behov. Väsentliga
-            förändringar meddelas användarna i rimlig tid.
-          </p>
-        </section>
-
-        <section>
-          <h2 className="text-xl font-bold mb-3 border-b pb-1">
-            13. Personuppgiftsbiträdesavtal (PUB-avtal)
-          </h2>
-          <p>
-            När du registrerar uppgifter om dina kunder är ditt företag
-            personuppgiftsansvarigt och {brand.namn} personuppgiftsbiträde.
-            Genom att godkänna villkoren ingår vi detta avtal, där {brand.namn}{" "}
-            åtar sig att:
-          </p>
-          <ul className="list-disc pl-6 mt-2 space-y-1">
-            <li>
-              bara behandla uppgifterna för att tillhandahålla tjänsten och
-              enligt dina dokumenterade instruktioner,
-            </li>
-            <li>
-              se till att alla som behandlar uppgifterna har tystnadsplikt,
-            </li>
-            <li>
-              vidta lämpliga tekniska och organisatoriska säkerhetsåtgärder,
-            </li>
-            <li>
-              bara anlita de underbiträden som anges i integritetspolicyn och
-              informera om ändringar i förväg,
-            </li>
-            <li>
-              hjälpa dig att uppfylla de registrerades rättigheter (t.ex. utdrag
-              och radering),
-            </li>
-            <li>
-              meddela dig utan onödigt dröjsmål vid en personuppgiftsincident,
-            </li>
-            <li>
-              radera uppgifterna när du raderar ditt konto, och ge dig möjlighet
-              att ta ut dem innan dess.
-            </li>
-          </ul>
-        </section>
-
-        <section className="bg-muted p-6 rounded-lg">
-          <h2 className="text-xl font-bold mb-3">14. Kontakt</h2>
-          <p>E-post: [Din e-postadress]</p>
-          <p>Företag: [Företagsnamn]</p>
-          <p>Organisationsnummer: [Organisationsnummer]</p>
-        </section>
-      </div>
-    </main>
+      <KontaktRuta rubrik="16. Kontakt" />
+    </JuridikSida>
   );
 }

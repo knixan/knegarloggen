@@ -3,7 +3,7 @@
 const CURRENT_YEAR = new Date().getFullYear();
 
 import Link from "next/link";
-import { brand } from "../../brand";
+import { brand, ORT } from "../../brand";
 import { BrandLogo } from "./brand-logo";
 import { Mail, MapPin, ExternalLink, LogOut } from "lucide-react";
 import { useSession } from "../../lib/auth-client";
@@ -38,7 +38,7 @@ export default function Footer() {
             </Link>
             <div className="text-muted-foreground flex items-center gap-2">
               <MapPin className="h-4 w-4" aria-hidden="true" />
-              <span>Mjölby, Sverige</span>
+              <span>{ORT}</span>
             </div>
           </div>
 
@@ -50,11 +50,11 @@ export default function Footer() {
             <div className="space-y-2">
               <p className="font-medium">Josefine Eriksson</p>
               <a
-                href="mailto:josefineeriksson@live.se"
+                href={`mailto:${brand.kontaktEpost}`}
                 className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
               >
                 <Mail className="h-4 w-4" aria-hidden="true" />
-                josefineeriksson@live.se
+                {brand.kontaktEpost}
               </a>
               <div className="pt-2">
                 <p className="text-xs text-muted-foreground mb-1">
@@ -122,6 +122,12 @@ export default function Footer() {
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 Användarvillkor
+              </Link>
+              <Link
+                href="/kontakt"
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Kontakt
               </Link>
             </nav>
           </div>
