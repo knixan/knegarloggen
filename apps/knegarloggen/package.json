@@ -11,6 +11,7 @@
     "db:migrate": "prisma migrate dev --config ../../packages/app/prisma.config.ts",
     "db:deploy": "prisma migrate deploy --config ../../packages/app/prisma.config.ts",
     "db:reset": "prisma migrate reset --config ../../packages/app/prisma.config.ts",
+    "db:studio": "prisma studio --config ../../packages/app/prisma.config.ts",
     "db:seed": "tsx ../../packages/app/prisma/seed.ts",
     "db:admin": "tsx ../../packages/app/prisma/gor-admin.ts"
   },

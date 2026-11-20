@@ -79,6 +79,7 @@ pnpm build                   # alla tre apparna
 # Databas – körs i apps/<app>, använder den appens .env
 pnpm db:migrate              # ny migrering (schema i packages/app/prisma)
 pnpm db:deploy
+pnpm db:studio               # Prisma Studio på localhost:5555 – ändringar sparas direkt
 pnpm db:reset                # raderar ALL data – se Databas nedan
 pnpm db:admin <e-post>       # gör ett konto till admin
 ```
